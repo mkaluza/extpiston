@@ -231,7 +231,34 @@ Emitter.register('ext-json', ExtJSONEmitter, 'application/json; charset=utf-8')
 
 
 from piston.resource import Resource
+from django.shortcuts import render_to_response
+
+def flatten(fields, prefix = None):
+	res=[]
+	for f in fields:
+		if isinstance(f,tuple):
+			new_prefix = f[0]
+			if prefix:
+				new_prefix = "%s__%s" % (prefix,new_prefix)
+			res+=flatten(f[1], new_prefix)
+			continue
+		if prefix:
+			res.append("%s__%s" % (prefix,f))
+		else:
+			res.append(f)
+	return res
+
+
 class ExtResource(Resource):
+	def __init__(self,handler,pageSize = None,*args,**kwargs):
+		super(ExtResource,self).__init__(handler, *args, **kwargs)
+		self.pageSize = pageSize
+		self.name = self.handler.model.__name__.lower()
+		try:
+			self.fields = flatten(self.handler.fields)
+		except:
+			self.fields = [f.name for f in self.handler.model._meta.fields]
+
 	def determine_emitter(self, request, *args, **kwargs):
 		em = kwargs.pop('emitter_format', None)
 		if not em:
@@ -252,6 +279,14 @@ class ExtResource(Resource):
 		columns = [{'header':f.verbose_name,'dataIndex':f.name,'tooltip':f.help_text} for f in self.handler.model._meta.fields]
 		return simplejson.dumps(columns, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
+	def store(self):
+		return render_to_response('mksoftware/store.js.tpl', {'fields':self.fields,'name':self.name,'pageSize':self.pageSize})
+
+	def grid(self):
+		return render_to_response('mksoftware/grid.js.tpl', {'name':self.name,'pageSize':self.pageSize})
+
+	def tab(self):
+		return render_to_response('mksoftware/fullgrid.js.tpl', {'name':self.name,'pageSize':self.pageSize})
 
 
 """
