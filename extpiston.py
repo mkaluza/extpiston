@@ -276,20 +276,20 @@ class ExtResource(Resource):
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
-		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self)]
+		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/store.js$' % name, self.store)]
 
 	def columns(self):
 		columns = [{'header':f.verbose_name,'dataIndex':f.name,'tooltip':f.help_text} for f in self.handler.model._meta.fields]
 		return simplejson.dumps(columns, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
-	def store(self):
-		return render_to_response('mksoftware/store.js.tpl', {'fields':self.fields,'name':self.name,'pageSize':self.pageSize})
+	def store(self,request):
+		return render_to_response('mksoftware/store.js.tpl', {'fields':self.fields,'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
 
-	def grid(self):
-		return render_to_response('mksoftware/grid.js.tpl', {'name':self.name,'pageSize':self.pageSize})
+	def grid(self,request):
+		return render_to_response('mksoftware/grid.js.tpl', {'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
 
-	def tab(self):
-		return render_to_response('mksoftware/fullgrid.js.tpl', {'name':self.name,'pageSize':self.pageSize})
+	def tab(self,request):
+		return render_to_response('mksoftware/fullgrid.js.tpl', {'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
 
 
 """
