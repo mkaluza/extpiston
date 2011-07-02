@@ -3,7 +3,7 @@
 
 from piston.handler import BaseHandler
 from piston.utils import rc, require_mime, require_extended, validate
-from piston.authentication import DjangoAuthentication
+#from piston.authentication import DjangoAuthentication
 
 from django.forms.models import model_to_dict
 import types
@@ -178,18 +178,6 @@ def flatten_dict(d,name=None):
 			res.append((newname,v))
 	return dict(res)
 
-def paginate(request,q):
-	limit=None
-	#start = int(request.GET.get('start'))
-	start = request.GET.get('start')
-	if start != None:
-		start = int(start)
-		#limit = start+int(request.GET.get('limit'))
-		limit = request.GET.get('limit')
-		if limit != None: limit = start + int(limit)
-	if start == None or limit == None: return q
-	return q[start:limit]
-
 class ExtJSONEmitter(Emitter):
 	"""
 	JSON emitter, understands timestamps, wraps result set in object literal
@@ -205,13 +193,11 @@ class ExtJSONEmitter(Emitter):
 
 		if isinstance(data,QuerySet):
 			cnt = data.count()
-			data = paginate(request,data.all())
 		else: cnt = None
 
 		if isinstance(data,(list,tuple)):
 			if cnt == None: 
 				cnt = len(data)
-				data = paginate(request,data)
 			data = [flatten_dict(d) for d in data]
 			#ext_dict['data'] = [flatten_dict(d) for d in data]
 		else:
