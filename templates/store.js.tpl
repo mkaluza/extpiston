@@ -8,6 +8,5 @@
 	storeId: '{{ name }}Store',
 	fields: {{ fields }},
 	restful: true,
-	totalProperty: 'totalCount',
 });
 
