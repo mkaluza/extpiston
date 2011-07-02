@@ -15,6 +15,9 @@ class DjangoAuthorization():
 	- dla wszystkich (domyslnie), 
 	- dla okreslonej metody('create','read', 'update','delete'),
 	- do modyfikacji (write='create','update','delete')
+	
+	if some method is specified, others are implicitly disabled. To enable them, use:
+	DjangoAuthorization(read=True,write='is_staff')	#allow reading to everyone (can be connected with authentication), writing for staff only
 
 	łączenie warunków
 	- list - OR
@@ -88,6 +91,8 @@ class DjangoAuthorization():
 			return el in request.user.groups.all()
 		elif isinstance(el,Permission):
 			return request.user.has_perm(el)
+		elif isinstance(el,bool):
+			return el
 		else:
 			invert=False
 			el=str(el)	#TODO potrzebne tutaj?
