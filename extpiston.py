@@ -27,20 +27,28 @@ class DjangoAuthorization():
 	- group(s) - user musi byc w grupie
 	- perm(s) - musi miec permsa
 	- key-value - dany parametr usera musi miec taka wartosc
+	DjangoAuthorization(username='bartur')
 	- key - flaga - musi miec wartość true lub równoważną
+	cennik_resource = ExtResource(handlers.Cennik,authorization=DjangoAuthorization('is_staff'))
+
+	examples:
 
 	"""
 
 	def __init__(self,*args,**kwargs):
-		method_names = set(['create','read','update','delete','write'])
+		allowed_method_names = set(['create','read','update','delete','write'])
 		self.method_authz={}
-		def_names = method_names & set(kwargs.keys())
-		for m in def_names:
+
+		#filter garbage kwargs
+		method_names = allowed_method_names & set(kwargs.keys())
+
+		for m in method_names:
 			self.method_authz[m]=kwargs.pop(m)
 		args=list(args)
 		args.append(kwargs)
 		print args
 		self.method_authz['all'] = args
+
 	def parse(self,request,el):
 		print "parse:",el
 		u=model_to_dict(request.user)
@@ -94,6 +102,9 @@ class DjangoAuthorization():
 				res=self.parse(request,self.method_authz['all'])
 		return res
 		
+	def __call__(self,*args,**kwargs):
+		return self.authorize(*args,**kwargs)
+
 class ExtHandler(BaseHandler):
 	#exclude = ()
 	def fix_data(self,request):
