@@ -214,20 +214,14 @@ class ExtJSONEmitter(Emitter):
 		print 'RENDER'
 		print type(data)
 
-		if isinstance(data,QuerySet):
-			cnt = data.count()
-		else: cnt = None
-
 		if isinstance(data,(list,tuple)):
-			if cnt == None: 
-				cnt = len(data)
 			data = [flatten_dict(d) for d in data]
 			#ext_dict['data'] = [flatten_dict(d) for d in data]
 		else:
-			cnt = 1
 			data = flatten_dict(data)
 			#ext_dict['data'] = flatten_dict(data)
-		ext_dict = {'success': True, 'data': data, 'message': 'Something good happened on the server!', 'totalCount': cnt}
+		ext_dict = {'success': True, 'data': data, 'message': 'Something good happened on the server!'}
+		if self.total != None: ext_dict['total'] = self.total
 		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
 		# Callback
