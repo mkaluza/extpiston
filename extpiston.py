@@ -28,8 +28,9 @@ class DjangoAuthorization():
 	- perm(s) - musi miec permsa
 	- key-value - dany parametr usera musi miec taka wartosc
 	DjangoAuthorization(username='bartur')
-	- key - flaga - musi miec wartość true lub równoważną
-	cennik_resource = ExtResource(handlers.Cennik,authorization=DjangoAuthorization('is_staff'))
+	- key - a flag, which must evaluate to True. Can be inverted with '!' in the beginning
+	DjangoAuthorization('is_staff')
+	DjangoAuthorization('!is_staff')
 
 	examples:
 
@@ -88,9 +89,15 @@ class DjangoAuthorization():
 		elif isinstance(el,Permission):
 			return request.user.has_perm(el)
 		else:
-			print 'flag',str(el),u.has_key(str(el))
+			invert=False
+			el=str(el)	#TODO potrzebne tutaj?
+			if el[0]=='!':	# invert flag
+				el=el[1:]
+				invert=True
+			print 'flag',str(el), u.has_key(str(el)), invert
 			print u
-			return u.has_key(str(el)) and u[str(el)]
+			return u.has_key(str(el)) and (invert ^ bool(u[str(el)])) # invert XOR element value
+
 	def authorize(self,request,method):
 		res=False
 		if self.method_authz.has_key(method):
