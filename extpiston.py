@@ -1,6 +1,8 @@
 # $Revision: 1.9 $
 # vim: set fileencoding=utf-8
 
+import re
+
 from piston.handler import BaseHandler
 from piston.utils import rc, require_mime, require_extended, validate
 #from piston.authentication import DjangoAuthentication
@@ -11,6 +13,9 @@ from django.contrib.auth.models import Permission,Group,User
 from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import Http404
+from django.template import Context, loader
+from django.http import HttpResponse
+import settings
 
 class DjangoAuthorization():
 	"""
@@ -299,5 +304,8 @@ class ExtResource(Resource):
 
 		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label}
 		defaults.update(dictionary or {})
-		return render_to_response('mksoftware/%s.js.tpl'%name, defaults,mimetype='text/javascript')
+		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults))
+		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
+		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
+		return HttpResponse(body,mimetype='text/javascript')
 
