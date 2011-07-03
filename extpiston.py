@@ -10,6 +10,7 @@ import types
 from django.contrib.auth.models import Permission,Group,User
 from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.http import Http404
 
 class DjangoAuthorization():
 	"""
@@ -278,30 +279,17 @@ class ExtResource(Resource):
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
-		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/store.js$' % name, self.store)]
+		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/js/(?P<name>\w+)$' % name, self.render_js)]
 
 	def columns(self):
 		columns = [{'header':f.verbose_name,'dataIndex':f.name,'tooltip':f.help_text} for f in self.handler.model._meta.fields]
 		return simplejson.dumps(columns, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
-	def store(self,request):
-		return render_to_response('mksoftware/store.js.tpl', {'fields':self.fields,'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
+	def render_js(self, request, name, dictionary=None):
+		if name.lower().replace('.js','') not in ['store','grid','combo','all']:
+			raise Http404
 
-	def grid(self,request):
-		return render_to_response('mksoftware/grid.js.tpl', {'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
+		defaults = {'fields':self.fields,'verbose_name': self.handler.model._meta.verbose_name,'name':self.name,'pageSize':self.pageSize}
+		defaults.update(dictionary or {})
+		return render_to_response('mksoftware/%s.js.tpl'%name, defaults,mimetype='text/javascript')
 
-	def tab(self,request):
-		return render_to_response('mksoftware/fullgrid.js.tpl', {'name':self.name,'pageSize':self.pageSize},mimetype='text/javascript')
-
-
-"""
-task_resource = ExtResource(TaskHandler)
-
-urlpatterns = patterns('',
-   url(r'^tasks/(?P<id>\d+)$', task_resource),
-   url(r'^tasks$', task_resource),
-#   url(r'^tasks/(?P<id>\d+)$', task_resource,  {'emitter_format': 'ext-json'}),
-#   url(r'^tasks$', task_resource, {'emitter_format': 'ext-json'}),   
-   #url(r'^tasks$', task_resource) # for basic example
-)
-"""
