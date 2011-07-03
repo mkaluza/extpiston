@@ -9,6 +9,8 @@ from django.forms.models import model_to_dict
 import types
 from django.contrib.auth.models import Permission,Group,User
 from django.db.models.query import QuerySet
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+
 class DjangoAuthorization():
 	"""
 	sposoby definiowania:
