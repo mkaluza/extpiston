@@ -259,7 +259,6 @@ class ExtResource(Resource):
 	def __init__(self,handler,pageSize = None,*args,**kwargs):
 		super(ExtResource,self).__init__(handler, *args, **kwargs)
 		self.pageSize = pageSize
-		self.name = self.handler.model.__name__.lower()
 		try:
 			self.fields = flatten(self.handler.fields)
 		except:
@@ -279,17 +278,26 @@ class ExtResource(Resource):
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
-		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/js/(?P<name>\w+)$' % name, self.render_js)]
+		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/js/(?P<name>\w+(.js)?)?/?$' % name, self.render_js)]
 
 	def columns(self):
 		columns = [{'header':f.verbose_name,'dataIndex':f.name,'tooltip':f.help_text} for f in self.handler.model._meta.fields]
 		return simplejson.dumps(columns, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
 
 	def render_js(self, request, name, dictionary=None):
-		if name.lower().replace('.js','') not in ['store','grid','combo','all']:
+		"""
+		JS can be rendered by calling api/$name/js/X, where X is a file name with or without .js extension.
+		calling with no X assumes x=all
+		"""
+		name = name or 'all'	#normal default value doesn't work with (P..)? since django then passes None as a value
+		name = name.lower().replace('.js','')
+		print 'render', name
+		if name not in ['store','grid','combo','all']:
 			raise Http404
 
-		defaults = {'fields':self.fields,'verbose_name': self.handler.model._meta.verbose_name,'name':self.name,'pageSize':self.pageSize}
+		meta = self.handler.model._meta
+
+		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label}
 		defaults.update(dictionary or {})
 		return render_to_response('mksoftware/%s.js.tpl'%name, defaults,mimetype='text/javascript')
 
