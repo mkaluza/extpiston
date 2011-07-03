@@ -3,10 +3,13 @@
 
 {# na podstawie http://blog.extjs.eu/know-how/writing-a-big-application-in-ext/ #}
 
-Ext.namespace({{appname|title}});
+Ext.namespace('{{app_label|title}}.{{name}}');
 
-{{appname|title}}.{{name|title}}ComboBox = Ext.extend(Ext.form.ComboBox, {
+{{app_label|title}}.{{name}}.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	initComponent:function() {
+		{% if config.separate_store %}
+		{% include "mksoftware/store.js.tpl" %}
+		{% endif %}
 		var config = {
 			store: {{name}}Store,
 			fieldLabel: '{{ verbose_name }}',
@@ -24,4 +27,4 @@ Ext.namespace({{appname|title}});
 
 	} //initComponent
 	});
-Ext.reg('{{appname|lower}}{{name|lower}}combobox',{{appname|title}}.{{name|title}}ComboBox);
+Ext.reg('{{app_label|lower}}.{{name|lower}}.combobox',{{app_label|title}}.{{name|title}}ComboBox);
