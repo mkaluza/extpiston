@@ -256,6 +256,33 @@ class ExtJSONEmitter(Emitter):
 	
 Emitter.register('ext-json', ExtJSONEmitter, 'application/json; charset=utf-8')
 
+class ArrayJSONEmitter(Emitter):
+	"""
+	JSON emitter, understands timestamps, wraps result set in object literal
+	for Ext JS compatibility
+	"""
+	def render(self, request):
+		#print request
+		cb = request.GET.get('callback')
+		#TODO zrobic tak, zeby tu byl queryset a nie lista
+		data=self.construct()
+
+		if isinstance(data,(list,tuple)):
+			data2 = [ flatten_dict(el) for el in data]
+			fields = flatten_fields(self.handler.fields)
+			data = [[ el[fname] for fname in fields] for el in data2 ]
+		else:
+			#TODO zrobic z tego array wtedy?
+			data = flatten_dict(data)
+		seria = simplejson.dumps(data, cls=DateTimeAwareJSONEncoder, ensure_ascii=False)
+
+		# Callback
+		if cb:
+			return '%s(%s)' % (cb, seria)
+
+		return seria
+
+Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
 
 from piston.resource import Resource
 from django.shortcuts import render_to_response
