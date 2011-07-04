@@ -17,14 +17,17 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			emptyText: 'Wybierz...',
 			forceSelection: true,			//true to restrict the selected value to one of the values in the list, false to allow the user to set arbitrary text into the field (defaults to false)
 			typeAhead: true,			//true to populate and autoselect the remainder of the text being typed after a configurable delay (typeAheadDelay) if it matches a known value (defaults to false)
-			typeAheadDelay: 250,			//The length of time in milliseconds to wait until the typeahead text is displayed if typeAhead = true (defaults to 250)
+			//typeAheadDelay: 250,			//The length of time in milliseconds to wait until the typeahead text is displayed if typeAhead = true (defaults to 250)
 			selectOnFocus:true,			//true to select any existing text in the field immediately on focus. Only applies when editable = true (defaults to false).
+			valueField: '{{ value_field|default:"id" }}',
+			displayField: '{{ display_field|default:"id" }}',
+			name: '{{ name|lower }}'
 		}; //config
 		
-		Ext.apply(this, Ext.apply(this.initialConfig, config));
+		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
-		Application.PersonnelGrid.superclass.initComponent.apply(this, arguments);
+		{{app_label|title}}.{{name}}.ComboBox.superclass.initComponent.apply(this, arguments);
 
 	} //initComponent
 	});
-Ext.reg('{{app_label|lower}}.{{name|lower}}.combobox',{{app_label|title}}.{{name|title}}ComboBox);
+Ext.reg('{{app_label|lower}}.{{name|lower}}.combobox',{{app_label|title}}.{{name|title}}.ComboBox);
