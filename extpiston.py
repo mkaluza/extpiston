@@ -209,6 +209,22 @@ def flatten_dict(d,name=None):
 			res.append((newname,v))
 	return dict(res)
 
+def flatten_fields(fields, prefix = None):
+	res=[]
+	for f in fields:
+		if isinstance(f,tuple):
+			new_prefix = f[0]
+			if prefix:
+				new_prefix = "%s__%s" % (prefix,new_prefix)
+			res+=flatten_fields(f[1], new_prefix)
+			continue
+		if prefix:
+			res.append("%s__%s" % (prefix,f))
+		else:
+			res.append(f)
+	return res
+
+
 class ExtJSONEmitter(Emitter):
 	"""
 	JSON emitter, understands timestamps, wraps result set in object literal
@@ -244,28 +260,12 @@ Emitter.register('ext-json', ExtJSONEmitter, 'application/json; charset=utf-8')
 from piston.resource import Resource
 from django.shortcuts import render_to_response
 
-def flatten(fields, prefix = None):
-	res=[]
-	for f in fields:
-		if isinstance(f,tuple):
-			new_prefix = f[0]
-			if prefix:
-				new_prefix = "%s__%s" % (prefix,new_prefix)
-			res+=flatten(f[1], new_prefix)
-			continue
-		if prefix:
-			res.append("%s__%s" % (prefix,f))
-		else:
-			res.append(f)
-	return res
-
-
 class ExtResource(Resource):
 	def __init__(self,handler,pageSize = None,*args,**kwargs):
 		super(ExtResource,self).__init__(handler, *args, **kwargs)
 		self.pageSize = pageSize
 		try:
-			self.fields = flatten(self.handler.fields)
+			self.fields = flatten_fields(self.handler.fields)
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
