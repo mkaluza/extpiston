@@ -304,7 +304,7 @@ class ExtResource(Resource):
 
 		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label}
 		defaults.update(dictionary or {})
-		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults))
+		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
 		return HttpResponse(body,mimetype='text/javascript')
