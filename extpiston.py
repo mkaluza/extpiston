@@ -296,6 +296,24 @@ class ExtResource(Resource):
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
+		if 'value_field' in kwargs: self.value_field = kwargs.pop('value_field')
+		else:
+			if hasattr(self.handler,'value_field'): self.value_field = self.handler.value_field
+			else:
+				self.value_field = self.handler.model._meta.pk.name
+
+		if 'display_field' in kwargs: self.display_field = kwargs.pop('display_field')
+		else:
+			if hasattr(self.handler,'display_field'): self.display_field = self.handler.display_field
+			else:
+				self.display_field = self.value_field
+
+		if 'store_type' in kwargs: self.store_type = kwargs.pop('store_type')
+		else:
+			if hasattr(self.handler,'store_type'): self.store_type = self.handler.store_type
+			else:
+				self.store_type = 'json'
+
 	def determine_emitter(self, request, *args, **kwargs):
 		em = kwargs.pop('emitter_format', None)
 		if not em:
@@ -329,7 +347,11 @@ class ExtResource(Resource):
 
 		meta = self.handler.model._meta
 
-		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label}
+		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label, 'value_field': self.value_field, 'display_field': self.display_field, 'store_type': self.store_type}
+		if self.store_type == 'array': 
+			resp = self(request,emitter_format='array-json')
+			defaults['data'] = resp.content
+
 		defaults.update(dictionary or {})
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
