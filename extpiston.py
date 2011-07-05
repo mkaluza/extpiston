@@ -2,19 +2,25 @@
 # vim: set fileencoding=utf-8
 
 import re
+import types
 
+from piston.emitters import Emitter
 from piston.handler import BaseHandler
+from piston.resource import Resource
 from piston.utils import rc, require_mime, require_extended, validate
+
 #from piston.authentication import DjangoAuthentication
 
-from django.forms.models import model_to_dict
-import types
 from django.contrib.auth.models import Permission,Group,User
-from django.db.models.query import QuerySet
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.http import Http404
+from django.core.serializers.json import DateTimeAwareJSONEncoder
+from django.db.models.query import QuerySet
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, Http404
+from django.shortcuts import render_to_response
 from django.template import Context, loader
-from django.http import HttpResponse
+from django.utils import simplejson
+
 import settings
 
 class DjangoAuthorization():
@@ -169,42 +175,20 @@ class ExtHandler(BaseHandler):
 		except self.model.MultipleObjectsReturned:
 			return rc.DUPLICATE_ENTRY
 
-#	def create(self, request, *args, **kwargs):
-#		request = self.fix_data(request)
-#		return super(ExtHandler, self).create(request, *args, **kwargs)
-		#return self.read(request,pk=result.pk) #tak trzeba, jesli mamy swoje queryset
-
 	def update(self, request, *args, **kwargs):
 		request = self.fix_data(request)
 		super(ExtHandler, self).update(request,  *args, **kwargs)
 		return self.read(request,*args, **kwargs)
 
-	
-"""
-from piston_demo.todos.models import Task
-from piston_demo.todos.forms import TaskForm
-
-class TaskHandler(ExtHandler):
-	fields = ('id', 'name', 'complete')
-	model = Task   
-"""
-
-from django.utils import simplejson
-from django.core.serializers.json import DateTimeAwareJSONEncoder
-
-from piston.emitters import Emitter
-
-def flatten_dict(d,name=None):
-#	print "flatten_dict",d,name
+def flatten_dict(d, name = None):
 	if not isinstance(d,dict):return d
 	res=[]
 	for k,v in d.iteritems():
 		if name:
-			newname="%s__%s"%(name,k)
-		else: newname=k
-#		print newname,type(v),v
+			newname = "%s__%s" % (name,k)
+		else: newname = k
 		if isinstance(v,dict):
-			res+=flatten_dict(v,newname).items()
+			res += flatten_dict(v,newname).items()
 		else:
 			res.append((newname,v))
 	return dict(res)
@@ -223,7 +207,6 @@ def flatten_fields(fields, prefix = None):
 		else:
 			res.append(f)
 	return res
-
 
 class ExtJSONEmitter(Emitter):
 	"""
@@ -283,9 +266,6 @@ class ArrayJSONEmitter(Emitter):
 		return seria
 
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
-
-from piston.resource import Resource
-from django.shortcuts import render_to_response
 
 class ExtResource(Resource):
 	def __init__(self,handler,pageSize = None,*args,**kwargs):
