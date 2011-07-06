@@ -253,7 +253,13 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
 			field_dict['header'] = ff.verbose_name
 			if ff.help_text: field_dict['tooltip'] = ff.help_text
-			if ff.primary_key: field_dict.update({'hidden':True, 'hideable':False})
+			if ff.primary_key:
+				field_dict.update({'hidden':True, 'hideable':False})
+				print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
+				if prefix and '__' not in prefix: 	#jeden stopien nizej
+					field_dict['header'] = parent_field.verbose_name
+					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]),model.__name__.lower())
+					field_dict['fk'] = True
 #
 		res[field]=field_dict
 #
@@ -386,19 +392,33 @@ class ExtResource(Resource):
 		name = name or 'all'	#normal default value doesn't work with (P..)? since django then passes None as a value
 		name = name.lower().replace('.js','')
 		print 'render', name
-		if name not in ['store','grid','combo','all']:
+		if name not in ['form','store','grid','combo','all']:
 			raise Http404
 
 		meta = self.handler.model._meta
 
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
-		if name == 'grid':
+		columns = {}
+		if name == 'form':
+			for k,col in self.columns.iteritems():
+				print k,col
+				newcol = {'fieldLabel': col['header']}
+				if 'fk' in col and col['fk']:
+					newcol['xtype'] = col['type']+'.combobox'
+				else:
+					newcol['xtype'] = col['type']+'field'
+				#if 'width' in col: del col['width']
+				columns[k]=newcol
+		elif name == 'grid':
 			for k,col in self.columns.iteritems():
 				col['dataIndex'] = col['name']
 				#col['xtype'] = {'date': 'datecolumn', 'number':'numbercolumn'}.get(col['type'],'gridcolumn') 	#TODO
+				columns[k]=col
+		else:
+			columns = self.columns.copy()
 
-		columns = [self.columns[k] for k in self.fields]
+		columns = [columns[k] for k in self.fields]
 		columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
 
 		defaults = {'fields':self.fields, 'columns': columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
