@@ -326,9 +326,15 @@ class ExtResource(Resource):
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
+		#TODO to powinno byc w handlerze
 		self.columns = flatten_fields2(self.handler)
 		if hasattr(self.handler,'columns'):
 			for name, data in self.handler.columns.iteritems():
+				if name in self.columns: self.columns[name].update(data)
+				else: self.columns[name] = data
+
+		if 'columns' in kwargs:
+			for name, data in kwargs.pop('columns').iteritems():
 				if name in self.columns: self.columns[name].update(data)
 				else: self.columns[name] = data
 
