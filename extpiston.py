@@ -208,6 +208,54 @@ def flatten_fields(fields, prefix = None):
 			res.append(f)
 	return res
 
+def get_fields(self):
+	field_map = {
+		'AutoField': 'numberfield',
+		'BigIntegerField': 'numberfield',
+		'IntegerField': 'numberfield',
+		'DateField': 'datefield',
+		'DateTimeField': 'datefield',
+	}
+
+		#help text
+		#TODO As currently implemented, setting auto_now or auto_now_add to True will cause the field to have editable=False and blank=True set.
+		#TODO trzeba wymyslic, czy ustawiac flage read only, czy zmieniac na displayfield
+
+def flatten_fields2(handler, fields = None, model = None, prefix = None):
+#	print "\n",fields, model, prefix
+	res = []
+	if not model: model = handler.model
+	if not fields: fields = handler.fields
+	model_fields = dict([(field.name,field) for field in model._meta.fields])
+#	print model_fields.keys()
+#
+	for field in fields:
+		if isinstance(field, tuple):
+			new_prefix = field[0]
+			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
+			new_model = model_fields[field[0]].rel.to		#get model that is referenced by this foreign key
+#			print 'related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
+#
+			res += flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix)
+			continue
+#
+		if field in model_fields: ff = model_fields[field]
+		else: ff = None
+#
+		if prefix: field = "%s__%s" % (prefix,field)
+#
+		field_dict = {'name':field, 'header': field, 'type': 'textfield'}
+#
+		if ff:
+			field_dict['type'] = ff.__class__.__name__
+			field_dict['header'] = ff.verbose_name
+			field_dict['tooltip'] = ff.help_text
+			if ff.primary_key: field_dict.update({'hidden':True, 'hideable':False})
+#
+		res.append(field_dict)
+#
+	return res
+
 class ExtJSONEmitter(Emitter):
 	"""
 	JSON emitter, understands timestamps, wraps result set in object literal
