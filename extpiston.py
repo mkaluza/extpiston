@@ -223,7 +223,7 @@ def get_fields(self):
 
 def flatten_fields2(handler, fields = None, model = None, prefix = None):
 #	print "\n",fields, model, prefix
-	res = []
+	res = {}
 	if not model: model = handler.model
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
@@ -236,7 +236,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None):
 			new_model = model_fields[field[0]].rel.to		#get model that is referenced by this foreign key
 #			print 'related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
 #
-			res += flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix)
+			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix))
 			continue
 #
 		if field in model_fields: ff = model_fields[field]
@@ -252,7 +252,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None):
 			field_dict['tooltip'] = ff.help_text
 			if ff.primary_key: field_dict.update({'hidden':True, 'hideable':False})
 #
-		res.append(field_dict)
+		res[field]=field_dict
 #
 	return res
 
