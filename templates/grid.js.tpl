@@ -5,6 +5,8 @@
 
 Ext.namespace('{{app_label|title}}.{{name}}');
 
+var {{app_name}}{{name}}Columns = {{ columns }}
+
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
 		{% if separate_store %}
@@ -14,7 +16,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			store: {{name}}Store,
 			autoScroll: false,
 			autoHeight: true,
-//			columns: {{name}}Columns,
+			columns: {{app_name}}{{name}}Columns,
 			loadMask: true,
 			{% if page_size %}
 			bbar: {
