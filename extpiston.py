@@ -324,8 +324,13 @@ class ExtResource(Resource):
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
 		self.columns = flatten_fields2(self.handler, self.fields)
-		sorted_columns = sorted(self.columns.values(), key = lambda x: x['name'])
-		self.columns = simplejson.dumps(sorted(self.columns.values(), key = lambda x: x['name']),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
+		if hasattr(self.handler,'columns'):
+			for name, data in self.handler.columns.iteritems():
+				if name in self.columns: self.columns[name].update(data)
+				else: self.columns[name] = data
+
+		sorted_columns = [self.columns[k] for k in self.fields]
+		self.columns = simplejson.dumps(sorted_columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
 
 		params = { # name, value, if value is a function that returns value, that is its argument
 			'value_field': (self.handler.model._meta.pk.name, None),
