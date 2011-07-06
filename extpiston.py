@@ -378,7 +378,10 @@ class ExtResource(Resource):
 
 		meta = self.handler.model._meta
 
-		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':meta.app_label}
+		#defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':meta.app_label}
+		app_label = self.handler.__module__.replace('api.handlers','')
+		if not app_label: app_label = 'main'
+		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
 
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
