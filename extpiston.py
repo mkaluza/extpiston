@@ -222,7 +222,7 @@ def get_field_type(cls, model = None, name = None):
 		#TODO As currently implemented, setting auto_now or auto_now_add to True will cause the field to have editable=False and blank=True set.
 		#TODO trzeba wymyslic, czy ustawiac flage read only, czy zmieniac na displayfield
 
-def flatten_fields2(handler, fields = None, model = None, prefix = None):
+def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_field = None):
 	print "\n1:",fields, model, prefix
 	res = {}
 	if not model: model = handler.model
@@ -235,10 +235,11 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None):
 		if isinstance(field, tuple):
 			new_prefix = field[0]
 			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
-			new_model = model_fields[field[0]].rel.to		#get model that is referenced by this foreign key
+			parent_field = model_fields[field[0]]
+			new_model = parent_field.rel.to		#get model that is referenced by this foreign key
 			print '3:related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
 #
-			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix))
+			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
 			continue
 #
 		if field in model_fields: ff = model_fields[field]
