@@ -210,7 +210,7 @@ def flatten_fields(fields, prefix = None):
 
 def get_field_type(cls, model = None, name = None):
 	field_map = {
-		'AutoField': 'number',
+		'AutoField': 'display',
 		'BigIntegerField': 'number',
 		'IntegerField': 'number',
 		'DateField': 'date',
