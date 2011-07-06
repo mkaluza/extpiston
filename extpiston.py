@@ -316,6 +316,23 @@ class ArrayJSONEmitter(Emitter):
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
 
 class ExtResource(Resource):
+	def init_values(self,*args,**kwargs):
+		values = [ # name, value, if value is a function that returns value, that is its argument
+			('value_field', self.handler.model._meta.pk.name, None),
+			('display_field', lambda x: x.value_field, [self,]),	#self is passed by reference
+			('store_type', 'json', None)
+			]
+
+		for name,default,args in values:
+			if args is not None: default = default(*args)	#if arguments are given, default is a function
+			#set atribute based on kwargs OR handler config OR default value
+			setattr(self, name, kwargs.pop(name,getattr(self.handler,name,default)))
+			#if name in kwargs: setattr(self, name, kwargs.pop(name))
+			#else:
+			#	if hasattr(self.handler,name): setattr(self, name, getattr(self.handler,name))
+			#	else:
+			#		setattr(self,name,default)
+
 	def __init__(self,handler,pageSize = None,*args,**kwargs):
 		super(ExtResource,self).__init__(handler, *args, **kwargs)
 		self.pageSize = pageSize
@@ -323,24 +340,7 @@ class ExtResource(Resource):
 			self.fields = flatten_fields(self.handler.fields)
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
-
-		if 'value_field' in kwargs: self.value_field = kwargs.pop('value_field')
-		else:
-			if hasattr(self.handler,'value_field'): self.value_field = self.handler.value_field
-			else:
-				self.value_field = self.handler.model._meta.pk.name
-
-		if 'display_field' in kwargs: self.display_field = kwargs.pop('display_field')
-		else:
-			if hasattr(self.handler,'display_field'): self.display_field = self.handler.display_field
-			else:
-				self.display_field = self.value_field
-
-		if 'store_type' in kwargs: self.store_type = kwargs.pop('store_type')
-		else:
-			if hasattr(self.handler,'store_type'): self.store_type = self.handler.store_type
-			else:
-				self.store_type = 'json'
+		self.init_values()
 
 	def determine_emitter(self, request, *args, **kwargs):
 		em = kwargs.pop('emitter_format', None)
