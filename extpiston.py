@@ -323,6 +323,10 @@ class ExtResource(Resource):
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
+		self.columns = flatten_fields2(self.handler, self.fields)
+		sorted_columns = sorted(self.columns.values(), key = lambda x: x['name'])
+		self.columns = simplejson.dumps(sorted(self.columns.values(), key = lambda x: x['name']),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
+
 		params = { # name, value, if value is a function that returns value, that is its argument
 			'value_field': (self.handler.model._meta.pk.name, None),
 			'display_field': (lambda x: x.value_field, [self,]),	#self is passed by reference
@@ -342,8 +346,6 @@ class ExtResource(Resource):
 			#	if hasattr(self.handler,name): setattr(self, name, getattr(self.handler,name))
 			#	else:
 			#		setattr(self,name,default)
-
-		#self.column
 
 	def determine_emitter(self, request, *args, **kwargs):
 		em = kwargs.pop('emitter_format', None)
@@ -380,7 +382,7 @@ class ExtResource(Resource):
 
 		#defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':meta.app_label}
 		app_label = self.handler.__module__.replace('api.handlers','') or 'main'
-		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
+		defaults = {'fields':self.fields, 'columns': self.columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
 
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
