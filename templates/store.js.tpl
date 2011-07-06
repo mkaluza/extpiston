@@ -13,17 +13,9 @@ var {{ name }}Store = new Ext.data.JsonStore({
 {% endif %}
 
 {% if store_type == 'array' %}
-var {{ name }}Store = {{ data }};
-{% endif %}
-
-{% if store_type == 'Xrray' %}
-{# to nie dziala i nie wiem dlaczego :/ #}
 var {{ name }}Store = new Ext.data.ArrayStore({
-	autoLoad: {{ data }},
-	{#data: {{ data }},#}
-	{#root: 'data',#}
+	data: {{ data }},
 	storeId: '{{ name }}Store',
-	idIndex: 0,
 	fields: {{ fields }}
 });
 {% endif %}
