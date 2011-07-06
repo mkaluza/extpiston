@@ -208,33 +208,35 @@ def flatten_fields(fields, prefix = None):
 			res.append(f)
 	return res
 
-def get_fields(self):
+def get_field_type(cls, model = None, name = None):
 	field_map = {
-		'AutoField': 'numberfield',
-		'BigIntegerField': 'numberfield',
-		'IntegerField': 'numberfield',
-		'DateField': 'datefield',
-		'DateTimeField': 'datefield',
+		'AutoField': 'number',
+		'BigIntegerField': 'number',
+		'IntegerField': 'number',
+		'DateField': 'date',
+		'DateTimeField': 'date',
 	}
+	return field_map.get(cls,'text')
 
 		#help text
 		#TODO As currently implemented, setting auto_now or auto_now_add to True will cause the field to have editable=False and blank=True set.
 		#TODO trzeba wymyslic, czy ustawiac flage read only, czy zmieniac na displayfield
 
 def flatten_fields2(handler, fields = None, model = None, prefix = None):
-#	print "\n",fields, model, prefix
+	print "\n1:",fields, model, prefix
 	res = {}
 	if not model: model = handler.model
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
-#	print model_fields.keys()
+	print "2:",model.__name__,model_fields.keys()[:10]
 #
 	for field in fields:
+		print "\t field:", field
 		if isinstance(field, tuple):
 			new_prefix = field[0]
 			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
 			new_model = model_fields[field[0]].rel.to		#get model that is referenced by this foreign key
-#			print 'related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
+			print '3:related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
 #
 			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix))
 			continue
@@ -244,12 +246,12 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None):
 #
 		if prefix: field = "%s__%s" % (prefix,field)
 #
-		field_dict = {'name':field, 'header': field, 'type': 'textfield'}
+		field_dict = {'name':field, 'header': field, 'type': 'text'}
 #
 		if ff:
-			field_dict['type'] = ff.__class__.__name__
+			field_dict['type'] = get_field_type(ff.__class__.__name__)
 			field_dict['header'] = ff.verbose_name
-			field_dict['tooltip'] = ff.help_text
+			if ff.help_text: field_dict['tooltip'] = ff.help_text
 			if ff.primary_key: field_dict.update({'hidden':True, 'hideable':False})
 #
 		res[field]=field_dict
@@ -277,7 +279,7 @@ class ExtJSONEmitter(Emitter):
 			#ext_dict['data'] = flatten_dict(data)
 		ext_dict = {'success': True, 'data': data, 'message': 'Something good happened on the server!'}
 		if self.total != None: ext_dict['total'] = self.total
-		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
+		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
 
 		# Callback
 		if cb:
@@ -323,14 +325,11 @@ class ExtResource(Resource):
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
-		self.columns = flatten_fields2(self.handler, self.fields)
+		self.columns = flatten_fields2(self.handler)
 		if hasattr(self.handler,'columns'):
 			for name, data in self.handler.columns.iteritems():
 				if name in self.columns: self.columns[name].update(data)
 				else: self.columns[name] = data
-
-		sorted_columns = [self.columns[k] for k in self.fields]
-		self.columns = simplejson.dumps(sorted_columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
 
 		params = { # name, value, if value is a function that returns value, that is its argument
 			'value_field': (self.handler.model._meta.pk.name, None),
@@ -385,13 +384,21 @@ class ExtResource(Resource):
 
 		meta = self.handler.model._meta
 
-		#defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':meta.app_label}
-		app_label = self.handler.__module__.replace('api.handlers','') or 'main'
-		defaults = {'fields':self.fields, 'columns': self.columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
+		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
+
+		if name == 'grid':
+			for k,col in self.columns.iteritems():
+				col['dataIndex'] = col['name']
+				#col['xtype'] = {'date': 'datecolumn', 'number':'numbercolumn'}.get(col['type'],'gridcolumn') 	#TODO
+
+		columns = [self.columns[k] for k in self.fields]
+		columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
+
+		defaults = {'fields':self.fields, 'columns': columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
 
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
-		if self.store_type == 'array': 
+		if self.store_type == 'array':
 			resp = self(request,emitter_format='array-json')
 			defaults['data'] = resp.content
 
