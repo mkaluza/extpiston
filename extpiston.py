@@ -316,14 +316,24 @@ class ArrayJSONEmitter(Emitter):
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
 
 class ExtResource(Resource):
-	def init_values(self,*args,**kwargs):
-		values = [ # name, value, if value is a function that returns value, that is its argument
-			('value_field', self.handler.model._meta.pk.name, None),
-			('display_field', lambda x: x.value_field, [self,]),	#self is passed by reference
-			('store_type', 'json', None)
-			]
+	def __init__(self,handler,*args,**kwargs):
+		super(ExtResource,self).__init__(handler, *args, **kwargs)
+		try:
+			self.fields = flatten_fields(self.handler.fields)
+		except:
+			self.fields = [f.name for f in self.handler.model._meta.fields]
 
-		for name,default,args in values:
+		params = { # name, value, if value is a function that returns value, that is its argument
+			'value_field': (self.handler.model._meta.pk.name, None),
+			'display_field': (lambda x: x.value_field, [self,]),	#self is passed by reference
+			'store_type': ('json', None),
+			'separate_store': (False, None),
+			'page_size': (None,None),
+			}
+
+		self.params = params
+
+		for name,(default,args) in self.params.iteritems():
 			if args is not None: default = default(*args)	#if arguments are given, default is a function
 			#set atribute based on kwargs OR handler config OR default value
 			setattr(self, name, kwargs.pop(name,getattr(self.handler,name,default)))
@@ -333,14 +343,7 @@ class ExtResource(Resource):
 			#	else:
 			#		setattr(self,name,default)
 
-	def __init__(self,handler,pageSize = None,*args,**kwargs):
-		super(ExtResource,self).__init__(handler, *args, **kwargs)
-		self.pageSize = pageSize
-		try:
-			self.fields = flatten_fields(self.handler.fields)
-		except:
-			self.fields = [f.name for f in self.handler.model._meta.fields]
-		self.init_values()
+		#self.column
 
 	def determine_emitter(self, request, *args, **kwargs):
 		em = kwargs.pop('emitter_format', None)
@@ -375,12 +378,16 @@ class ExtResource(Resource):
 
 		meta = self.handler.model._meta
 
-		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name,'pageSize':self.pageSize, 'app_label':meta.app_label, 'value_field': self.value_field, 'display_field': self.display_field, 'store_type': self.store_type}
+		defaults = {'fields':self.fields,'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':meta.app_label}
+
+		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
+
 		if self.store_type == 'array': 
 			resp = self(request,emitter_format='array-json')
 			defaults['data'] = resp.content
 
 		defaults.update(dictionary or {})
+
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
