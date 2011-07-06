@@ -21,7 +21,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			selectOnFocus:true,			//true to select any existing text in the field immediately on focus. Only applies when editable = true (defaults to false).
 			valueField: '{{ value_field|default:"id" }}',
 			displayField: '{{ display_field|default:"id" }}',
-			name: '{{ name|lower }}'
+			name: '{{ name|lower }}',
 			hiddenName: '{{ name|lower }}'
 		}; //config
 		
