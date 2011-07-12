@@ -328,8 +328,8 @@ class ExtResource(Resource):
 			if name in self.columns: self.columns[name].update(data)
 			else: self.columns[name] = data
 
-	def __init__(self,handler,*args,**kwargs):
-		super(ExtResource,self).__init__(handler, *args, **kwargs)
+	def __init__(self,handler, authentication=None, authorization=None,**kwargs):
+		super(ExtResource,self).__init__(handler, authentication=authentication, authorization=authorization)
 		try:
 			self.fields = flatten_fields(self.handler.fields)
 		except:
