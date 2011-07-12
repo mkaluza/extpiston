@@ -359,6 +359,7 @@ class ExtResource(Resource):
 			#	if hasattr(self.handler,name): setattr(self, name, getattr(self.handler,name))
 			#	else:
 			#		setattr(self,name,default)
+		self.forms = kwargs.pop('forms',{})
 
 	def determine_emitter(self, request, *args, **kwargs):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
@@ -370,15 +371,19 @@ class ExtResource(Resource):
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
-		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/js/(?P<name>\w+(.js)?)?/?$' % name, self.render_js)]
+		return urls+[
+				url(r'^%s/(?P<id>\d+)$' % name, self),
+				url(r'^%s$' % name, self),
+				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % name, self.render_js),
+				]
 
-	def render_js(self, request, name, dictionary=None):
+	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
 		JS can be rendered by calling api/$name/js/X, where X is a file name with or without .js extension.
 		calling with no X assumes x=all
 		"""
-		name = name or 'all'	#normal default value doesn't work with (P..)? since django then passes None as a value
-		name = name.lower().replace('.js','')
+		name = (name or 'all').lower().replace('.js','') #normal default value doesn't work with (P..)? since django then passes None as a value
+		name2 = (name2 or '').lower().replace('.js','')
 		print 'render', name
 		if name not in ['form','store','grid','combo','all']:
 			raise Http404
@@ -389,9 +394,14 @@ class ExtResource(Resource):
 
 		columns = {}
 		if name == 'form':
-			for k,col in self.columns.iteritems():
+			if name2 and name2 not in ['default','all']:
+				if name2 not in self.forms: raise Http404
+				_columns = [(n,self.columns[n]) for n in self.forms[name2]]
+			else:
+				_columns = self.columns.iteritems()
+			for k,col in _columns:
 				print k,col
-				newcol = {'fieldLabel': col['header']}
+				newcol = {'fieldLabel': col['header'], 'name': col['name']}
 				if 'fk' in col and col['fk']:
 					newcol['xtype'] = col['type']+'.combobox'
 				else:
@@ -406,10 +416,11 @@ class ExtResource(Resource):
 		else:
 			columns = self.columns.copy()
 
-		columns = [columns[k] for k in self.fields]
+		columns = [columns[k] for k in set(self.fields) & set(columns.keys())]
 		columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
 
-		defaults = {'fields':self.fields, 'columns': columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'app_label':app_label}
+		if name2 in ['default','all']: name2=''
+		defaults = {'fields':self.fields, 'columns': columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'name2': name2, 'app_label':app_label}
 
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
