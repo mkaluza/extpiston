@@ -374,10 +374,6 @@ class ExtResource(Resource):
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
 		return urls+[url(r'^%s/(?P<id>\d+)$' % name, self), url(r'^%s$' % name, self), url(r'^%s/js/(?P<name>\w+(.js)?)?/?$' % name, self.render_js)]
 
-	def columns(self):
-		columns = [{'header':f.verbose_name,'dataIndex':f.name,'tooltip':f.help_text} for f in self.handler.model._meta.fields]
-		return simplejson.dumps(columns, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4)
-
 	def render_js(self, request, name, dictionary=None):
 		"""
 		JS can be rendered by calling api/$name/js/X, where X is a file name with or without .js extension.
