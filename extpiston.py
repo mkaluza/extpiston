@@ -253,9 +253,11 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
 			field_dict['header'] = ff.verbose_name
 			if ff.help_text: field_dict['tooltip'] = ff.help_text
+			if ff.choices: field_dict['choices'] = ff.choices
 			if ff.primary_key:
 				field_dict.update({'hidden':True, 'hideable':False})
 				print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
+				if not prefix: field_dict['pk'] = True
 				if prefix and '__' not in prefix: 	#jeden stopien nizej
 					field_dict['header'] = parent_field.verbose_name
 					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]) or 'main',model.__name__.lower())
@@ -348,7 +350,7 @@ class ExtResource(Resource):
 			'value_field': (self.handler.model._meta.pk.name, None),
 			'display_field': (lambda x: x.value_field, [self,]),	#self is passed by reference
 			'store_type': ('json', None),
-			'separate_store': (False, None),
+			'separate_store': (True, None),
 			'page_size': (None,None),
 			}
 
@@ -381,6 +383,39 @@ class ExtResource(Resource):
 				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % name, self.render_js),
 				]
 
+	def render_form(self, request, name = '', dictionary = None):
+		columns = {}
+		if name and name not in ['default','all']:
+			if name not in self.forms: raise Http404
+			_columns = [(n,self.columns[n]) for n in self.forms[name]]
+		else:
+			_columns = self.columns.iteritems()
+
+		for k,col in _columns:
+			print k,col
+			if "__" in col['name'] and not col.get('fk',None): continue
+			newcol = {'fieldLabel': col['header'], 'name': col['name']}
+			if col.get('pk',None):
+				newcol.update({'xtype': 'displayfield', 'hidden': True})
+			elif 'fk' in col and col['fk']:
+				newcol['xtype'] = col['type']+'.combo'
+			elif col.get('choices',None):
+				#newcol.update({'xtype': 'combo', 'store': col['choices']})
+				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybież...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
+			else:
+				newcol['xtype'] = col['type']+'field'
+			#if 'width' in col: del col['width']
+			columns[k]=newcol
+		return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
+
+
+	def render_grid(self, request, name = '', dictionary = None):
+		columns = {}
+		for k,col in self.columns.iteritems():
+			col['dataIndex'] = col['name']
+			columns[k]=col
+		return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
+
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
 		JS can be rendered by calling api/$name/js/X, where X is a file name with or without .js extension.
@@ -393,45 +428,24 @@ class ExtResource(Resource):
 			raise Http404
 
 		meta = self.handler.model._meta
-
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
-		columns = {}
-		if name == 'form':
-			if name2 and name2 not in ['default','all']:
-				if name2 not in self.forms: raise Http404
-				_columns = [(n,self.columns[n]) for n in self.forms[name2]]
-			else:
-				_columns = self.columns.iteritems()
-			for k,col in _columns:
-				print k,col
-				newcol = {'fieldLabel': col['header'], 'name': col['name']}
-				if 'fk' in col and col['fk']:
-					newcol['xtype'] = col['type']+'.combobox'
-				else:
-					newcol['xtype'] = col['type']+'field'
-				#if 'width' in col: del col['width']
-				columns[k]=newcol
-		elif name == 'grid':
-			for k,col in self.columns.iteritems():
-				col['dataIndex'] = col['name']
-				#col['xtype'] = {'date': 'datecolumn', 'number':'numbercolumn'}.get(col['type'],'gridcolumn') 	#TODO
-				columns[k]=col
-		else:
-			columns = self.columns.copy()
-
-		columns = [columns[k] for k in set(self.fields) & set(columns.keys())]
-		columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
-
-		if name2 in ['default','all']: name2=''
-		defaults = {'fields':self.fields, 'columns': columns, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'name2': name2, 'app_label':app_label}
-
+		defaults = {'fields': self.fields, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'name2': name2 if name2 not in ['default','all'] else '', 'app_label':app_label}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
+
+		#columns2 = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
+		#columns = [columns[k] for k in set(self.fields) & set(columns.keys())]
+		#columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
 
 		if self.store_type == 'array':
 			resp = self(request,emitter_format='array-json')
 			defaults['data'] = resp.content
-
+		#if name == 'grid': defaults.update(self.render_grid(request))
+		#elif name == 'form': defaults.update(self.render_form(request))
+		#else: defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
+		defaults.update(self.render_grid(request))
+		defaults.update(self.render_form(request))
+		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(dictionary or {})
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
