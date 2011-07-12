@@ -363,11 +363,7 @@ class ExtResource(Resource):
 			#		setattr(self,name,default)
 
 	def determine_emitter(self, request, *args, **kwargs):
-		em = kwargs.pop('emitter_format', None)
-		if not em:
-			em = request.GET.get('format', 'ext-json')
-		
-		return em
+		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
 
 	def urls(self,*args,**kwargs):
 		#args are numbers by default
