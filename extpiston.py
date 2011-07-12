@@ -229,7 +229,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
 	print "2:",model.__name__,model_fields.keys()[:10]
-#
+
 	for field in fields:
 		print "\t field:", field
 		if isinstance(field, tuple):
@@ -238,17 +238,17 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 			parent_field = model_fields[field[0]]
 			new_model = parent_field.rel.to		#get model that is referenced by this foreign key
 			print '3:related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
-#
+
 			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
 			continue
-#
+
 		if field in model_fields: ff = model_fields[field]
 		else: ff = None
-#
+
 		if prefix: field = "%s__%s" % (prefix,field)
-#
+
 		field_dict = {'name':field, 'header': field, 'type': 'text'}
-#
+
 		if ff:
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
 			field_dict['header'] = ff.verbose_name
@@ -260,9 +260,9 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 					field_dict['header'] = parent_field.verbose_name
 					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]),model.__name__.lower())
 					field_dict['fk'] = True
-#
+
 		res[field]=field_dict
-#
+
 	return res
 
 class ExtJSONEmitter(Emitter):
@@ -280,10 +280,8 @@ class ExtJSONEmitter(Emitter):
 
 		if isinstance(data,(list,tuple)):
 			data = [flatten_dict(d) for d in data]
-			#ext_dict['data'] = [flatten_dict(d) for d in data]
 		else:
 			data = flatten_dict(data)
-			#ext_dict['data'] = flatten_dict(data)
 		ext_dict = {'success': True, 'data': data, 'message': 'Something good happened on the server!'}
 		if self.total != None: ext_dict['total'] = self.total
 		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
