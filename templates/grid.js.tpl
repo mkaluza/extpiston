@@ -5,7 +5,8 @@
 
 Ext.namespace('{{app_label|title}}.{{name}}');
 
-var {{app_name}}{{name}}Columns = {{ columns }}
+{{app_label|title}}.{{name}}.gridColumns = {{ gridColumns }}
+{{app_label|title}}.{{name}}.gridColumnNames = {{ gridColumnNames }}
 
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
@@ -16,7 +17,7 @@ var {{app_name}}{{name}}Columns = {{ columns }}
 			store: {{name}}Store,
 			autoScroll: false,
 			autoHeight: true,
-			columns: {{app_name}}{{name}}Columns,
+			columns: [],
 			loadMask: true,
 			{% if page_size %}
 			bbar: {
@@ -33,6 +34,8 @@ var {{app_name}}{{name}}Columns = {{ columns }}
 			},
 			itemId: '{{ name|lower }}'
 		}; //config
+		for (var name in {{app_label|title}}.{{name}}.gridColumns)
+			config.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 

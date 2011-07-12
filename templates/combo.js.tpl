@@ -32,4 +32,4 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 	} //initComponent
 	});
-Ext.reg('{{app_label|lower}}.{{name|lower}}.combobox',{{app_label|title}}.{{name}}.ComboBox);
+Ext.reg('{{app_label|lower}}.{{name|lower}}.combo',{{app_label|title}}.{{name}}.ComboBox);
