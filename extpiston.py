@@ -325,6 +325,11 @@ class ArrayJSONEmitter(Emitter):
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
 
 class ExtResource(Resource):
+	def updateColumns(self,columns):
+		for name, data in columns.iteritems():
+			if name in self.columns: self.columns[name].update(data)
+			else: self.columns[name] = data
+
 	def __init__(self,handler,*args,**kwargs):
 		super(ExtResource,self).__init__(handler, *args, **kwargs)
 		try:
@@ -334,15 +339,8 @@ class ExtResource(Resource):
 
 		#TODO to powinno byc w handlerze
 		self.columns = flatten_fields2(self.handler)
-		if hasattr(self.handler,'columns'):
-			for name, data in self.handler.columns.iteritems():
-				if name in self.columns: self.columns[name].update(data)
-				else: self.columns[name] = data
-
-		if 'columns' in kwargs:
-			for name, data in kwargs.pop('columns').iteritems():
-				if name in self.columns: self.columns[name].update(data)
-				else: self.columns[name] = data
+		if hasattr(self.handler,'columns'): self.updateColumns(self.handler.columns)
+		if 'columns' in kwargs: self.updateColumns(kwargs.pop('columns'))
 
 		params = { # name, value, if value is a function that returns value, that is its argument
 			'value_field': (self.handler.model._meta.pk.name, None),
