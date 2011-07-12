@@ -258,7 +258,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 				print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
 				if prefix and '__' not in prefix: 	#jeden stopien nizej
 					field_dict['header'] = parent_field.verbose_name
-					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]),model.__name__.lower())
+					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]) or 'main',model.__name__.lower())
 					field_dict['fk'] = True
 
 		res[field]=field_dict
