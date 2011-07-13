@@ -16,9 +16,28 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			url: '{{app_label}}/api/{{ name|lower }}',
 			items: [],
 			loadMask: true,
-			itemId: '{{ name|lower }}form'
+			defaults: {labelWidth: 100, width: 200},
+			itemId: '{{ name|lower }}form',
+			bubbleEvents: ['cancel','save'],
+			buttons: [{
+					text: 'Zapisz',
+					handler: function() {
+						this.fireEvent('save');
+					}
+				},{
+					text: 'Anuluj',
+					handler: function() {
+						this.fireEvent('cancel');
+					}
+				}]
+
 		}; //config
-		for (var name in {{app_label|title}}.{{name}}.{{name2|title}}formFields) config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
+		if (this.initialConfig.fields) {
+			for (var name in this.initialConfig.fields) 
+				if (typeof(name)=="string") 
+					config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
+		} else
+			for (var name in {{app_label|title}}.{{name}}.{{name2|title}}formFields) config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
