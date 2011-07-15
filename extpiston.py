@@ -222,12 +222,21 @@ def get_field_type(cls, model = None, name = None):
 		#TODO As currently implemented, setting auto_now or auto_now_add to True will cause the field to have editable=False and blank=True set.
 		#TODO trzeba wymyslic, czy ustawiac flage read only, czy zmieniac na displayfield
 
+def get_model_properties(model):
+	result = []
+	for p in dir(model):
+		if isinstance(getattr(model,p),property):
+			result.append(p)
+	return result
+
 def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_field = None):
 	print "\n1:",fields, model, prefix
 	res = {}
 	if not model: model = handler.model
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
+	model_properties = get_model_properties(model)
+
 	print "2:",model.__name__,model_fields.keys()[:10]
 
 	for field in fields:
