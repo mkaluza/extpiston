@@ -264,15 +264,15 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 
 		if ff:
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
-			field_dict['header'] = ff.verbose_name
-			if ff.help_text: field_dict['tooltip'] = ff.help_text
+			if type(ff.verbose_name) in [str,unicode]: field_dict['header'] = ff.verbose_name
+			if ff.help_text and type(ff.help_text) in [str,unicode]: field_dict['tooltip'] = ff.help_text
 			if ff.choices: field_dict['choices'] = ff.choices
 			if ff.primary_key:
 				field_dict.update({'hidden':True, 'hideable':False})
 				print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
 				if not prefix: field_dict['pk'] = True
 				if prefix and '__' not in prefix: 	#jeden stopien nizej
-					field_dict['header'] = parent_field.verbose_name
+					if type(parent_field.verbose_name) in [str,unicode]: field_dict['header'] = parent_field.verbose_name
 					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]) or 'main',model.__name__.lower())
 					field_dict['fk'] = True
 
