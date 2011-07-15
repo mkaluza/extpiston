@@ -7,7 +7,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	initComponent:function() {
-		{% if config.separate_store %}
+		{% if separate_store %}
 		{% include "mksoftware/store.js.tpl" %}
 		{% endif %}
 		var config = {
