@@ -14,7 +14,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{% include "mksoftware/store.js.tpl" %}
 		{% endif %}
 		var config = {
-			store: {{name}}Store,
+			store: {{name}}StoreConfig,
 			autoScroll: false,
 			autoHeight: true,
 			columns: [],
@@ -23,7 +23,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			bbar: {
 				xtype:'paging',
 				pageSize: {{ page_size }},
-				store: {{name}}Store,
 				displayInfo: true,
 				displayMsg: 'Wyniki {0} - {1} z {2}',
 				emptyMsg: "Brak wyników"
@@ -37,7 +36,20 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		for (var name in {{app_label|title}}.{{name}}.gridColumns)
 			config.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
 
-		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
+		if (this.initialConfig.storeConfig)
+			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
+
+		if (!(this.initialConfig.store))
+			config.store = new Ext.data.JsonStore(config.store); 		//if no store is supplied, create one from config
+
+		Ext.applyIf(this.initialConfig, config);
+
+		if (this.initialConfig.bbar) 		//if has a bbar
+			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet
+				this.initialConfig.bbar.store = this.initialConfig.store;	//than set it
+
+		Ext.apply(this, this.initialConfig);
+
 
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 	} //initComponent
