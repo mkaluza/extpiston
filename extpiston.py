@@ -242,13 +242,17 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 	for field in fields:
 		print "\t field:", field
 		if isinstance(field, tuple):
-			new_prefix = field[0]
+			new_prefix = field_name = field[0]
 			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
-			parent_field = model_fields[field[0]]
-			new_model = parent_field.rel.to		#get model that is referenced by this foreign key
-			print '3:related',field[0],model_fields[field[0]],model_fields[field[0]].related.model
+			if field_name in model_fields:
+				parent_field = model_fields[field_name]
+				new_model = parent_field.rel.to		#get model that is referenced by this foreign key
+				print '3:related',field_name,model_fields[field_name],model_fields[field_name].related.model
 
-			res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
+				res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
+			else:
+				for f in flatten_fields(field[1],new_prefix):
+					res[f] = {'name':f, 'header': f, 'type': 'text'}
 			continue
 
 		if field in model_fields: ff = model_fields[field]
