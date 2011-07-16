@@ -175,6 +175,8 @@ class ExtHandler(BaseHandler):
 			#the rest (properties)
 			for f in fields - modelfields:
 				if hasattr(inst,f): setattr(inst,f,attrs[f])
+			#TODO fails for inherited models?
+			#TODO handle foreign keys?
 			inst.save()
 			return inst
 		except self.model.MultipleObjectsReturned:
@@ -302,7 +304,8 @@ class ExtJSONEmitter(Emitter):
 			data = [flatten_dict(d) for d in data]
 		else:
 			data = flatten_dict(data)
-		ext_dict = {'success': True, 'data': data, 'message': 'Something good happened on the server!'}
+		ext_dict = {'success': True, 'data': data}
+		if hasattr(self.handler,'message'): ext_dict['message']=self.handler.message
 		if self.total != None: ext_dict['total'] = self.total
 		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
 
@@ -419,7 +422,6 @@ class ExtResource(Resource):
 			elif 'fk' in col and col['fk']:
 				newcol['xtype'] = col['type']+'.combo'
 			elif col.get('choices',None):
-				#newcol.update({'xtype': 'combo', 'store': col['choices']})
 				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybież...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
 			else:
 				newcol['xtype'] = col['type']+'field'
