@@ -133,6 +133,11 @@ class DjangoAuthorization():
 
 class ExtHandler(BaseHandler):
 	#exclude = ()
+	def __init__(self):
+		super(ExtHandler,self).__init__(self)
+		if not hasattr(self,'name'): self.name = self.model._meta.object_name
+		if not hasattr(self,'verbose_name'): self.name = self.model._meta.verbose_name
+
 	def fix_data(self,request):
 		if hasattr(request,'data_fixed'): return request
 		req_data=getattr(request,request.method)
@@ -379,21 +384,21 @@ class ExtResource(Resource):
 			#	else:
 			#		setattr(self,name,default)
 		self.forms = kwargs.pop('forms',{})
+		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
 
 	def determine_emitter(self, request, *args, **kwargs):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
 
-	def urls(self,*args,**kwargs):
+	def urls(self, *args, **kwargs):
 		#args are numbers by default
 		from django.conf.urls.defaults import url
-		name = self.handler.model.__name__.lower()
 		urls=[]
-		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (name,k,k),self))
-		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (name,k,k,v),self))
+		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (self.name,k,k),self))
+		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (self.name,k,k,v),self))
 		return urls+[
 				url(r'^%s/(?P<id>\d+)$' % name, self),
 				url(r'^%s$' % name, self),
-				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % name, self.render_js),
+				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.name, self.render_js),
 				]
 
 	def render_form(self, request, name = '', dictionary = None):
@@ -440,10 +445,9 @@ class ExtResource(Resource):
 		if name not in ['form','store','grid','combo','all']:
 			raise Http404
 
-		meta = self.handler.model._meta
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
-		defaults = {'fields': self.fields, 'verbose_name': meta.verbose_name,'name':meta.object_name, 'name2': name2 if name2 not in ['default','all'] else '', 'app_label':app_label}
+		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2 if name2 not in ['default','all'] else '', 'app_label':app_label}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
 		#columns2 = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
