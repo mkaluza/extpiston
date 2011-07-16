@@ -134,9 +134,9 @@ class DjangoAuthorization():
 class ExtHandler(BaseHandler):
 	#exclude = ()
 	def __init__(self):
-		super(ExtHandler,self).__init__(self)
+		super(ExtHandler,self).__init__()
 		if not hasattr(self,'name'): self.name = self.model._meta.object_name
-		if not hasattr(self,'verbose_name'): self.name = self.model._meta.verbose_name
+		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
 
 	def fix_data(self,request):
 		if hasattr(request,'data_fixed'): return request
@@ -385,6 +385,7 @@ class ExtResource(Resource):
 			#		setattr(self,name,default)
 		self.forms = kwargs.pop('forms',{})
 		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
+		self.verbose_name = self.handler.verbose_name
 
 	def determine_emitter(self, request, *args, **kwargs):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
@@ -396,8 +397,8 @@ class ExtResource(Resource):
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (self.name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (self.name,k,k,v),self))
 		return urls+[
-				url(r'^%s/(?P<id>\d+)$' % name, self),
-				url(r'^%s$' % name, self),
+				url(r'^%s/(?P<id>\d+)$' % self.name, self),
+				url(r'^%s$' % self.name, self),
 				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.name, self.render_js),
 				]
 
