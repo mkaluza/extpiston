@@ -27,7 +27,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				emptyMsg: "Brak wyników"
 			},
 			{% endif %}
+			{% if verbose_name %}title: '{{verbose_name}}',{% endif %}
 			viewConfig: {
+				emptyText: 'Brak wyników',
 				autoFill: true
 			},
 			itemId: '{{ name|lower }}'
@@ -54,6 +56,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 	initComponent:function() {
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
+
+		this.relayEvents(this.getSelectionModel(),['selectionchange']);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
@@ -68,7 +72,9 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 			Ext.applyIf(this.initialConfig.storeConfig, storeConfig);
 		else
 			this.initialConfig.storeConfig = storeConfig;
+
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
+
 		var onSave = function onSave(btn, ev) {
 			this.getStore().save();
 		}
@@ -140,6 +146,9 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 			if (col.editable && !col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
 		}
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
+
+		this.relayEvents(this.getSelectionModel(),['selectionchange']);
+
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
