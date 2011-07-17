@@ -117,15 +117,21 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 
 		//TODO zrobić to mądrzej
 		if (!this.initialConfig.tbar) {
-			var tbar=[]
-			this.initialConfig.tbar = tbar;
-			if (!this.initialConfig.RESTbuttons) this.initialConfig.RESTbuttons=['add','remove','save'];
-
-			for (var n=0;n<this.initialConfig.RESTbuttons.length;n++) {
-				tbar.push(buttons[this.initialConfig.RESTbuttons[n]]);
-				if (n<this.initialConfig.RESTbuttons.length-1) tbar.push('-');
-			}
+			this.initialConfig.tbar = [];
 		}
+		else this.initialConfig.tbar.unshift('-');
+
+		var tbar = this.initialConfig.tbar;
+		if (!this.initialConfig.RESTbuttons) this.initialConfig.RESTbuttons=['add','remove','save'];
+
+		for (var n = this.initialConfig.RESTbuttons.length-1;n>=0; n--) {
+			tbar.unshift(buttons[this.initialConfig.RESTbuttons[n]]);
+			if (n>0) tbar.unshift('-');
+		}
+		/*for (var n=0;n<this.initialConfig.RESTbuttons.length;n++) {
+			tbar.push(buttons[this.initialConfig.RESTbuttons[n]]);
+			if (n<this.initialConfig.RESTbuttons.length-1) tbar.push('-');
+		}*/
 		Ext.apply(this, this.initialConfig);
 
 		for(var n = 0; n < this.columns.length; n++)
