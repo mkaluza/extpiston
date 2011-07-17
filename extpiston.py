@@ -331,7 +331,8 @@ class ArrayJSONEmitter(Emitter):
 		if isinstance(data,(list,tuple)):
 			data2 = [ flatten_dict(el) for el in data]
 			fields = flatten_fields(self.handler.fields)
-			data = [[ el[fname] for fname in fields] for el in data2 ]
+			#data = [[ el[fname] for fname in fields if fname in el] for el in data2 ]
+			data = [[ el[fname] if fname in el else "" for fname in fields] for el in data2]
 		else:
 			#TODO zrobic z tego array wtedy?
 			data = flatten_dict(data)
