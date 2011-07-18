@@ -7,7 +7,7 @@ import types
 from piston.emitters import Emitter
 from piston.handler import BaseHandler
 from piston.resource import Resource
-from piston.utils import rc, require_mime, require_extended, validate
+from piston.utils import rc, require_mime, require_extended, validate, coerce_put_post
 
 #from piston.authentication import DjangoAuthentication
 
@@ -151,7 +151,7 @@ class ExtHandler(BaseHandler):
 		return request
 
 	def create(self, request, *args, **kwargs):
-		request = self.fix_data(request)
+		#request = self.fix_data(request)
 		print "create"
 		if not self.has_model():
 			return rc.NOT_IMPLEMENTED
@@ -183,7 +183,7 @@ class ExtHandler(BaseHandler):
 			return rc.DUPLICATE_ENTRY
 
 	def update(self, request, *args, **kwargs):
-		request = self.fix_data(request)
+		#request = self.fix_data(request)
 		super(ExtHandler, self).update(request,  *args, **kwargs)
 		return self.read(request,*args, **kwargs)
 
@@ -390,6 +390,31 @@ class ExtResource(Resource):
 		self.forms = kwargs.pop('forms',{})
 		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
 		self.verbose_name = self.handler.verbose_name
+
+	def __call__(self, request, *args, **kwargs):
+		#TODO to dziala tylko, jka jest encode: true w jsonWriter
+		#print "extresource", hasattr(request, 'data'), request.method
+		coerce_put_post(request)
+		if not hasattr(request, 'data') and request.method in ['GET','PUT','POST']:
+			#print request
+			#print dir(request)
+			#print request._post
+			#print request.method,':',type(getattr(request,request.method)),getattr(request,request.method)
+			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
+		else: data = request.data
+
+		#print 'data:', type(data), data
+
+		if 'data' in data:
+			#print 'data2:', type(data['data']), data['data']
+			if type(data['data']) in [unicode,str]: data['data'] = simplejson.loads(data['data'])
+			setattr(request,'data',data['data'])
+			del data['data']
+		else:
+			setattr(request,'data',data)
+		setattr(request,'params',data)
+
+		return super(ExtResource, self).__call__(request, *args, **kwargs)
 
 	def determine_emitter(self, request, *args, **kwargs):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
