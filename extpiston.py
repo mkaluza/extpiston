@@ -401,7 +401,7 @@ class ExtResource(Resource):
 			#print request._post
 			#print request.method,':',type(getattr(request,request.method)),getattr(request,request.method)
 			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
-		else: data = request.data
+		else: data = getattr(request,'data',{})
 
 		#print 'data:', type(data), data
 
