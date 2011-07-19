@@ -331,8 +331,7 @@ class ArrayJSONEmitter(Emitter):
 		if isinstance(data,(list,tuple)):
 			data2 = [ flatten_dict(el) for el in data]
 			fields = flatten_fields(self.handler.fields)
-			#data = [[ el[fname] for fname in fields if fname in el] for el in data2 ]
-			data = [[ el[fname] if fname in el else "" for fname in fields] for el in data2]
+			data = [[ el.get(fname,"") for fname in fields] for el in data2]
 		else:
 			#TODO zrobic z tego array wtedy?
 			data = flatten_dict(data)
@@ -453,7 +452,8 @@ class ExtResource(Resource):
 				newcol['xtype'] = col['type']+'field'
 			#if 'width' in col: del col['width']
 			columns[k]=newcol
-		return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
+		return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
+		#return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
 
 	def render_grid(self, request, name = '', dictionary = None):
@@ -461,7 +461,8 @@ class ExtResource(Resource):
 		for k,col in self.columns.iteritems():
 			col['dataIndex'] = col['name']
 			columns[k]=col
-		return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
+		return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
+		#return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
@@ -476,7 +477,8 @@ class ExtResource(Resource):
 
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
-		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2 if name2 not in ['default','all'] else '', 'app_label':app_label}
+		if name2 in ['default','all']: name2 = ''
+		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
 		#columns2 = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
@@ -491,7 +493,8 @@ class ExtResource(Resource):
 		#else: defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(self.render_grid(request))
 		defaults.update(self.render_form(request))
-		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
+		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3)
+		#defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(dictionary or {})
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
