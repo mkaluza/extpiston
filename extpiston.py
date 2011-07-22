@@ -504,9 +504,11 @@ class ExtResource(Resource):
 
 def request_debug(func):
 	def wrapper(self,request,*args,**kwargs):
-		print self.__class__.__name__, func.__name__
+		print "REQUEST:",self.__class__.__name__, func.__name__
 		print 'data',request.data
 		print 'params',request.params
+		print 'args', args
+		print 'kwargs', kwargs
 		return func(self,request,*args,**kwargs)
 	return wrapper
 
