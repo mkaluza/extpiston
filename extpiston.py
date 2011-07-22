@@ -502,3 +502,11 @@ class ExtResource(Resource):
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
 		return HttpResponse(body,mimetype='text/javascript')
 
+def request_debug(func):
+	def wrapper(self,request,*args,**kwargs):
+		print self.__class__.__name__, func.__name__
+		print 'data',request.data
+		print 'params',request.params
+		return func(self,request,*args,**kwargs)
+	return wrapper
+
