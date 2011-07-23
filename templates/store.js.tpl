@@ -10,6 +10,8 @@ var {{ name }}StoreConfig = {
 	root: 'data',
 	storeId: '{{ name }}Store',
 	fields: {{ fields }},
+	writer: new Ext.data.JsonWriter({encode:true}),
+	autoSave: false,
 	restful: true
 };
 

@@ -64,9 +64,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 
 {{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 	initComponent:function() {
-		var storeConfig = {	//TODO przeniesc do store.tpl
-			writer: new Ext.data.JsonWriter({encode:true}),
-			autoSave: false
+		var storeConfig = {
 		};
 		if (this.initialConfig.storeConfig)
 			Ext.applyIf(this.initialConfig.storeConfig, storeConfig);
