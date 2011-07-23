@@ -10,7 +10,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.gridInit = function() {
 		{% if separate_store %}
-		{% include "mksoftware/store.js.tpl" %}
+		{% include "mksoftware/store.js.tpl" with store_type="json" %}
 		{% endif %}
 		var config = {
 			store: {{name}}StoreConfig,
