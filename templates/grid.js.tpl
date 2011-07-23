@@ -14,11 +14,11 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{% endif %}
 		var config = {
 			store: {{name}}StoreConfig,
-			autoScroll: false,
 			autoHeight: true,
 			columns: [],
 			loadMask: true,
 			{% if page_size %}
+			autoScroll: false,
 			bbar: {
 				xtype:'paging',
 				pageSize: {{ page_size }},
