@@ -57,7 +57,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 
-		this.relayEvents(this.getSelectionModel(),['selectionchange']);
+		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
@@ -90,6 +90,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 			this.stopEditing();
 			store.insert(0, u);
 			this.startEditing(0,1);	//TODO - to sie musi samo wymyslac albo znajdywac
+			this.fireEvent('addItem', this, u);
 		}
 
 		var onDelete = function onDelete() {
@@ -102,8 +103,10 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 			store.removeAt(rec[0]);
 			var cnt = store.getCount();
 			if (cnt<=rec[0]) sm.select(cnt-1,1);
-			else sm.select(rec[0],1)
+			else sm.select(rec[0],1);
+			this.fireEvent('removeItem', this, rec);
 		}
+
 		var buttons = {
 			add: {
 				text: 'Dodaj',
@@ -146,6 +149,9 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange']);
+		this.relayEvents(this.getStore(),['save']);
+		this.getStore().enableBubble(['save']);
+		this.addEvents(['addItem','removeItem']);
 
 	} //initComponent
 });
