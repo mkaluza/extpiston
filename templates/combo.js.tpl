@@ -30,6 +30,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 		{{app_label|title}}.{{name}}.ComboBox.superclass.initComponent.apply(this, arguments);
 
+		if (this.initialConfig.baseParams)
+			for(var name in this.initialConfig.baseParams)
+				this.store.setBaseParam(name,this.initialConfig.baseParams[name]);
+
 	} //initComponent
 	});
 Ext.reg('{{app_label|lower}}.{{name|lower}}.combo',{{app_label|title}}.{{name}}.ComboBox);
