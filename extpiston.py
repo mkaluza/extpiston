@@ -237,24 +237,24 @@ def get_model_properties(model):
 	return result
 
 def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_field = None):
-	print "\n1:",fields, model, prefix
+	#print "\n1:",fields, model, prefix
 	res = {}
 	if not model: model = handler.model
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
 	model_properties = get_model_properties(model)
 
-	print "2:",model.__name__,model_fields.keys()[:10]
+	#print "2:",model.__name__,model_fields.keys()[:10]
 
 	for field in fields:
-		print "\t field:", field
+		#print "\t field:", field
 		if isinstance(field, tuple):
 			new_prefix = field_name = field[0]
 			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
 			if field_name in model_fields:
 				parent_field = model_fields[field_name]
 				new_model = parent_field.rel.to		#get model that is referenced by this foreign key
-				print '3:related',field_name,model_fields[field_name],model_fields[field_name].related.model
+				#print '3:related',field_name,model_fields[field_name],model_fields[field_name].related.model
 
 				res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
 			else:
@@ -276,7 +276,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 			if ff.choices: field_dict['choices'] = ff.choices
 			if ff.primary_key:
 				field_dict.update({'hidden':True, 'hideable':False})
-				print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
+				#print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
 				if not prefix: field_dict['pk'] = True
 				if prefix and '__' not in prefix: 	#jeden stopien nizej
 					if type(parent_field.verbose_name) in [str,unicode]: field_dict['header'] = parent_field.verbose_name
