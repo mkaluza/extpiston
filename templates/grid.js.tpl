@@ -58,6 +58,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
+		this.relayEvents(this.getStore(),['load','save']);
+		this.getStore().enableBubble(['load','save']);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
@@ -149,8 +151,8 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange']);
-		this.relayEvents(this.getStore(),['save']);
-		this.getStore().enableBubble(['save']);
+		this.relayEvents(this.getStore(),['load','save']);
+		this.getStore().enableBubble(['load','save']);
 		this.addEvents(['addItem','removeItem']);
 
 	} //initComponent

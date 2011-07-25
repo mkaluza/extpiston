@@ -20,6 +20,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			typeAhead: true,			//true to populate and autoselect the remainder of the text being typed after a configurable delay (typeAheadDelay) if it matches a known value (defaults to false)
 			//typeAheadDelay: 250,			//The length of time in milliseconds to wait until the typeahead text is displayed if typeAhead = true (defaults to 250)
 			selectOnFocus:true,			//true to select any existing text in the field immediately on focus. Only applies when editable = true (defaults to false).
+			bubbleEvents: ['change','select'],
 			valueField: '{{ value_field|default:"id" }}',
 			displayField: '{{ display_field|default:"id" }}',
 			name: '{{ name|lower }}',
