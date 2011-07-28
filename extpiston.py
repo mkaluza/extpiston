@@ -162,6 +162,9 @@ class ExtHandler(BaseHandler):
 		print "request.data.fixed:", request.data
 		return request
 
+	def queryset(self,request,*args, **kwargs):
+		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
+
 	def create(self, request, *args, **kwargs):
 		#request = self.fix_data(request)
 		print "create"
