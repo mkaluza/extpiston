@@ -36,5 +36,11 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				this.store.setBaseParam(name,this.initialConfig.baseParams[name]);
 
 	} //initComponent
+	{% if store_type == 'json' %}
+	,onRender: function() {
+		this.store.load();
+		{{app_label|title}}.{{name}}.ComboBox.superclass.onRender.apply(this, arguments);
+	}
+	{% endif %}
 	});
 Ext.reg('{{app_label|lower}}.{{name|lower}}.combo',{{app_label|title}}.{{name}}.ComboBox);
