@@ -64,6 +64,22 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
 
+function fkrenderer(value, metaData, record, rowIndex, colIndex, store) {
+	/*
+	// tego bedziemy mogli uzyc kiedy indziej
+	var parts = this.dataIndex.split('__');
+	parts.pop();
+	var fk_name = parts.join('__');
+	*/
+	try {
+		var ed = this.editor;
+		var index = ed.store.find(ed.initialConfig.valueField,value);
+		var rec = ed.store.getAt(index);
+		var val = rec.data[ed.initialConfig.displayField];
+		return val;
+	} catch (e) { return value; }
+};
+
 {{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 	initComponent:function() {
 		var storeConfig = {
@@ -146,7 +162,11 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		for(var n = 0; n < this.columns.length; n++)
 		{
 			var col = this.columns[n]
-			if (col.editable && !col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
+			if (col.editable) {
+			       if (!col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
+			       if (!(col.editor.xtype in Ext.ComponentMgr.types)) console.log('type ' +col.editor.xtype+ ' not available');
+			       if (col.fk && !col.renderer) col.renderer = fkrenderer;
+			}
 		}
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
