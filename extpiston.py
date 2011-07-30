@@ -23,6 +23,20 @@ from django.utils import simplejson
 
 import settings
 
+def request_debug(func):
+	def wrapper(self,request,*args,**kwargs):
+		print "REQUEST:",self.__class__.__name__, func.__name__
+		try:
+			print 'data',request.data
+		except: pass
+		try:
+			print 'params',request.params
+		except: pass
+		print 'args', args
+		print 'kwargs', kwargs
+		return func(self,request,*args,**kwargs)
+	return wrapper
+
 class DjangoAuthorization():
 	"""
 	sposoby definiowania:
@@ -541,14 +555,4 @@ class ExtResource(Resource):
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
 		return HttpResponse(body,mimetype='text/javascript')
-
-def request_debug(func):
-	def wrapper(self,request,*args,**kwargs):
-		print "REQUEST:",self.__class__.__name__, func.__name__
-		print 'data',request.data
-		print 'params',request.params
-		print 'args', args
-		print 'kwargs', kwargs
-		return func(self,request,*args,**kwargs)
-	return wrapper
 
