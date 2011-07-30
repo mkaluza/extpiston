@@ -166,8 +166,6 @@ class ExtHandler(BaseHandler):
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
 
 	def create(self, request, *args, **kwargs):
-		#request = self.fix_data(request)
-		print "create"
 		if not self.has_model():
 			return rc.NOT_IMPLEMENTED
 
@@ -212,7 +210,6 @@ class ExtHandler(BaseHandler):
 			return rc.DUPLICATE_ENTRY
 
 	def update(self, request, *args, **kwargs):
-		#request = self.fix_data(request)
 		super(ExtHandler, self).update(request,  *args, **kwargs)
 
 		inst = self.read(request,*args, **kwargs)
