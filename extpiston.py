@@ -184,26 +184,26 @@ class ExtHandler(BaseHandler):
 			fields=set(attrs.keys())
 			modeldata = {}
 			#Only model fields
-			for f in fields & modelfields: modeldata[f] = attrs[f]
+			for f in fields & modelfields:
+				modeldata[f] = attrs[f]
+				fields.remove(f)
 
 			inst = self.model(**modeldata)
+
+			#potential fk fields
+			for f in filter(lambda x:'__' in x,fields):
+				fk = f.replace('__','_')
+				if hasattr(inst,fk):
+					setattr(inst,fk,attrs[f])
+					fields.remove(f)
+
 			#the rest (properties)
-			for f in fields - modelfields:
+			for f in fields:
 				try:
 					if hasattr(inst,f): setattr(inst,f,attrs[f])
 				except:
 					#in case it's read only...
 					pass
-
-				if '__' in f:		#fk
-					pth = f.split('__')
-					#print 'fk pth: %s w obiekcie %s w modelu %s'  % (str(pth),hasattr(inst,pth[0]), pth[0] in modelfields)
-					if len(pth)>2: continue									#we can't handle that (yet)
-					if not hasattr(inst,pth[0]) and not pth[0] in modelfields: continue			#can this happen? (if we get trash?)
-					fk_model = self.model._meta.get_field_by_name(pth[0])[0].rel.to
-					if fk_model._meta.pk.name != pth[1]: continue						#we look for pk, we don't set related objects' properties (yet)
-					#print "setting fk %s" % str(pth)
-					setattr(inst,pth[0],fk_model.objects.get(pk=attrs[f]))
 
 			#TODO fails for inherited models?
 			inst.save()
