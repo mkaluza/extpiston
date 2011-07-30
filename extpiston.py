@@ -214,7 +214,20 @@ class ExtHandler(BaseHandler):
 	def update(self, request, *args, **kwargs):
 		#request = self.fix_data(request)
 		super(ExtHandler, self).update(request,  *args, **kwargs)
-		return self.read(request,*args, **kwargs)
+
+		inst = self.read(request,*args, **kwargs)
+
+		attrs = self.flatten_dict(request.data)
+		#potential fk fields
+		fields=set(attrs.keys())
+		for f in filter(lambda x:'__' in x,fields):
+			fk = f.replace('__','_')
+			if hasattr(inst,fk):
+				setattr(inst,fk,attrs[f])
+				fields.remove(f)
+
+		inst.save()
+		return inst
 
 def flatten_dict(d, name = None):
 	if not isinstance(d,dict):return d
