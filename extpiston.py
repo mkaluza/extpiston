@@ -275,7 +275,9 @@ def get_field_type(cls, model = None, name = None):
 		'BigIntegerField': 'number',
 		'IntegerField': 'number',
 		'DateField': 'date',
-		'DateTimeField': 'date',
+		'DateTimeField': 'datetime',
+		'BooleanField': 'bool',
+		'TextField': 'textarea'
 	}
 	return field_map.get(cls,'text')
 
@@ -540,15 +542,28 @@ class ExtResource(Resource):
 			_columns = self.columns.iteritems()
 
 		for k,col in _columns:
-			print k,col
+			#print k,col
 			if "__" in col['name'] and not col.get('fk',None): continue
 			newcol = {'fieldLabel': col['header'], 'name': col['name']}
+			if 'width' in col: newcol['width'] = col['width']
+			if 'height' in col: newcol['height'] = col['height']
+			if 'format' in col: newcol['format'] = col['format']
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
 			elif 'fk' in col and col['fk']:
 				newcol['xtype'] = col['type']+'.combo'
 			elif col.get('choices',None):
 				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybież...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
+			elif col['type'] == 'bool':
+				newcol['xtype'] = 'checkbox'
+			elif col['type'] == 'textarea':
+				newcol['xtype'] = 'textarea'
+			elif col['type'] == 'date':
+				newcol['xtype'] = 'datefield'
+				if hasattr(settings,'DATE_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATE_FORMAT
+			elif col['type'] == 'datetime':
+				newcol['xtype'] = 'datefield'
+				if hasattr(settings,'DATETIME_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATETIME_FORMAT
 			else:
 				newcol['xtype'] = col['type']+'field'
 			#if 'width' in col: del col['width']
@@ -572,7 +587,7 @@ class ExtResource(Resource):
 		"""
 		name = (name or 'all').lower().replace('.js','') #normal default value doesn't work with (P..)? since django then passes None as a value
 		name2 = (name2 or '').lower().replace('.js','')
-		print 'render', name
+		#print 'render', name
 		if name not in ['form','store','grid','combo','all']:
 			raise Http404
 
