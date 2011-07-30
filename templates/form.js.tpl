@@ -16,19 +16,23 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			url: '{{app_label}}/api/{{ name|lower }}',
 			items: [],
 			loadMask: true,
-			defaults: {labelWidth: 100, width: 200},
+			labelWidth: 100,
+			defaults: {width: 200},
 			itemId: '{{ name|lower }}form',
 			bubbleEvents: ['cancel','save'],
 			buttons: [{
 					text: 'Zapisz',
 					handler: function() {
+						this.form.submit();
 						this.fireEvent('save');
-					}
+					},
+					scope: this
 				},{
 					text: 'Anuluj',
 					handler: function() {
 						this.fireEvent('cancel');
-					}
+					},
+					scope: this
 				}]
 
 		}; //config
