@@ -132,7 +132,7 @@ class DjangoAuthorization():
 		return self.authorize(*args,**kwargs)
 
 class ExtHandler(BaseHandler):
-	#exclude = ()
+	exclude = ()
 	def __init__(self):
 		super(ExtHandler,self).__init__()
 		if not hasattr(self,'name'): self.name = self.model._meta.object_name
