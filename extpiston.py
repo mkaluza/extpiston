@@ -151,6 +151,7 @@ class ExtHandler(BaseHandler):
 		super(ExtHandler,self).__init__()
 		if not hasattr(self,'name'): self.name = self.model._meta.object_name
 		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
+		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
 
 	def Xfix_data(self,request):
 		print "FIXDATA"
@@ -399,6 +400,44 @@ class ArrayJSONEmitter(Emitter):
 
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
 
+class ManyToManyHandler(ExtHandler):
+	allowed_methods = ('GET','POST','DELETE')
+
+	def __init__(self, field = None):
+		if field: self.field = field
+		if not hasattr(self,'model'): self.model = field.rel.to
+		self.fields = (self.model._meta.pk.name,)
+		print "m2m init", self.fields
+		super(ManyToManyHandler,self).__init__()
+
+	def create(self, request, *args, **kwargs):
+		f = self.field
+		main_obj = f.model.objects.get(pk=kwargs.get('main_id'))
+		related_obj = f.rel.to.objects.get(pk=request.data.get(f.rel.to._meta.pk.name))
+		getattr(main_obj,f.name).add(related_obj)
+		return related_obj
+
+	def delete(self, request, *args, **kwargs):
+		f = self.field
+		main_obj = f.model.objects.get(pk=kwargs.get('main_id'))
+		related_obj = self.queryset(request,*args,**kwargs).get(pk=kwargs.get('id'))
+		getattr(main_obj,f.name).remove(related_obj)
+		return rc.DELETED
+
+	def queryset(self, request, *args, **kwargs):
+		f = self.field
+		main_id = kwargs.pop('main_id', None)
+		if main_id == None:
+			main_id = self.main_id
+		else: self.main_id = main_id
+		main_obj = f.model.objects.get(pk= self.main_id)
+		return getattr(main_obj,f.name).all()
+
+	def read(self, request, *args, **kwargs):
+		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac
+		self.main_id = kwargs.pop('main_id')
+		return super(ManyToManyHandler,self).read(request,*args,**kwargs)
+
 def deepUpdate(dst,src):
 	if not src: return dst
 	if not dst: return src
@@ -478,6 +517,14 @@ class ExtResource(Resource):
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (self.name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (self.name,k,k,v),self))
+		for f in self.handler.model._meta.many_to_many:
+			if not f.name in self.columns: continue
+			sub_handler = self.handler.m2m_handlers.get(f.name,ManyToManyHandler(field=f))
+			print "SUBHANDLER", f.name
+			sub_resource = ExtResource(sub_handler)
+			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f.name},sub_resource))
+			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f.name},sub_resource))
+
 		return urls+[
 				url(r'^%s/(?P<id>\d+)$' % self.name, self),
 				url(r'^%s$' % self.name, self),
