@@ -23,7 +23,18 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			buttons: [{
 					text: 'Zapisz',
 					handler: function() {
+						var url = this.form.url;
+						var pk = this.form.findField('{{pk}}');
+
+						if (pk) {
+							var pkv = pk.getValue();
+							if (pkv !== undefined && pkv !== null && pkv != "") {
+								if (url.charAt(url.length-1)!='/') url+='/';
+								url+=pkv;
+							}
+						}
 						this.form.submit({
+							url: url,
 							failure: function(form,action) {
 								switch (action.failureType) {
 									case Ext.form.Action.CLIENT_INVALID:
