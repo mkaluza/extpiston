@@ -12,6 +12,7 @@ var {{ name }}StoreConfig = {
 	fields: {{ fields }},
 	writer: new Ext.data.JsonWriter({encode:true}),
 	autoSave: false,
+	idProperty: '{{pk}}',
 	restful: true
 };
 
