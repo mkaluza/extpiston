@@ -24,10 +24,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			valueField: '{{ value_field|default:"id" }}',
 			displayField: '{{ display_field|default:"id" }}',
 			name: '{{ name|lower }}',
-			hiddenName: '{{ name|lower }}'
 		}; //config
 		
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
+		this.hiddenName = this.hiddenName || this.name;
 
 		{{app_label|title}}.{{name}}.ComboBox.superclass.initComponent.apply(this, arguments);
 
