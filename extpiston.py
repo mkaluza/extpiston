@@ -217,6 +217,16 @@ class ExtHandler(BaseHandler):
 		inst.save()
 		return inst
 
+	def read(self,request,*args,**kwargs):
+		res  = super(ExtHandler,self).read(request,*args,**kwargs)
+		if isinstance(res,QuerySet):
+			for k,v in request.data.iteritems():
+				if k.startswith('filter__'):
+					k=k.replace('filter__','')+'__icontains'
+					#TODO recognize filter commands and add default only if no other is given
+					res = res.filter(**{k:v})
+		return res
+
 def flatten_dict(d, name = None):
 	if not isinstance(d,dict):return d
 	res=[]

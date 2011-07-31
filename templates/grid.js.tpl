@@ -45,6 +45,12 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 		Ext.applyIf(this.initialConfig, config);
 
+		if (this.initialConfig.filterBy) {
+			this.initialConfig.tbar = this.initialConfig.tbar || [];
+			var tb = this.initialConfig.tbar;
+			tb.push(new Ext.ux.form.SearchField({paramName: 'filter__'+this.initialConfig.filterBy, store: this.initialConfig.store}));
+		}
+
 		if (this.initialConfig.bbar) 		//if has a bbar
 			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet
 				this.initialConfig.bbar.store = this.initialConfig.store;	//than set it
