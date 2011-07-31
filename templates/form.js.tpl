@@ -25,16 +25,20 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					handler: function() {
 						var url = this.form.url;
 						var pk = this.form.findField('{{pk}}');
+						var method = 'POST';
 
 						if (pk) {
+							//TODO this should be done in beforeaction event
 							var pkv = pk.getValue();
 							if (pkv !== undefined && pkv !== null && pkv != "") {
 								if (url.charAt(url.length-1)!='/') url+='/';
 								url+=pkv;
+								method = 'PUT';
 							}
 						}
 						this.form.submit({
 							url: url,
+							method: method,
 							failure: function(form,action) {
 								switch (action.failureType) {
 									case Ext.form.Action.CLIENT_INVALID:

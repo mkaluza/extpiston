@@ -495,11 +495,6 @@ class ExtResource(Resource):
 			setattr(request,'data',data)
 		setattr(request,'params',data)
 
-		#TODO I have no other way to work around it - since ExtJS form submits are always POST, the only way to know if it's an update or a new record is when a pk is given
-		#TODO change forms to submit with PUT if they have pk set
-		if self.handler.model._meta.pk.name in kwargs:
-			request.META['REQUEST_METOHD'] = 'PUT'
-			request.method = 'PUT'
 		return super(ExtResource, self).__call__(request, *args, **kwargs)
 
 	def determine_emitter(self, request, *args, **kwargs):
