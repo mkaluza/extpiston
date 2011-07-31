@@ -23,8 +23,12 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			buttons: [{
 					text: 'Zapisz',
 					handler: function() {
-						this.form.submit();
-						this.fireEvent('save');
+						this.form.submit({
+							success: function(form,action) {
+									 App.setAlert(true, action.result.message || 'OK');
+									 }
+						});
+						//this.fireEvent('save');
 					},
 					scope: this
 				},{
