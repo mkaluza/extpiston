@@ -24,9 +24,24 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					text: 'Zapisz',
 					handler: function() {
 						this.form.submit({
+							failure: function(form,action) {
+								switch (action.failureType) {
+									case Ext.form.Action.CLIENT_INVALID:
+										App.setAlert(false, 'Błąd danych w formularzu');
+										break;
+									case Ext.form.Action.CONNECT_FAILURE:
+										App.setAlert(false, 'Błąd serwera');
+										break;
+									case Ext.form.Action.SERVER_INVALID:
+										App.setAlert(false, action.result.message || 'PROCESSING ERROR');
+										break;
+								}
+							},
 							success: function(form,action) {
-									 App.setAlert(true, action.result.message || 'OK');
-									 }
+								App.setAlert(true, action.result.message || 'OK');
+								this.fireEvent('save',form,action);		//TODO shouldn't we load recieved values into form here?
+							},
+							scope: this
 						});
 						//this.fireEvent('save');
 					},
