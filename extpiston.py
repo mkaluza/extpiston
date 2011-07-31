@@ -153,30 +153,6 @@ class ExtHandler(BaseHandler):
 		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
 		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
 
-	def Xfix_data(self,request):
-		print "FIXDATA"
-		if hasattr(request,'data_fixed'): return request
-		req_data=getattr(request,request.method)
-		if req_data.has_key('data'):
-			d = simplejson.loads(req_data.get('data'))
-			del request.data['data']
-			if not hasattr(request,'params'):
-				setattr(request,'params',request.data)
-			request.data = d
-		else:
-			#if len(request.data)==1 and request.data.has_key('data'):
-			if request.data.has_key('data'):		#TODO po co bylo ten len==1?
-				d = request.data['data']
-				del request.data['data']
-				if not hasattr(request,'params'):
-					setattr(request,'params',request.data)
-				#d.update(request.data)
-				request.data=d
-				#request.data=request.data['data']
-		setattr(request,'data_fixed',True)
-		print "request.data.fixed:", request.data
-		return request
-
 	def queryset(self,request,*args, **kwargs):
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
 
