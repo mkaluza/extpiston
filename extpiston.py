@@ -349,6 +349,7 @@ class ExtJSONEmitter(Emitter):
 		ext_dict = {'success': True, 'data': data}
 		if hasattr(self.handler,'message'): ext_dict['message']=self.handler.message
 		if hasattr(self.handler,'extra'): ext_dict['extra']=self.handler.extra
+		if hasattr(self.handler,'errors'): ext_dict['errors']=self.handler.errors
 		if self.total != None: ext_dict['total'] = self.total
 		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
 
