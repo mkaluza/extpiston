@@ -34,8 +34,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			},
 			itemId: '{{ name|lower }}'
 		}; //config
-		for (var name in {{app_label|title}}.{{name}}.gridColumns)
-			config.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
+		for (var name in {{app_label|title}}.{{name}}.gridColumnNames) {
+			name = {{app_label|title}}.{{name}}.gridColumnNames[name]
+			if (typeof(name)=='string') config.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
+		}
 
 		if (this.initialConfig.storeConfig)
 			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store

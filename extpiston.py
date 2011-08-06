@@ -459,7 +459,13 @@ class ExtResource(Resource):
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
 		#TODO to powinno byc w handlerze
-		self.columns = flatten_fields2(self.handler)
+		self.columns = {}
+		col_num = 0
+		for k,v in flatten_fields2(self.handler):
+			self.columns[k]=v
+			v['_col_num']=col_num
+			col_num += 1
+
 		deepUpdate(self.columns, getattr(self.handler,'columns',None))
 		deepUpdate(self.columns, kwargs.pop('columns',None))
 
@@ -545,7 +551,7 @@ class ExtResource(Resource):
 		for k,col in _columns:
 			#print k,col
 			if "__" in col['name'] and not col.get('fk',None): continue
-			newcol = {'fieldLabel': col['header'], 'name': col['name']}
+			newcol = {'fieldLabel': col['header'], 'name': col['name'], '_col_num':col['_col_num']}
 			if 'width' in col: newcol['width'] = col['width']
 			if 'height' in col: newcol['height'] = col['height']
 			if 'format' in col: newcol['format'] = col['format']
@@ -571,6 +577,10 @@ class ExtResource(Resource):
 				newcol['xtype'] = col['type']+'field'
 			#if 'width' in col: del col['width']
 			columns[k]=newcol
+
+		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
+
+		return {'formFields':  simplejson.dumps(columns,sort_keys = False, indent = 3), 'formFieldNames':simplejson.dumps(sorted_column_names, indent = 3)}
 		return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
 		#return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
@@ -580,6 +590,10 @@ class ExtResource(Resource):
 		for k,col in self.columns.iteritems():
 			col['dataIndex'] = col['name']
 			columns[k]=col
+
+		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
+
+		return {'gridColumns': simplejson.dumps(columns, indent = 3), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3)}
 		return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
 		#return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
@@ -612,7 +626,8 @@ class ExtResource(Resource):
 		#else: defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(self.render_grid(request))
 		defaults.update(self.render_form(request))
-		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3)
+		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3)
+		#defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3)
 		#defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(dictionary or {})
 
