@@ -160,7 +160,12 @@ class ExtHandler(BaseHandler):
 		self.file_fields = set(getattr(self,'file_fields',[]))
 
 	def queryset(self,request,*args, **kwargs):
+		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
+		#print only
+		fk = filter(lambda x: '__' in x,only)
+		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(*fk)
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
+		return super(ExtHandler,self).queryset(request,*args,**kwargs).only(*only)	#doesn't work
 
 	def create(self, request, *args, **kwargs):
 		if not self.has_model():
@@ -252,19 +257,33 @@ def flatten_dict(d, name = None):
 			res.append((newname,v))
 	return dict(res)
 
-def flatten_fields(fields, prefix = None):
+def flatten_fields(fields, prefix = None, model = None, include_fk_pk = False):
+	def append(res, field, prefix = None):
+		if prefix:
+			res.append("%s__%s" % (prefix,field))
+		else:
+			res.append(field)
+		return res
+
 	res=[]
+
+	if include_fk_pk and model: append(res,model._meta.pk.name,prefix)
+
 	for f in fields:
 		if isinstance(f,tuple):
 			new_prefix = f[0]
 			if prefix:
 				new_prefix = "%s__%s" % (prefix,new_prefix)
-			res+=flatten_fields(f[1], new_prefix)
+			if model:
+				try:
+					rel_model = model._meta.get_field_by_name(f[0])[0].rel.to
+				except:
+					rel_model = None
+			else:
+				rel_model = None
+			res+=flatten_fields(f[1], new_prefix, rel_model, include_fk_pk)
 			continue
-		if prefix:
-			res.append("%s__%s" % (prefix,f))
-		else:
-			res.append(f)
+		append(res,f,prefix)
 	return res
 
 def get_field_type(cls, model = None, name = None):
