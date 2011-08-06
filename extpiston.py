@@ -311,30 +311,34 @@ def get_model_properties(model):
 			result.append(p)
 	return result
 
-def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_field = None):
-	#print "\n1:",fields, model, prefix
-	res = {}
+def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_field = None):
+	debug = False
+	#debug = (handler.verbose_name=='pozycja faktury')
+	if debug: print "\n1:",fields, model, prefix
+	res = []
 	if not model: model = handler.model
 	if not fields: fields = handler.fields
 	model_fields = dict([(field.name,field) for field in model._meta.fields])
 	model_properties = get_model_properties(model)
 
-	#print "2:",model.__name__,model_fields.keys()[:10]
+	if debug: print "2:",model.__name__,model_fields.keys()[:10]
 
 	for field in fields:
-		#print "\t field:", field
+		if debug: print "\t"*(prefix.count('__')+(len(prefix)>0)),"field:", field
 		if isinstance(field, tuple):
 			new_prefix = field_name = field[0]
 			if prefix: new_prefix = "%s__%s" % (prefix,new_prefix)
 			if field_name in model_fields:
 				parent_field = model_fields[field_name]
 				new_model = parent_field.rel.to		#get model that is referenced by this foreign key
-				#print '3:related',field_name,model_fields[field_name],model_fields[field_name].related.model
+				if debug: print '3:related:',field_name,model_fields[field_name].rel.to
 
-				res.update(flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field))
+				res += flatten_fields2(handler,fields = field[1], model = new_model, prefix = new_prefix, parent_field = parent_field)
+				if debug: print '3: end related'
 			else:
+				if debug: print '4: not a field', field
 				for f in flatten_fields(field[1],new_prefix):
-					res[f] = {'name':f, 'header': f, 'type': 'text'}
+					res.append((f, {'name':f, 'header': f, 'type': 'text'}))
 			continue
 
 		if field in model_fields: ff = model_fields[field]
@@ -358,7 +362,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = None, parent_
 					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]) or 'main',model.__name__.lower())
 					field_dict['fk'] = True
 
-		res[field]=field_dict
+		res.append((field, field_dict))
 
 	return res
 
