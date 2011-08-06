@@ -3,6 +3,9 @@
 
 import re
 import types
+import pprint as pretty_print
+pp = pretty_print.PrettyPrinter(indent=4)
+pprint = pp.pprint
 
 from piston.emitters import Emitter
 from piston.handler import BaseHandler
