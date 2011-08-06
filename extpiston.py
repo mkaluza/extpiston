@@ -307,8 +307,11 @@ def get_field_type(cls, model = None, name = None):
 def get_model_properties(model):
 	result = []
 	for p in dir(model):
-		if isinstance(getattr(model,p),property):
-			result.append(p)
+		try:
+			if isinstance(getattr(model,p),property):
+				result.append(p)
+		except:
+			pass
 	return result
 
 def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_field = None):
