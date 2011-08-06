@@ -28,19 +28,22 @@ import settings
 
 from functions import Timer
 
-def request_debug(func):
-	def wrapper(self,request,*args,**kwargs):
-		print "REQUEST:",self.__class__.__name__, func.__name__
-		try:
-			print 'data',request.data
-		except: pass
-		try:
-			print 'params',request.params
-		except: pass
-		print 'args', args
-		print 'kwargs', kwargs
-		return func(self,request,*args,**kwargs)
-	return wrapper
+def request_debug(show_sql = False):
+	def _request_debug(func):
+		def wrapper(self,request,*args,**kwargs):
+			print "REQUEST:",self.__class__.__name__, func.__name__
+			try:
+				print 'data',request.data
+			except: pass
+			try:
+				print 'params',request.params
+			except: pass
+			print 'args', args
+			print 'kwargs', kwargs
+			if show_sql: setattr(request,'FORCE_QUERY_DUMP',True)
+			return func(self,request,*args,**kwargs)
+		return wrapper
+	return _request_debug
 
 class DjangoAuthorization():
 	"""
