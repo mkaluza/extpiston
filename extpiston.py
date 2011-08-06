@@ -23,6 +23,8 @@ from django.utils import simplejson
 
 import settings
 
+from functions import Timer
+
 def request_debug(func):
 	def wrapper(self,request,*args,**kwargs):
 		print "REQUEST:",self.__class__.__name__, func.__name__
