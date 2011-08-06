@@ -28,8 +28,23 @@ import settings
 
 from functions import Timer
 
-def request_debug(show_sql = False):
-	def _request_debug(func):
+def request_debug(func):
+	def wrapper(self,request,*args,**kwargs):
+		print "REQUEST:",self.__class__.__name__, func.__name__
+		try:
+			print 'data',request.data
+		except: pass
+		try:
+			print 'params',request.params
+		except: pass
+		print 'args', args
+		print 'kwargs', kwargs
+		return func(self,request,*args,**kwargs)
+	return wrapper
+
+def request_debug2(show_sql = False):	#TODO not working :(
+	def _request_debug(func, *args):
+		print "_request_debug",func, args
 		def wrapper(self,request,*args,**kwargs):
 			print "REQUEST:",self.__class__.__name__, func.__name__
 			try:
