@@ -30,7 +30,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			{% if verbose_name %}title: '{{verbose_name}}',{% endif %}
 			viewConfig: {
 				emptyText: 'Brak wyników',
-				autoFill: true
+				//autoFill: true		//fits columns only on render
+				forceFit: true			//fits columns always - on resize as well
 			},
 			itemId: '{{ name|lower }}'
 		}; //config
