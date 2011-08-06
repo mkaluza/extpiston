@@ -376,8 +376,6 @@ class ExtJSONEmitter(Emitter):
 		cb = request.GET.get('callback')
 		#TODO zrobic tak, zeby tu byl queryset a nie lista
 		data=self.construct()
-		print 'RENDER'
-		print type(data)
 
 		if isinstance(data,(list,tuple)):
 			data = [flatten_dict(d) for d in data]
@@ -433,7 +431,7 @@ class ManyToManyHandler(ExtHandler):
 		if field: self.field = field
 		if not hasattr(self,'model'): self.model = field.rel.to
 		self.fields = (self.model._meta.pk.name,)
-		print "m2m init", self.fields
+		#print "m2m init", self.fields
 		super(ManyToManyHandler,self).__init__()
 
 	def create(self, request, *args, **kwargs):
@@ -517,17 +515,10 @@ class ExtResource(Resource):
 
 	def __call__(self, request, *args, **kwargs):
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
-		#print "extresource", hasattr(request, 'data'), request.method
 		coerce_put_post(request)
 		if not hasattr(request, 'data') and request.method in ['GET','PUT','POST']:
-			#print request
-			#print dir(request)
-			#print request._post
-			#print request.method,':',type(getattr(request,request.method)),getattr(request,request.method)
 			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
 		else: data = getattr(request,'data',{})
-
-		#print 'data:', type(data), data
 
 		if 'data' in data:
 			#print 'data2:', type(data['data']), data['data']
@@ -552,7 +543,6 @@ class ExtResource(Resource):
 		for f in self.handler.model._meta.many_to_many:
 			if not f.name in self.columns: continue
 			sub_handler = self.handler.m2m_handlers.get(f.name,ManyToManyHandler(field=f))
-			print "SUBHANDLER", f.name
 			sub_resource = ExtResource(sub_handler)
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f.name},sub_resource))
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f.name},sub_resource))
@@ -598,14 +588,11 @@ class ExtResource(Resource):
 				if hasattr(settings,'DATETIME_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATETIME_FORMAT
 			else:
 				newcol['xtype'] = col['type']+'field'
-			#if 'width' in col: del col['width']
 			columns[k]=newcol
 
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
 		return {'formFields':  simplejson.dumps(columns,sort_keys = False, indent = 3), 'formFieldNames':simplejson.dumps(sorted_column_names, indent = 3)}
-		return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
-		#return {'formFields':  simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'formFieldNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
 
 	def render_grid(self, request, name = '', dictionary = None):
@@ -617,8 +604,6 @@ class ExtResource(Resource):
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
 		return {'gridColumns': simplejson.dumps(columns, indent = 3), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3)}
-		return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3)}
-		#return {'gridColumns': simplejson.dumps(columns, sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None), 'gridColumnNames':simplejson.dumps(columns.keys(),sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)}
 
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
@@ -637,21 +622,17 @@ class ExtResource(Resource):
 		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.model._meta.pk.name}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
-		#columns2 = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
-		#columns = [columns[k] for k in set(self.fields) & set(columns.keys())]
-		#columns = simplejson.dumps(columns,sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None) #display nice output only in debug mode
-
-		if self.store_type == 'array':
+		if self.store_type == 'array' and name != 'grid':
 			resp = self(request,emitter_format='array-json')
 			defaults['data'] = resp.content
+
 		#if name == 'grid': defaults.update(self.render_grid(request))
 		#elif name == 'form': defaults.update(self.render_form(request))
 		#else: defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
+
 		defaults.update(self.render_grid(request))
 		defaults.update(self.render_form(request))
 		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3)
-		#defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3)
-		#defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],sort_keys = settings.DEBUG,indent = 3 if settings.DEBUG else None)
 		defaults.update(dictionary or {})
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
