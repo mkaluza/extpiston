@@ -152,6 +152,7 @@ class ExtHandler(BaseHandler):
 		if not hasattr(self,'name'): self.name = self.model._meta.object_name
 		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
 		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
+		self.file_fields = set(getattr(self,'file_fields',[]))
 
 	def queryset(self,request,*args, **kwargs):
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
@@ -194,8 +195,14 @@ class ExtHandler(BaseHandler):
 					#in case it's read only...
 					pass
 
+			#handle file uploads
+			for ff in set(request.FILES.keys()) & self.file_fields:
+				f = request.FILES[ff]
+				print "Handling file %s" % f.name
+
 			#TODO fails for inherited models?
 			inst.save()
+
 			return inst
 		except self.model.MultipleObjectsReturned:
 			return rc.DUPLICATE_ENTRY
@@ -263,7 +270,9 @@ def get_field_type(cls, model = None, name = None):
 		'DateField': 'date',
 		'DateTimeField': 'datetime',
 		'BooleanField': 'bool',
-		'TextField': 'textarea'
+		'TextField': 'textarea',
+		'FileField': 'file',
+		'ImageField': 'image',
 	}
 	return field_map.get(cls,'text')
 
@@ -548,6 +557,8 @@ class ExtResource(Resource):
 			elif col['type'] == 'date':
 				newcol['xtype'] = 'datefield'
 				if hasattr(settings,'DATE_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATE_FORMAT
+			elif col['type'] in [ 'file', 'image' ]:
+				newcol['xtype'] = 'fileuploadfield'
 			elif col['type'] == 'datetime':
 				newcol['xtype'] = 'datefield'
 				if hasattr(settings,'DATETIME_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATETIME_FORMAT
