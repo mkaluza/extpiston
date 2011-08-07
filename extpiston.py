@@ -28,6 +28,12 @@ import settings
 
 from functions import Timer
 
+def mprint(obj, skip_defaults = True, show_nulls=False):
+	for k,v in sorted(model_to_dict(obj).items(),key = lambda x: x[0]):
+		f = obj._meta.get_field_by_name(k)[0]
+		if v == f.default and skip_defaults: continue
+		if (v != None and v != '') or show_nulls: print '%s:' % k,v
+
 def request_debug(func):
 	def wrapper(self,request,*args,**kwargs):
 		print "REQUEST:",self.__class__.__name__, func.__name__
