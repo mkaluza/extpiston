@@ -1,0 +1,19 @@
+/*!
+ * Ext JS Library 3.4.0
+ * Copyright(c) 2006-2011 Sencha Inc.
+ * licensing@sencha.com
+ * http://www.sencha.com/license
+ * z extjs/examples/shared/.../extjs.css
+ */
+
+/**
+ * Ext.App#setAlert message-box styles.
+ */
+.app-msg .x-box-mc {
+    text-align: left;
+}
+.x-icon-text { background-repeat: no-repeat; padding-left: 20px; }
+.icon-status-ok { background-image: url(../../icons/fam/accept.png) !important; }
+.icon-status-error { background-image: url(../../icons/fam/error.png) !important; }
+.icon-status-notice { background-image: url(../../icons/fam/information.png) !important; }
+
