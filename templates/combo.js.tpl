@@ -34,6 +34,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.initialConfig.baseParams)
 			for(var name in this.initialConfig.baseParams)
 				this.store.setBaseParam(name,this.initialConfig.baseParams[name]);
+		{% if store_type == 'json' %}
+		this.store.load();
+		{% endif %}
 
 	} //initComponent
 	{% if store_type == 'json' %}
