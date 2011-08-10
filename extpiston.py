@@ -48,11 +48,10 @@ def request_debug(func):
 		return func(self,request,*args,**kwargs)
 	return wrapper
 
-def request_debug2(show_sql = False):	#TODO not working :(
-	def _request_debug(func, *args):
-		print "_request_debug",func, args
+def request_debug2(show_sql):	#this can only decorate class methods
+	#TODO make parameter optional as in django.contrib.auth.decorators
+	def _request_debug(func):
 		def wrapper(self,request,*args,**kwargs):
-			print "REQUEST:",self.__class__.__name__, func.__name__
 			try:
 				print 'data',request.data
 			except: pass
