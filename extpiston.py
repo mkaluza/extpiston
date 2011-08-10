@@ -181,6 +181,7 @@ class ExtHandler(BaseHandler):
 		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
 		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
 		self.file_fields = set(getattr(self,'file_fields',[]))
+		self.pk_name = getattr(self, 'pk_name', self.model._meta.pk.name)
 
 	def queryset(self,request,*args, **kwargs):
 		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
@@ -646,7 +647,7 @@ class ExtResource(Resource):
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
 		if name2 in ['default','all']: name2 = ''
-		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.model._meta.pk.name}
+		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.pk_name}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
 		if self.store_type == 'array' and name != 'grid':
