@@ -6,6 +6,7 @@ import re
 from piston.resource import Resource
 from piston.utils import rc, coerce_put_post
 
+from django.conf.urls.defaults import url
 from django.contrib.auth.models import Permission,Group,User
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -58,6 +59,13 @@ class ExtResource(Resource):
 		self.forms = kwargs.pop('forms',{})
 		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
 		self.verbose_name = self.handler.verbose_name
+		self.base_url = self.name
+
+		#for related relations
+		self.parent = kwargs.pop('parent', None)
+		if self.parent:
+			self.base_url = r"^%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.handler.parent_pk_name, self.base_url)
+
 
 	def __call__(self, request, *args, **kwargs):
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
@@ -84,7 +92,6 @@ class ExtResource(Resource):
 
 	def urls(self, *args, **kwargs):
 		#args are numbers by default
-		from django.conf.urls.defaults import url
 		urls=[]
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (self.name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (self.name,k,k,v),self))
@@ -95,9 +102,10 @@ class ExtResource(Resource):
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f.name},sub_resource))
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f.name},sub_resource))
 
+		_urls = ['', r'(?P<id>\d+)']	#urls needed for piston getting all records and operating on a single one
+
+		urls += [url(r"^%s/%s$" % (self.base_url,u),self) for u in _urls]
 		return urls+[
-				url(r'^%s/(?P<id>\d+)$' % self.name, self),
-				url(r'^%s$' % self.name, self),
 				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.name, self.render_js),
 				]
 
