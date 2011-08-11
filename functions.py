@@ -4,7 +4,7 @@
 
 import time
 
-import log,logging
+import logging
 logger = logging.getLogger(__name__)
 
 import inspect
@@ -16,7 +16,7 @@ def lineno():
 def getFields(cursor):
 	return [f[0] for f in cursor.description]
 
-class Timer():
+class Timer(object):
 	def __init__(self, name=None):
 		self.start=time.time()
 		self.times=[['init',self.start]]

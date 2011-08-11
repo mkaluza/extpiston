@@ -11,7 +11,7 @@ import settings
 from functions import Timer
 from internal import *
 
-class DjangoAuthorization():
+class DjangoAuthorization(object):
 	"""
 	sposoby definiowania:
 	- dla wszystkich (domyslnie), 
