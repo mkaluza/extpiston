@@ -148,6 +148,20 @@ class ExtResource(Resource):
 			sub_resource = RelatedExtResource(params['handler'], parent = self)
 			urls += sub_resource.urls()
 
+		#rpc urls
+		for name in self.handler.rpc:
+			#handler procedures
+			proc = getattr(self.handler,name,None)
+			if proc and callable(proc):
+				urls.append(url(r'%s/%s' % (self.base_url,name),proc))
+				continue
+
+			#model procedures
+			proc = getattr(self.handler.model,name,None)
+			if proc and callable(proc):
+				urls.append(url(r'%s/(?P<id>\d+)/%s' % (self.base_url,name),self.handler.exec_rpc_on_model,{'procname':name}))
+				continue
+
 		return urls
 
 	def render_form(self, request, name = '', dictionary = None):

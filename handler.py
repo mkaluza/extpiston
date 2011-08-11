@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models.fields import related as related_fields
 from django.db.models.query import QuerySet
 
+from functions import *
 from internal import *
 
 class ExtHandler(BaseHandler):
@@ -20,6 +21,7 @@ class ExtHandler(BaseHandler):
 		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
 		self.file_fields = set(getattr(self,'file_fields',[]))
 		self.reverse_related_fields = getattr(self,'reverse_related_fields',[])
+		self.rpc = getattr(self,'rpc',[])
 		self.pk_name = getattr(self, 'pk_name', self.model._meta.pk.name)
 
 	def queryset(self,request,*args, **kwargs):
@@ -106,6 +108,14 @@ class ExtHandler(BaseHandler):
 					#TODO recognize filter commands and add default only if no other is given
 					res = res.filter(**{k:v})
 		return res
+
+	@request_debug
+	def exec_rpc_on_model(self,request,*args,**kwargs):
+		proc = kwargs.pop('procname')
+		obj = self.read(request,*args,**kwargs)
+		proc = getattr(obj,proc)
+		res = proc()
+		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http
 
 class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
