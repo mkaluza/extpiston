@@ -129,9 +129,9 @@ class ExtResource(Resource):
 
 		#standard piston urls
 		_urls = ['', r'(?P<id>\d+)']
-		urls += [url(r"^%s/%s$" % (self.base_url,u),self) for u in _urls]
+		urls += [url(r"^%s/*%s$" % (self.base_url,u),self) for u in _urls]
 
-		if not self.parent: return urls		#if this is a related resource, generate only standard urls
+		if self.parent: return urls		#if this is a related resource, generate only standard urls
 
 		urls.append(url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.base_url, self.render_js))	#js generator
 
