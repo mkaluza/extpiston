@@ -3,6 +3,7 @@
 
 import re
 
+from piston.handler import typemapper
 from piston.resource import Resource
 from piston.utils import rc, coerce_put_post
 
@@ -15,7 +16,7 @@ from django.utils import simplejson
 
 import settings
 
-from functions import Timer
+from functions import Timer, request_debug
 from internal import *
 
 class ExtResource(Resource):
@@ -64,8 +65,37 @@ class ExtResource(Resource):
 		#for related relations
 		self.parent = kwargs.pop('parent', None)
 		if self.parent:
-			self.base_url = r"^%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.handler.parent_pk_name, self.base_url)
+			self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.handler.parent_fk_name, self.base_url)
+			#TODO a co, jesli handler nie ma parenta?
 
+		#handle related fields and handlers
+		self.reverse_related_fields = {}
+		for f in self.handler.reverse_related_fields:
+			#if not f in self.columns: continue
+			if type(f) == tuple:
+				#some params are given
+				f_name = f[0]
+
+				if type(f[1])==dict:
+					#more params are given
+					params = f[1]
+				else:
+					#only a handler is given
+					params = {'handler': f[1]}
+
+				if isinstance(params['handler'],(str,unicode)):
+					#just a handler class name is given, so we have to find a class
+					params['handler'] = filter(lambda handler: handler.__name__ == params['handler'], typemapper)[0]
+			else:
+				#only a field name is given, search for a handler for the related model
+				f_name = f
+				f = self.handler.model._meta.get_field_by_name(f_name)[0]
+				sub_handler = filter(lambda handler: typemapper[handler][0] == f.model, typemapper)[0]	#get default handler for model - has to be defined
+				#TODO handle handlers as strings (just a class_name)
+				#TODO if no handler is defined, create a read-only handler with pk and __str__ only
+				params = {'handler': sub_handler}
+
+			self.reverse_related_fields[f_name] = params
 
 	def __call__(self, request, *args, **kwargs):
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
@@ -93,8 +123,19 @@ class ExtResource(Resource):
 	def urls(self, *args, **kwargs):
 		#args are numbers by default
 		urls=[]
+		#TODO zrobić z tego jakieś RPC
 		for k in args: urls.append(url(r'%s/%s/(?P<%s>\d+)$' % (self.name,k,k),self))
 		for k,v in kwargs.iteritems(): urls.append(url(r'%s/%s/(?P<%s>%s)$' % (self.name,k,k,v),self))
+
+		#standard piston urls
+		_urls = ['', r'(?P<id>\d+)']
+		urls += [url(r"^%s/%s$" % (self.base_url,u),self) for u in _urls]
+
+		if not self.parent: return urls		#if this is a related resource, generate only standard urls
+
+		urls.append(url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.base_url, self.render_js))	#js generator
+
+		#TODO przenieść część do __init__ oraz zrobić odwołanie do urls(), a nie generować palcem
 		for f in self.handler.model._meta.many_to_many:
 			if not f.name in self.columns: continue
 			sub_handler = self.handler.m2m_handlers.get(f.name,ManyToManyHandler(field=f))
@@ -102,12 +143,12 @@ class ExtResource(Resource):
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f.name},sub_resource))
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f.name},sub_resource))
 
-		_urls = ['', r'(?P<id>\d+)']	#urls needed for piston getting all records and operating on a single one
+		#handle related fields and handlers
+		for f, params in self.reverse_related_fields.iteritems():
+			sub_resource = RelatedExtResource(params['handler'], parent = self)
+			urls += sub_resource.urls()
 
-		urls += [url(r"^%s/%s$" % (self.base_url,u),self) for u in _urls]
-		return urls+[
-				url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.name, self.render_js),
-				]
+		return urls
 
 	def render_form(self, request, name = '', dictionary = None):
 		columns = {}
@@ -196,3 +237,9 @@ class ExtResource(Resource):
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
 		return HttpResponse(body,mimetype='text/javascript')
 
+class RelatedExtResource(ExtResource):
+	def __call__(self, request, *args, **kwargs):
+		params = getattr(request,'params',{})
+		params[self.handler.parent_fk_name] = kwargs.pop(self.handler.parent_fk_name)
+		setattr(request,'params',params)
+		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)

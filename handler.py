@@ -6,6 +6,7 @@ from piston.utils import rc
 
 from django.contrib.auth.models import Permission,Group,User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db.models.fields import related as related_fields
 from django.db.models.query import QuerySet
 
 from internal import *
@@ -18,6 +19,7 @@ class ExtHandler(BaseHandler):
 		if not hasattr(self,'verbose_name'): self.verbose_name = self.model._meta.verbose_name
 		if not hasattr(self,'m2m_handlers'): self.m2m_handlers = {}
 		self.file_fields = set(getattr(self,'file_fields',[]))
+		self.reverse_related_fields = getattr(self,'reverse_related_fields',[])
 		self.pk_name = getattr(self, 'pk_name', self.model._meta.pk.name)
 
 	def queryset(self,request,*args, **kwargs):
