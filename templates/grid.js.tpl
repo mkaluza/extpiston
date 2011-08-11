@@ -46,6 +46,33 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (!(this.initialConfig.store))
 			config.store = new Ext.data.JsonStore(config.store); 		//if no store is supplied, create one from config
 
+		this.setBaseUrl = function(baseUrl) {
+			//TODO zrobić to lepiej... dużo lepiej...
+			var url = baseUrl+'/{{ name|lower }}';
+			//this.store.url = url;		//optional for unified look
+			this.store.proxy.setUrl(url,true);
+		}
+
+		if (this.initialConfig.baseUrl) {				//if a component handles a related field, baseUrl is added to url
+			var baseUrl = this.initialConfig.baseUrl;
+			if (typeof(baseUrl) == "string")
+				this.setBaseUrl(baseUrl);
+			//TODO to zrobić jako eventy, bo jak jest funkcja, to znaczy, że ma być dynamiczne
+			//else if (typeof(baseUrl) == "function")
+			//	config.store.url = baseUrl()+'/'+config.store.url
+			//	else
+			//		throw "{{app_label|title}}.{{name}}.gridInit: invalid baseUrl: "+baseUrl;
+		}
+		//dynamic base url setting
+		var thisGrid = this;
+		var setDynamicBaseUrl = function(store) {
+			//if it's a function, call it to get current base url
+			if (typeof(thisGrid.initialConfig.baseUrl) == "function") thisGrid.store.proxy.setUrl(thisGrid.initialConfig.baseUrl()+'/{{ name|lower }}');
+		}
+		config.store.on('beforeload',setDynamicBaseUrl);
+		config.store.on('beforesave',setDynamicBaseUrl);
+		config.store.on('beforewrite',setDynamicBaseUrl); //is this necessary?
+
 		Ext.applyIf(this.initialConfig, config);
 
 		if (this.initialConfig.filterBy) {
@@ -61,14 +88,19 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		Ext.apply(this, this.initialConfig);
 }
 
+{{app_label|title}}.{{name}}.gridPostInit = function() {
+	this.relayEvents(this.getStore(),['load','save']);
+	this.getStore().enableBubble(['load','save']);
+}
+
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
-		this.relayEvents(this.getStore(),['load','save']);
-		this.getStore().enableBubble(['load','save']);
+
+		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
@@ -164,10 +196,9 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange']);
-		this.relayEvents(this.getStore(),['load','save']);
-		this.getStore().enableBubble(['load','save']);
 		this.addEvents(['addItem','removeItem']);
 
+		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
