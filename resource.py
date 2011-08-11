@@ -73,6 +73,8 @@ class ExtResource(Resource):
 			del data['data']
 		else:
 			setattr(request,'data',data)
+
+		data.update(getattr(request,'params',{}))	#if any inherited handler already set any params, keep them
 		setattr(request,'params',data)
 
 		return super(ExtResource, self).__call__(request, *args, **kwargs)
