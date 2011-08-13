@@ -75,7 +75,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				if (typeof(name)=="string") 
 					config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
 		} else
-			for (var name in {{app_label|title}}.{{name}}.{{name2|title}}formFields) config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
+			for (var name in {{app_label|title}}.{{name}}.{{name2|title}}formFields)
+				config.items.push({{app_label|title}}.{{name}}.{{name2|title}}formFields[name]);
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 

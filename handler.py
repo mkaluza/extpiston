@@ -73,7 +73,8 @@ class ExtHandler(BaseHandler):
 			#handle file uploads
 			for ff in set(request.FILES.keys()) & self.file_fields:
 				f = request.FILES[ff]
-				print "Handling file %s" % f.name
+				ff = getattr(inst,ff)
+				ff.save(f.name,f,save=False)
 
 			#TODO fails for inherited models?
 			inst.save()

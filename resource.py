@@ -115,7 +115,10 @@ class ExtResource(Resource):
 		data.update(getattr(request,'params',{}))	#if any inherited handler already set any params, keep them
 		setattr(request,'params',data)
 
-		return super(ExtResource, self).__call__(request, *args, **kwargs)
+		response = super(ExtResource, self).__call__(request, *args, **kwargs)
+		#if it's a file upload, it's not XHR, it's via a hidden iframe and so response type must be text/html, otherwise browser shows 'save as' dialog for file 'application/json'
+		if len(request.FILES): response['content-type']=response['content-type'].replace('application/json','text/html')	#TODO swap any mime for this with re
+		return response
 
 	def determine_emitter(self, request, *args, **kwargs):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
