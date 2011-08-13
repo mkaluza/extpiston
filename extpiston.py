@@ -3,7 +3,7 @@
 
 from piston.handler import BaseHandler
 from piston.utils import rc, require_mime, require_extended, validate
-from piston.authentication import DjangoAuthentication
+#from piston.authentication import DjangoAuthentication
 
 from django.forms.models import model_to_dict
 import types
