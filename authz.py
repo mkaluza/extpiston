@@ -14,10 +14,10 @@ from internal import *
 class DjangoAuthorization(object):
 	"""
 	sposoby definiowania:
-	- dla wszystkich (domyslnie), 
+	- dla wszystkich (domyslnie),
 	- dla okreslonej metody('create','read', 'update','delete'),
 	- do modyfikacji (write='create','update','delete')
-	
+
 	if some method is specified, others are implicitly disabled. To enable them, use:
 	DjangoAuthorization(read=True,write='is_staff')	#allow reading to everyone (can be connected with authentication), writing for staff only
 
@@ -64,7 +64,7 @@ class DjangoAuthorization(object):
 			print "dict"
 			if el.has_key('LOGIC') and el['LOGIC'].upper()=='AND':	#default logic is OR
 				#AND
-				for k,v in el.iteritems(): 
+				for k,v in el.iteritems():
 					if k in ['group','user','perm']:
 						#TODO zamienic string na obiekt przy pomocy generic relatio
 						if not self.parse(request,v): return False
@@ -73,7 +73,7 @@ class DjangoAuthorization(object):
 				return True
 			else:
 				#OR
-				for k,v in el.iteritems(): 
+				for k,v in el.iteritems():
 					if k in ['group','user','perm']:
 						if self.parse(request,v): return True
 					else:
@@ -115,6 +115,6 @@ class DjangoAuthorization(object):
 			else:
 				res=self.parse(request,self.method_authz['all'])
 		return res
-		
+
 	def __call__(self,*args,**kwargs):
 		return self.authorize(*args,**kwargs)

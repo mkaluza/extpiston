@@ -40,7 +40,7 @@ class ExtJSONEmitter(Emitter):
 			return '%s(%s)' % (cb, seria)
 
 		return seria
-	
+
 Emitter.register('ext-json', ExtJSONEmitter, 'application/json; charset=utf-8')
 
 class ArrayJSONEmitter(Emitter):

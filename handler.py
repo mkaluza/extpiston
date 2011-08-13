@@ -40,7 +40,7 @@ class ExtHandler(BaseHandler):
 
 		try:
 			pkfield = self.model._meta.pk.name
-			#if pkfield in attrs: 
+			#if pkfield in attrs:
 			#niepotrzebne - jak nie ma, to sie wywali, jak jest i nie znajdzie, to tez sie wywali, a jak znajdzie, to powie ze juz istnieje
 			inst = self.queryset(request).get(pk=attrs[pkfield])
 			return rc.DUPLICATE_ENTRY

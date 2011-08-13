@@ -21,7 +21,7 @@ class Timer(object):
 		self.start=time.time()
 		self.times=[['init',self.start]]
 		self.name = name
-	
+
 	def __call__(self,desc = None):
 		self.time(desc)
 
@@ -29,7 +29,7 @@ class Timer(object):
 		if desc == None: desc = 'entry #%d' % len(self.times)
 
 		self.times.append([desc,time.time()])
-	
+
 	def total(self):
 		return self.times[len(self.times)-1][1]-self.start
 
