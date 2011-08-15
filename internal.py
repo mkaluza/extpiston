@@ -144,9 +144,12 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 				field_dict.update({'hidden':True, 'hideable':False})
 				#print "4:",prefix,".".join(model.__module__.split('.')[1:-1]).lower()
 				if not prefix: field_dict['pk'] = True
-				if prefix and '__' not in prefix: 	#jeden stopien nizej
+				if prefix and '__' not in prefix: 	#this is a foreign key field that model directly owns, so it can be editable
 					if type(parent_field.verbose_name) in [str,unicode]: field_dict['header'] = parent_field.verbose_name
-					field_dict['type'] = "%s.%s" % (".".join(model.__module__.split('.')[1:-1]) or 'main',model.__name__.lower())
+
+					module_name = ".".join(model.__module__.split('.')[1:-1])
+					if not module_name: module_name = 'main'
+					field_dict['type'] = "%s.%s" % (module_name,model.__name__.lower())
 					field_dict['fk'] = True
 
 		res.append((field, field_dict))

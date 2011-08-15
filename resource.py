@@ -39,7 +39,7 @@ class ExtResource(Resource):
 		deepUpdate(self.columns, kwargs.pop('columns',None))
 
 		params = { # name, value, if value is a function that returns value, that is its argument
-			'value_field': (self.handler.model._meta.pk.name, None),
+			'value_field': (self.handler.pkfield, None),
 			'display_field': (lambda x: x.value_field, [self,]),	#self is passed by reference
 			'store_type': ('json', None),
 			'separate_store': (True, None),

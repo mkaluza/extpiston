@@ -94,10 +94,12 @@ class ExtHandler(BaseHandler):
 		for f in filter(lambda x:'__' in x,fields):
 			fk = f.replace('__','_')
 			if hasattr(inst,fk):
-				setattr(inst,fk,attrs[f])
+				setattr(inst,fk,attrs[f])	#TODO find a related object and assign it instead of id - then the read below won't be necessary
 				fields.remove(f)
 
 		inst.save()
+
+		if len(fields): return self.read(request,*args, **kwargs)	#if foreign keys were updated, only *_id fields are set. Fields containig real referenced objects are not set and therefore need ot be
 		return inst
 
 	def read(self,request,*args,**kwargs):
