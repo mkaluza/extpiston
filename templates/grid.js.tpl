@@ -195,7 +195,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		}
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
-		this.relayEvents(this.getSelectionModel(),['selectionchange']);
+		this.relayEvents(this.getSelectionModel(),['selectionchange', 'cellselect']);
 		this.addEvents(['addItem','removeItem']);
 
 		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
