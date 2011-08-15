@@ -22,7 +22,7 @@ class ExtHandler(BaseHandler):
 		self.file_fields = set(getattr(self,'file_fields',[]))
 		self.reverse_related_fields = getattr(self,'reverse_related_fields',[])
 		self.rpc = getattr(self,'rpc',[])
-		self.pk_name = getattr(self, 'pk_name', self.model._meta.pk.name)
+		self.pkfield = getattr(self, 'pkfield', self.model._meta.pk.name)
 
 	def queryset(self,request,*args, **kwargs):
 		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
@@ -39,7 +39,7 @@ class ExtHandler(BaseHandler):
 		attrs = self.flatten_dict(request.data)
 
 		try:
-			pkfield = self.model._meta.pk.name
+			pkfield = self.pkfield
 			#if pkfield in attrs:
 			#niepotrzebne - jak nie ma, to sie wywali, jak jest i nie znajdzie, to tez sie wywali, a jak znajdzie, to powie ze juz istnieje
 			inst = self.queryset(request).get(pk=attrs[pkfield])

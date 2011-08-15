@@ -233,7 +233,7 @@ class ExtResource(Resource):
 		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
 
 		if name2 in ['default','all']: name2 = ''
-		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.pk_name}
+		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.pkfield}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
 		if self.store_type == 'array' and name != 'grid':
