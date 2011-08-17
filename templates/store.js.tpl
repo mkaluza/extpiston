@@ -23,6 +23,7 @@ var {{ name }}Store = new Ext.data.JsonStore({{ name}}StoreConfig);
 var {{ name }}Store = new Ext.data.ArrayStore({
 	data: {{ data }},
 	storeId: '{{ name }}Store',
+	idProperty: '{{pk}}',
 	fields: {{ fields }}
 });
 {% endif %}
