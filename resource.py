@@ -218,7 +218,6 @@ class ExtResource(Resource):
 			else:
 				newcol['xtype'] = col['type']+'field'
 
-
 			newcol.update(self.forms[name].get(k,{}))	#update generated column/field definition with value passwd to a Resource via form/forms parameter
 			columns[k]=newcol
 
@@ -232,8 +231,13 @@ class ExtResource(Resource):
 		if name:	#if a form name is given
 			if name not in self.grids: raise Http404	#check if it is defined
 			if self.grids[name]:	#if anything is set there
-				_columns = [(n,self.columns[n]) for n in self.grids[name].keys() if not n.startswith('_')]	#add only columns mentioned
-				#_keywords are internal
+				_columns = []
+				for n,v in self.grids[name].iteritems():		#add only columns mentioned
+					if n.startswith('_'): continue		#_keywords are internal
+					col = (n,self.columns[n].copy())
+					col[1].update(v)
+					_columns.append(col)
+
 				#to add columns with default values, add 'name':{}
 
 		for k,col in _columns:
