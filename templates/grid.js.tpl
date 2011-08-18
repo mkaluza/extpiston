@@ -95,10 +95,79 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
+		var namespace = '{{app_label|lower}}.{{name|lower}}';
+		this.namespace = namespace;
+
+		var formClass = this.initialConfig.formClass || namespace+'.form';
+
+		var editWindow = {
+			title: "",
+			autoHeight: true,
+			width: 400,
+			items: {
+				xtype: formClass
+			}
+		}
+
+		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
+		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
+
+		var showWindow = function(grid, showRec) {
+			editWindow.baseUrl = grid.store.url;
+			var win = new Ext.Window(editWindow);
+			if (showRec) {
+				var rec = grid.getSelectionModel().getSelected();
+				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
+			};
+			win.show();
+			win.on('close',grid.store.reload.createDelegate(grid.store));
+		};
+
+		var buttons = {
+			add : {
+				text: "Nowy",
+				width: 90,
+				handler: function() {
+					showWindow(this,false);
+				},
+				scope: this
+			},
+			edit: {
+				text: "Edytuj",
+				width: 90,
+				handler: function(a,b,c,d) {
+					var rec = this.getSelectionModel().getSelected();
+					if (rec) {
+						showWindow(this,true);
+					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
+
+				},
+				scope: this
+			}
+		}
+
+		if (!this.initialConfig.tbar) {
+			this.initialConfig.tbar = [];
+		}
+		else this.initialConfig.tbar.unshift('-');
+
+		var tbar = this.initialConfig.tbar;
+		if (this.initialConfig.editButtons)
+			for (var n = this.initialConfig.editButtons.length-1;n>=0; n--) {
+				tbar.unshift(buttons[this.initialConfig.editButtons[n]]);
+				if (n>0) tbar.unshift('-');
+			}
+
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
+
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
+
+		if (this.editWindow) editWindow = this.editWindow
+
+		if (this.initialConfig.editButtons && this.initialConfig.editButtons.indexOf('edit')>=0)
+			this.on('celldblclick',buttons.edit.handler);
 
 		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
 	} //initComponent
