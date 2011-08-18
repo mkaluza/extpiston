@@ -119,8 +119,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 					res.append((f, {'name':f, 'header': f, 'type': 'text'}))
 			continue
 
-		if field in model_fields: ff = model_fields[field]
-		else: ff = None
+		ff = model_fields.get(field, None)
 
 		if prefix: field = "%s__%s" % (prefix,field)
 

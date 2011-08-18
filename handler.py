@@ -109,7 +109,7 @@ class ExtHandler(BaseHandler):
 		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
 		#print only
 		fk = filter(lambda x: '__' in x,only)
-		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(*fk)
+		return super(ExtHandler,self).queryset(request).select_related(*fk)
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).only(*only)	#doesn't work
 
