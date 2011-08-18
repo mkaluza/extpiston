@@ -33,6 +33,12 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				//autoFill: true		//fits columns only on render
 				forceFit: true			//fits columns always - on resize as well
 			},
+			tools: [{
+				id: 'refresh',
+				handler: function(event, toolEl, panel, tc) {
+					panel.store.reload();
+				}
+			       }],
 			itemId: '{{ name|lower }}'
 		}; //config
 		for (var name in {{app_label|title}}.{{name}}.gridColumnNames) {
