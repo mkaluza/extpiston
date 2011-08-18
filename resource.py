@@ -52,12 +52,16 @@ class ExtResource(Resource):
 			if args is not None: default = default(*args)	#if arguments are given, default is a function
 			#set atribute based on kwargs OR handler config OR default value
 			setattr(self, name, kwargs.pop(name,getattr(self.handler,name,default)))
-			#if name in kwargs: setattr(self, name, kwargs.pop(name))
-			#else:
-			#	if hasattr(self.handler,name): setattr(self, name, getattr(self.handler,name))
-			#	else:
-			#		setattr(self,name,default)
-		self.forms = kwargs.pop('forms',{})
+
+		self.forms = getattr(self,'forms', { 'default': {}})
+		self.grids = getattr(self,'grids', { 'default': {}})
+		deepUpdate(self.forms, kwargs.pop('forms',None))
+		deepUpdate(self.grids, kwargs.pop('grids',None))
+
+		#to shorten arguments, default grid/form can be given as grid/form
+		deepUpdate(self.forms['default'], kwargs.pop('form',None))
+		deepUpdate(self.grids['default'], kwargs.pop('grid',None))
+
 		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
 		self.verbose_name = self.handler.verbose_name
 		self.base_url = self.name
@@ -166,13 +170,15 @@ class ExtResource(Resource):
 
 		return urls
 
-	def render_form(self, request, name = '', dictionary = None):
+	def render_form(self, request, name = 'default', dictionary = None):
 		columns = {}
-		if name and name not in ['default','all']:
-			if name not in self.forms: raise Http404
-			_columns = [(n,self.columns[n]) for n in self.forms[name]]
-		else:
-			_columns = self.columns.iteritems()
+		_columns = self.columns.iteritems()
+		if name:	#if a form name is given
+			if name not in self.forms: raise Http404	#check if it is defined
+			if self.forms[name]:	#if anything is set there
+				_columns = [(n,self.columns[n]) for n in self.forms[name].keys() if not n.startswith('_')]	#add only columns mentioned
+				#_keywords are internal
+				#to add columns with default values, add 'name':{}
 
 		for k,col in _columns:
 			#print k,col
@@ -194,23 +200,33 @@ class ExtResource(Resource):
 			elif col['type'] == 'date':
 				newcol['xtype'] = 'datefield'
 				if hasattr(settings,'DATE_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATE_FORMAT
-			elif col['type'] in [ 'file', 'image' ]:
-				newcol['xtype'] = 'fileuploadfield'
 			elif col['type'] == 'datetime':
 				newcol['xtype'] = 'datefield'
 				if hasattr(settings,'DATETIME_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATETIME_FORMAT
+			elif col['type'] in [ 'file', 'image' ]:
+				newcol['xtype'] = 'fileuploadfield'
 			else:
 				newcol['xtype'] = col['type']+'field'
+
+
+			newcol.update(self.forms[name].get(k,{}))	#update generated column/field definition with value passwd to a Resource via form/forms parameter
 			columns[k]=newcol
 
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
 		return {'formFields':  simplejson.dumps(columns,sort_keys = False, indent = 3), 'formFieldNames':simplejson.dumps(sorted_column_names, indent = 3)}
 
-
-	def render_grid(self, request, name = '', dictionary = None):
+	def render_grid(self, request, name = 'default', dictionary = None):
 		columns = {}
-		for k,col in self.columns.iteritems():
+		_columns = self.columns.iteritems()
+		if name:	#if a form name is given
+			if name not in self.grids: raise Http404	#check if it is defined
+			if self.grids[name]:	#if anything is set there
+				_columns = [(n,self.columns[n]) for n in self.grids[name].keys() if not n.startswith('_')]	#add only columns mentioned
+				#_keywords are internal
+				#to add columns with default values, add 'name':{}
+
+		for k,col in _columns:
 			col['dataIndex'] = col['name']
 			columns[k]=col
 
