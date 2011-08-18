@@ -139,14 +139,13 @@ class ExtResource(Resource):
 		urls.append(url(r'^%s/js/(?P<name>\w+(.js)?)?/?(?P<name2>\w+(.js)?)?/?$' % self.base_url, self.render_js))	#js generator
 
 		#TODO przenieść część do __init__ oraz zrobić odwołanie do urls(), a nie generować palcem
-		for f in self.handler.model._meta.many_to_many:
-			if not f.name in self.columns: continue
-			sub_handler = self.handler.m2m_handlers.get(f.name,ManyToManyHandler(field=f))
+		for f, sub_handler in self.handler.m2m_handlers.iteritems():
+			if not f in self.columns: continue
 			sub_resource = ExtResource(sub_handler)
-			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f.name},sub_resource))
-			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f.name},sub_resource))
+			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f},sub_resource))
+			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f},sub_resource))
 
-		#handle related fields and handlers
+		#handle related fields
 		for f, params in self.reverse_related_fields.iteritems():
 			sub_resource = RelatedExtResource(params['handler'], parent = self)
 			urls += sub_resource.urls()
