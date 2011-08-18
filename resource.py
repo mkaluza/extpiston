@@ -104,6 +104,16 @@ class ExtResource(Resource):
 	def __call__(self, request, *args, **kwargs):
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
 		coerce_put_post(request)
+		if request.method=='POST' and request.META['CONTENT_TYPE'].startswith('multipart/form-data'):
+			#it's probably a submit from a form with fileUpload
+			if self.handler.pkfield in kwargs:
+				#it's an update, so make it a PUT
+				setattr(request,'PUT',request.POST)
+				request.method = 'PUT'
+			extjs_file_post = True
+		else:
+			extjs_file_post = False
+
 		if not hasattr(request, 'data') and request.method in ['GET','PUT','POST']:
 			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
 		else: data = getattr(request,'data',{})
@@ -121,7 +131,7 @@ class ExtResource(Resource):
 
 		response = super(ExtResource, self).__call__(request, *args, **kwargs)
 		#if it's a file upload, it's not XHR, it's via a hidden iframe and so response type must be text/html, otherwise browser shows 'save as' dialog for file 'application/json'
-		if len(request.FILES): response['content-type']=response['content-type'].replace('application/json','text/html')	#TODO swap any mime for this with re
+		if extjs_file_post: response['content-type']=response['content-type'].replace('application/json','text/html')	#TODO swap any mime for this with re
 		return response
 
 	def determine_emitter(self, request, *args, **kwargs):
