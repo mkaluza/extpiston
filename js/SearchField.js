@@ -30,7 +30,7 @@ Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
             this.el.dom.value = '';
             var o = {start: 0};
             this.store.baseParams = this.store.baseParams || {};
-            this.store.baseParams[this.paramName] = '';
+            delete this.store.baseParams[this.paramName];
             this.store.reload({params:o});
             this.triggers[0].hide();
             this.hasSearch = false;
