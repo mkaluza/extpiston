@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 import inspect
 
+from django.forms.models import model_to_dict
+
 def lineno():
 	"""Returns the current line number in our program."""
 	return inspect.currentframe().f_back.f_lineno

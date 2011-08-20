@@ -35,6 +35,9 @@ class ExtHandler(BaseHandler):
 		return sub_handler
 
 	def setup_file_fields(self):
+		"""
+		Find file fields that are in handler's fields property and are not explicitly specified in file_fields property
+		"""
 		for f in self.local_field_names-set(self.file_fields):
 			try:
 				field = self.model._meta.get_field_by_name(f)[0]
@@ -83,9 +86,13 @@ class ExtHandler(BaseHandler):
 
 		m = self.model._meta
 
+		#handler fields pseudofields and properties owned directly by the model
 		self.local_field_names = set(filter(lambda f: isinstance(f,(str,unicode)), self.fields))
-		self.nonlocal_field_names = set(self.local_field_names)-set([f.name for f in m.fields])
-		self.reverse_field_names = self.nonlocal_field_names - set([f.name for f in m.many_to_many])
+		#handler fields that are not model's fields
+		self.nonmodel_field_names = set(self.local_field_names)-set([f.name for f in m.fields])
+		#when we filter out m2m, all that's left is reverse related fields and properties
+		self.reverse_field_names = self.nonmodel_field_names - set([f.name for f in m.many_to_many])
+		#TODO filter out properties?
 
 		self.columns = getattr(self, 'columns', {})
 
