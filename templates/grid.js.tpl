@@ -49,6 +49,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.initialConfig.storeConfig)
 			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
 
+		if (this.initialConfig.viewConfig)
+			Ext.applyIf(this.initialConfig.viewConfig, config.viewConfig);	//apply default configuration for view
+
 		if (!(this.initialConfig.store))
 			config.store = new Ext.data.JsonStore(config.store); 		//if no store is supplied, create one from config
 
