@@ -283,6 +283,9 @@ class ExtResource(Resource):
 		if not settings.DEBUG: body = re.sub("\t+\/\/.*",'',body) # remove comments
 		return HttpResponse(body,mimetype='text/javascript')
 
+	def error_handler(self,*args,**kwargs):
+		raise
+
 class RelatedExtResource(ExtResource):
 	def __call__(self, request, *args, **kwargs):
 		params = getattr(request,'params',{})
