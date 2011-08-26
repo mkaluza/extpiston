@@ -21,7 +21,7 @@ from internal import *
 
 class ExtResource(Resource):
 	def __init__(self,handler, authentication=None, authorization=None,**kwargs):
-		super(ExtResource,self).__init__(handler, authentication=authentication, authorization=authorization)
+		super(ExtResource,self).__init__(handler, authentication=authentication)
 		try:
 			self.fields = flatten_fields(self.handler.fields)
 		except:
