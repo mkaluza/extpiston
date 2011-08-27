@@ -13,6 +13,8 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				xtype: formClass
 			}
 		}
+		//if (this.editWindow) editWindow = this.editWindow	//TODO po co to?
+
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
 		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 
@@ -34,6 +36,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				handler: function() {
 					this.showWindow(this,false);
 				},
+				name: 'add',
 			},
 			edit: {
 				text: "Edytuj",
@@ -45,13 +48,16 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					} else Ext.MessageBox.alert('B³±d','Proszê wybraæ pozycjê');
 
 				},
+				name: 'edit',
 			}
 		}
 
 		//add any actions given by the user to our actions
 		var actions=[]
 		if (this.initialConfig.actions) {
+			var key,act;
 			for each([key, act] in Iterator(this.initialConfig.actions)) {
+				//TODO jesli this.iC.actions jest obiektem (czyli key bêdzie stringiem i bêdzie nazw± predefiniowanej akcji), to robiæ apply/applyIf z predefiniowanymi akcjami jako¶ (nadpisuj±c lub nie) - do ustalenia, w któr± stronê
 				if (typeof(act) == "string") {
 					if (act in _actions) act = _actions[act]		//use default action by that name
 					else continue		//TODO error message
@@ -62,7 +68,12 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					act.scope = act.scope || this;
 					act = new Ext.Action(act);
 				}
-				actions.push(act)
+				actions.push(act);
+				if (act.initialConfig.name == 'edit')
+					this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
+						grid.getSelectionModel().selectRow(rowIndex);
+						act.execute();
+					});
 			}
 		};
 

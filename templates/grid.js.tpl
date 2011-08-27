@@ -112,11 +112,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
 
-		if (this.editWindow) editWindow = this.editWindow
-
-		if (this.initialConfig.editButtons && this.initialConfig.editButtons.indexOf('edit')>=0)
-			this.on('celldblclick',function(){ actions.edit.execute();});
-
 		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
 	} //initComponent
 });
