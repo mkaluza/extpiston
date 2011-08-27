@@ -132,14 +132,13 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			win.on('close',grid.store.reload.createDelegate(grid.store));
 		};
 
-		var buttons = {
+		var _actions = {
 			add : {
 				text: "Nowy",
 				width: 90,
 				handler: function() {
 					showWindow(this,false);
 				},
-				scope: this
 			},
 			edit: {
 				text: "Edytuj",
@@ -151,21 +150,47 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
 
 				},
-				scope: this
 			}
 		}
 
+		//add any actions given by the user to our actions
+		var actions=[]
+		if (this.initialConfig.actions) {
+			for each([key, act] in Iterator(this.initialConfig.actions)) {
+				if (typeof(act) == "string") {
+					if (act in _actions) act = _actions[act]		//use default action by that name
+					else continue		//TODO error message
+				}
+
+				if (!(act instanceof Ext.Action)) {
+					//if it's an object, create Ext.Action (assume it's a config object), else do nothing
+					act.scope = act.scope || this;
+					act = new Ext.Action(act);
+				}
+				actions.push(act)
+			}
+		};
+
+		//initiate toolbar
 		if (!this.initialConfig.tbar) {
 			this.initialConfig.tbar = [];
 		}
 		else this.initialConfig.tbar.unshift('-');
 
 		var tbar = this.initialConfig.tbar;
-		if (this.initialConfig.editButtons)
-			for (var n = this.initialConfig.editButtons.length-1;n>=0; n--) {
-				tbar.unshift(buttons[this.initialConfig.editButtons[n]]);
-				if (n>0) tbar.unshift('-');
-			}
+
+		//initiate context menu
+		var menu = new Ext.menu.Menu();
+		this.on('contextmenu', function(event){
+			event.stopEvent();
+			menu.showAt(event.xy);
+		});
+
+		for each([index, action] in Iterator(actions)) {
+			tbar.push(action);
+			menu.add(action);
+			if (index<actions.length-1) tbar.push('-');
+		}
 
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 
@@ -176,7 +201,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.editWindow) editWindow = this.editWindow
 
 		if (this.initialConfig.editButtons && this.initialConfig.editButtons.indexOf('edit')>=0)
-			this.on('celldblclick',buttons.edit.handler);
+			this.on('celldblclick',function(){ actions.edit.execute();});
 
 		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
 	} //initComponent
