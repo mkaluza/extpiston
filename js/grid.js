@@ -2,6 +2,28 @@ Ext.namespace('ExtPiston.grid');
 
 ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
+		var formClass = this.initialConfig.formClass || this.namespace.toLowerCase()+'.form';
+
+		var editWindow = {
+			title: "",
+			autoHeight: true,
+			width: 400,
+			items: {
+				xtype: formClass
+			}
+		}
+
+		this.showWindow = function(grid, showRec) {
+			editWindow.baseUrl = grid.store.url;
+			var win = new Ext.Window(editWindow);
+			if (showRec) {
+				var rec = grid.getSelectionModel().getSelected();
+				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
+			};
+			win.show();
+			win.on('close',grid.store.reload.createDelegate(grid.store));
+		};
+
 		var _actions = {
 			add : {
 				text: "Nowy",

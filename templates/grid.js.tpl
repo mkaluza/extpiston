@@ -104,34 +104,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 	initComponent:function() {
-		var namespace = '{{app_label|lower}}.{{name|lower}}';
-		this.namespace = namespace;
-
-		var formClass = this.initialConfig.formClass || namespace+'.form';
-
-		var editWindow = {
-			title: "",
-			autoHeight: true,
-			width: 400,
-			items: {
-				xtype: formClass
-			}
-		}
+		this.namespace = '{{app_label|title}}.{{name|lower}}';
 
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
 		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
-
-		this.showWindow = function(grid, showRec) {
-			editWindow.baseUrl = grid.store.url;
-			var win = new Ext.Window(editWindow);
-			if (showRec) {
-				var rec = grid.getSelectionModel().getSelected();
-				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
-			};
-			win.show();
-			win.on('close',grid.store.reload.createDelegate(grid.store));
-		};
-
 
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 
