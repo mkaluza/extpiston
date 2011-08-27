@@ -102,7 +102,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 	this.getStore().enableBubble(['load','save']);
 }
 
-{{app_label|title}}.{{name}}.GridPanel = Ext.extend(Ext.grid.GridPanel, {
+{{app_label|title}}.{{name}}.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 	initComponent:function() {
 		var namespace = '{{app_label|lower}}.{{name|lower}}';
 		this.namespace = namespace;
@@ -121,7 +121,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
 		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 
-		var showWindow = function(grid, showRec) {
+		this.showWindow = function(grid, showRec) {
 			editWindow.baseUrl = grid.store.url;
 			var win = new Ext.Window(editWindow);
 			if (showRec) {
@@ -132,65 +132,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			win.on('close',grid.store.reload.createDelegate(grid.store));
 		};
 
-		var _actions = {
-			add : {
-				text: "Nowy",
-				width: 90,
-				handler: function() {
-					showWindow(this,false);
-				},
-			},
-			edit: {
-				text: "Edytuj",
-				width: 90,
-				handler: function(a,b,c,d) {
-					var rec = this.getSelectionModel().getSelected();
-					if (rec) {
-						showWindow(this,true);
-					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
-
-				},
-			}
-		}
-
-		//add any actions given by the user to our actions
-		var actions=[]
-		if (this.initialConfig.actions) {
-			for each([key, act] in Iterator(this.initialConfig.actions)) {
-				if (typeof(act) == "string") {
-					if (act in _actions) act = _actions[act]		//use default action by that name
-					else continue		//TODO error message
-				}
-
-				if (!(act instanceof Ext.Action)) {
-					//if it's an object, create Ext.Action (assume it's a config object), else do nothing
-					act.scope = act.scope || this;
-					act = new Ext.Action(act);
-				}
-				actions.push(act)
-			}
-		};
-
-		//initiate toolbar
-		if (!this.initialConfig.tbar) {
-			this.initialConfig.tbar = [];
-		}
-		else this.initialConfig.tbar.unshift('-');
-
-		var tbar = this.initialConfig.tbar;
-
-		//initiate context menu
-		var menu = new Ext.menu.Menu();
-		this.on('contextmenu', function(event){
-			event.stopEvent();
-			menu.showAt(event.xy);
-		});
-
-		for each([index, action] in Iterator(actions)) {
-			tbar.push(action);
-			menu.add(action);
-			if (index<actions.length-1) tbar.push('-');
-		}
 
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 
