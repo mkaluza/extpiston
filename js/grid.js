@@ -6,16 +6,19 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		var editWindow = {
 			title: "",
+			xtype: 'window',
 			autoHeight: true,
 			width: 400,
 			items: {
 				xtype: formClass
 			}
 		}
+		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
+		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 
 		this.showWindow = function(grid, showRec) {
 			editWindow.baseUrl = grid.store.url;
-			var win = new Ext.Window(editWindow);
+			var win = new Ext.create(editWindow,'window');
 			if (showRec) {
 				var rec = grid.getSelectionModel().getSelected();
 				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);

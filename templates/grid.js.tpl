@@ -106,9 +106,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 	initComponent:function() {
 		this.namespace = '{{app_label|title}}.{{name|lower}}';
 
-		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
-		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
-
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
