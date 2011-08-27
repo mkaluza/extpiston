@@ -50,6 +50,10 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		//initiate context menu
 		var menu = new Ext.menu.Menu();
+		this.on('rowcontextmenu', function(grid, index, event){
+			grid.getSelectionModel().selectRow(index);
+		});
+
 		this.on('contextmenu', function(event){
 			event.stopEvent();
 			menu.showAt(event.xy);
