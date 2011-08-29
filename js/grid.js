@@ -53,12 +53,14 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		}
 
 		//add any actions given by the user to our actions
-		var actions=[]
+		this.actions = new Ext.util.MixedCollection();
+
 		if (this.initialConfig.actions) {
 			var key,act;
 			for each([key, act] in Iterator(this.initialConfig.actions)) {
 				//TODO jesli this.iC.actions jest obiektem (czyli key bêdzie stringiem i bêdzie nazw± predefiniowanej akcji), to robiæ apply/applyIf z predefiniowanymi akcjami jako¶ (nadpisuj±c lub nie) - do ustalenia, w któr± stronê
 				if (typeof(act) == "string") {
+					key = act;
 					if (act in _actions) act = _actions[act]		//use default action by that name
 					else continue		//TODO error message
 				}
@@ -68,7 +70,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					act.scope = act.scope || this;
 					act = new Ext.Action(act);
 				}
-				actions.push(act);
+				this.actions.add(key, act);
 				if (act.initialConfig.name == 'edit')
 					this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
 						grid.getSelectionModel().selectRow(rowIndex);
@@ -78,7 +80,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		};
 
 		//initiate toolbar
-		if (actions.length>0)
+		if (this.actions.length>0)
 			if (!this.tbar) {
 				this.tbar = [];
 			}
@@ -86,6 +88,8 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		//initiate context menu
 		var menu = new Ext.menu.Menu();
+		this.menu = menu;
+		//co¶ jest nei tak z kolejno¶ci± odpalania tych zdarzeñ, bo tak dzia³a, a jako osobne metody nie dzia³a
 		this.on('rowcontextmenu', function(grid, index, event){
 			grid.getSelectionModel().selectRow(index);
 		});
@@ -95,10 +99,28 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			menu.showAt(event.xy);
 		});
 
-		for each([index, action] in Iterator(actions)) {
+		/*
+		for each([index, action] in Iterator(this.actions)) {
 			this.tbar.push(action);
 			menu.add(action);
 			if (index<actions.length-1) this.tbar.push('-');
+		}
+		*/
+		//TODO actions shoud be some kind of an objects/collection (a class shoud be defined for it)
+		this.actions.each(function(action,index,length) {
+			this.tbar.push(action);
+			menu.add(action);
+			if (index<length-1) this.tbar.push('-');
+		}, this);
+		this.actions.disable = function() {
+			this.each(function(action,index,length) {
+				action.disable();
+			});
+		}
+		this.actions.enable = function() {
+			this.each(function(action,index,length) {
+				action.enable();
+			});
 		}
 		//TODO kiedy robiæ t± inicjalizacjê z akcjami? przed czy po superclass.initComponent??
 
