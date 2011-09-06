@@ -55,6 +55,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		//add any actions given by the user to our actions
 		this.actions = new Ext.util.MixedCollection();
 
+		var actions_count = 0;
 		if (this.initialConfig.actions) {
 			var key,act;
 			for each([key, act] in Iterator(this.initialConfig.actions)) {
@@ -70,6 +71,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					act.scope = act.scope || this;
 					act = new Ext.Action(act);
 				}
+				actions_count++;
 				this.actions.add(key, act);
 				if (act.initialConfig.name == 'edit')
 					this.on('celldblclick',function(grid, rowIndex, columnIndex, event){

@@ -20,21 +20,19 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			defaults: {width: 200},
 			itemId: '{{ name|lower }}form',
 			bubbleEvents: ['cancel','save'],
+			pkField: '{{pk}}',
 			buttons: [{
 					text: 'Zapisz',
 					handler: function() {
 						var url = this.form.url;
-						var pk = this.form.findField('{{pk}}');
+						var pkv = this.getPk();
 						var method = 'POST';
-
-						if (pk) {
-							//TODO this should be done in beforeaction event
-							var pkv = pk.getValue();
-							if (pkv !== undefined && pkv !== null && pkv != "") {
-								if (url.charAt(url.length-1)!='/') url+='/';
-								url+=pkv;
-								method = 'PUT';
-							}
+						//TODO all this shoud be redefined using actions
+						//TODO this should be done in beforeaction event
+						if (pkv !== undefined && pkv !== null && pkv != "") {
+							if (url.charAt(url.length-1)!='/') url+='/';
+							url+=pkv;
+							method = 'PUT';
 						}
 						this.form.submit({
 							url: url,
@@ -54,6 +52,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 							},
 							success: function(form,action) {
 								App.setAlert(true, action.result.message || 'OK');
+								form.setValues(action.result.data);
 								this.fireEvent('save',form,action);		//TODO shouldn't we load recieved values into form here?
 							},
 							scope: this
@@ -84,6 +83,34 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
 		{{app_label|title}}.{{name}}.FormPanel.superclass.initComponent.apply(this, arguments);
-	} //initComponent
-	});
+		var old_f = this.form.setValues.createDelegate(this.form);
+		var setValues = function(values) {
+			old_f(values);
+			this.fireEvent('setvalues',this,values);
+		}
+		this.form.setValues = setValues.createDelegate(this.form);
+		this.form.addEvents('setvalues');
+		this.form.getPk = this.getPk.createDelegate(this);
+
+	}, //initComponent
+	getBaseUrl: function(param1) {
+		var pk = this.getPk();
+		if (pk !== undefined && pk !== null && pk != "") {
+			if (url.charAt(url.length-1)!='/') url+='/';
+			url+=pk;
+			return url;
+		}
+		if (param1)
+			return url;
+		else
+			return null;
+	},
+	getPk: function() {
+		var url = this.form.url;
+		var pk = this.form.findField(this.pkField);
+		if (!pk) return null;
+		var pkv = pk.getValue();
+		return pkv;
+	}
+});
 Ext.reg('{{app_label|lower}}.{{name|lower}}.{{name2|lower}}form',{{app_label|title}}.{{name}}.FormPanel);

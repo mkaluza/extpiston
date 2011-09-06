@@ -73,14 +73,13 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			//		throw "{{app_label|title}}.{{name}}.gridInit: invalid baseUrl: "+baseUrl;
 		}
 		//dynamic base url setting
-		var thisGrid = this;
 		var setDynamicBaseUrl = function(store) {
 			//if it's a function, call it to get current base url
-			if (typeof(thisGrid.initialConfig.baseUrl) == "function") thisGrid.store.proxy.setUrl(thisGrid.initialConfig.baseUrl()+'/{{ name|lower }}');
+			if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}');
 		}
-		config.store.on('beforeload',setDynamicBaseUrl);
-		config.store.on('beforesave',setDynamicBaseUrl);
-		config.store.on('beforewrite',setDynamicBaseUrl); //is this necessary?
+		config.store.on('beforeload', setDynamicBaseUrl, this);
+		config.store.on('beforesave', setDynamicBaseUrl, this);
+		config.store.on('beforewrite', setDynamicBaseUrl, this); //is this necessary?
 
 		Ext.applyIf(this.initialConfig, config);
 
