@@ -4,6 +4,7 @@
 from piston.handler import BaseHandler, typemapper
 from piston.utils import rc
 
+import django
 from django.contrib.auth.models import Permission,Group,User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models.fields import FieldDoesNotExist, related as related_fields, files as file_fields
@@ -18,6 +19,9 @@ class ExtHandler(BaseHandler):
 	def find_handler_by_name(self,name):
 		#TODO handle 'not found'
 		return filter(lambda handler: handler.__name__ == name, typemapper)[0]
+
+	def find_handler_for_model(self,model):
+		return filter(lambda handler: getattr(handler,'model',None) == model, typemapper)[0]
 
 	def find_handler_for_field(self,field):
 		#TODO check if field is a name or a field
@@ -113,6 +117,12 @@ class ExtHandler(BaseHandler):
 		self.setup_file_fields()
 		self.setup_m2m_fields()
 		self.setup_reverse_related_fields()
+
+		self.value_field = getattr(self,'value_field',self.pkfield)
+		self.display_field = getattr(self,'display_field','__str__')
+
+		if 'data' in self.local_field_names:
+			raise ValueError("Handler %s: There can't be (yet) a field named 'data'" % self.name)
 
 	def queryset(self,request,*args, **kwargs):
 		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
