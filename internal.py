@@ -141,6 +141,13 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 					field_dict['type'] = "%s.%s" % (module_name,model.__name__.lower())
 					field_dict['fk'] = True
 
+		if field in handler.m2m_handlers:
+			field_dict['m2m'] = True
+			m2mhandler = handler.m2m_handlers[field]
+			module_name = ".".join(m2mhandler.model.__module__.split('.')[1:-1])
+			if not module_name: module_name = 'main'
+			field_dict['type'] = "%s.%s" % (module_name,m2mhandler.model.__name__.lower())
+
 		res.append((field, field_dict))
 
 	return res

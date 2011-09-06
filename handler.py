@@ -47,6 +47,7 @@ class ExtHandler(BaseHandler):
 				pass
 
 	def setup_m2m_fields(self):
+		#TODO obsluga relacji odwrotnej, ktora sie w tej petli nie pojawi
 		for f in self.model._meta.many_to_many:
 			if f.name in self.fields and f.name not in self.m2m_handlers:
 				self.m2m_handlers[f.name] = ManyToManyHandler(field=f)
@@ -88,6 +89,7 @@ class ExtHandler(BaseHandler):
 
 		#handler fields pseudofields and properties owned directly by the model
 		self.local_field_names = set(filter(lambda f: isinstance(f,(str,unicode)), self.fields))
+
 		#handler fields that are not model's fields
 		self.nonmodel_field_names = set(self.local_field_names)-set([f.name for f in m.fields])
 		#when we filter out m2m, all that's left is reverse related fields and properties
@@ -213,34 +215,59 @@ class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
 
 	def __init__(self, field = None):
+		"""
+		Initialize m2m handler.
+
+		Force setting of fields:
+			- self.model contains the model field relates to,
+			- self.owner_model contains the model that owns the field,
+			- self.field_name contains actual field name(for reverse objects it's not field.name
+		The fields it returns are either (pk.name,__str__) or, if the model has a handler defined, value_field and display_field from the handler
+		"""
+
 		if field: self.field = field
-		if not hasattr(self,'model'): self.model = field.rel.to
-		self.fields = (self.model._meta.pk.name,)
+		#if not hasattr(self,'model'):
+		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
+			self.model = field.rel.to
+			self.owner_model = field.model
+			self.field_name = field.name
+		else:
+			self.model = field.model
+			self.owner_model = field.parent_model
+			self.field_name = field.field.rel.related_name
+
+		#TODO either get value_field/display_field from a default handler if a model has one or get pk/__str__
+		self.fields = [self.model._meta.pk.name, '__str__']
+		h = self.find_handler_for_model(self.model)()
+		self.fields[0]=h.value_field
+		self.fields[1]=h.display_field
 		#print "m2m init", self.fields
 		super(ManyToManyHandler,self).__init__()
 
 	def create(self, request, *args, **kwargs):
-		f = self.field
-		main_obj = f.model.objects.get(pk=kwargs.get('main_id'))
-		related_obj = f.rel.to.objects.get(pk=request.data.get(f.rel.to._meta.pk.name))
-		getattr(main_obj,f.name).add(related_obj)
+		main_obj = self.owner_model.objects.get(pk=kwargs.get('main_id'))
+		related_obj = self.model.objects.get(pk=request.data.get(self.model._meta.pk.name))
+		getattr(main_obj,self.field_name).add(related_obj)
 		return related_obj
 
 	def delete(self, request, *args, **kwargs):
-		f = self.field
-		main_obj = f.model.objects.get(pk=kwargs.get('main_id'))
+		main_obj = self.owner_model.objects.get(pk=kwargs.get('main_id'))
 		related_obj = self.queryset(request,*args,**kwargs).get(pk=kwargs.get('id'))
-		getattr(main_obj,f.name).remove(related_obj)
+		getattr(main_obj,self.field_name).remove(related_obj)
 		return rc.DELETED
 
 	def queryset(self, request, *args, **kwargs):
-		f = self.field
+		#TODO to trzeba poprawic/skomentowac
 		main_id = kwargs.pop('main_id', None)
 		if main_id == None:
 			main_id = self.main_id
 		else: self.main_id = main_id
-		main_obj = f.model.objects.get(pk= self.main_id)
-		return getattr(main_obj,f.name).all()
+
+		main_obj = self.owner_model.objects.get(pk = self.main_id)
+		if request.params.get('all',False):
+			return self.model.objects.exclude(pk__in=getattr(main_obj,self.field.name).all().values('pk'))		#return remaining objects not assigned to our parent object
+		else:
+			return getattr(main_obj,self.field_name).all()
 
 	def read(self, request, *args, **kwargs):
 		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac

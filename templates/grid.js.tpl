@@ -214,3 +214,19 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
+
+{{app_label|title}}.{{name}}.m2m = Ext.extend(ExtPiston.m2m.Panel, {
+	initComponent: function() {
+		var config = {
+			valueField: '{{ value_field|default:"id" }}',
+			displayField: '{{ display_field|default:"id" }}',
+			url: '{{ name|lower }}',
+			name: '{{ name|lower }}'
+		};
+
+		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
+
+		{{app_label|title}}.{{name}}.m2m.superclass.initComponent.apply(this,arguments);
+	} //initComponent
+});
+Ext.reg('{{app_label|lower}}.{{name|lower}}.m2m',{{app_label|title}}.{{name}}.m2m);

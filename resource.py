@@ -201,6 +201,8 @@ class ExtResource(Resource):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
 			elif 'fk' in col and col['fk']:
 				newcol['xtype'] = col['type']+'.combo'
+			elif  col.get('m2m',False):
+				newcol['xtype'] = col['type']+'.m2m'
 			elif col.get('choices',None):
 				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybież...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
 			elif col['type'] == 'bool':
