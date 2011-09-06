@@ -20,12 +20,21 @@ from functions import Timer, request_debug
 from internal import *
 
 class ExtResource(Resource):
+	"""ExtResource Class
+
+	description
+	"""
 	def __init__(self,handler, authentication=None, authorization=None,**kwargs):
+		"""
+		Initialize a resource
+		"""
+
 		super(ExtResource,self).__init__(handler, authentication=authentication)
 		try:
 			self.fields = flatten_fields(self.handler.fields)
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
+		"""Initialize fields based on either handler's fields or handlers model fields"""
 
 		#TODO to powinno byc w handlerze
 		self.columns = {}
@@ -45,6 +54,7 @@ class ExtResource(Resource):
 			'separate_store': (True, None),
 			'page_size': (None,None),
 			}
+		"""Default values for resource object fields. These names are later used in render_js to get defaults for component rendering functions"""
 
 		self.params = params
 
@@ -61,17 +71,27 @@ class ExtResource(Resource):
 		#to shorten arguments, default grid/form can be given as grid/form
 		deepUpdate(self.forms['default'], kwargs.pop('form',None))
 		deepUpdate(self.grids['default'], kwargs.pop('grid',None))
+		"""default grid and form definition can be provided with grid and form fields set in a resource subclass"""
 
-		self.name = kwargs.pop('name',getattr(self.handler,'name')).lower()
-		self.verbose_name = self.handler.verbose_name
+		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
+		"""Resource name, if not set, is taken from: kwargs, handler.name"""
+
+		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
+		"""Resource verbose name, if not set, is taken from the handler"""
+
 		self.base_url = self.name
+		"""Default base_url is self.name"""
 
 		#for related relations
 		self.parent = kwargs.pop('parent', None)
+		"""If resource is a subresource (for reverse relations), parent is given in kwargs and base_url is prefixed with parent's base_url and a parent pk parameter, which name is self.handler.parent_fk_name
+		"""
+
 		if self.parent:
 			self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.handler.parent_fk_name, self.base_url)
 			#TODO a co, jesli handler nie ma parenta?
 
+		#TODO to powinno byc w handlerze
 		#handle related fields and handlers
 		self.reverse_related_fields = {}
 		for f in self.handler.reverse_related_fields:
@@ -102,6 +122,25 @@ class ExtResource(Resource):
 			self.reverse_related_fields[f_name] = params
 
 	def __call__(self, request, *args, **kwargs):
+		"""Main request handler
+
+		**File uploads**
+
+		File uploads from ExtJS forms (with fileUpload: true) are not XHR - they are always POST and multipart/form-data.
+		If such a request is detected, response type is changed from application/javasctript to text/html.
+		If a pk is given in kwargs, it means that the request is an update and ``request.method`` is changed to PUT.
+
+		**Request data preprocessing**
+
+		Data from a request can be either directly in ``QueryDict`` (TODO forms only?) or as ``QueryDict.data`` (grids). Guess what it is and clean it up.
+		If ``QueryDict.data`` exists, it is used for ``request.data`` and the rest of the ``QueryDict`` is ``request.params``, otherwise both ``request.data`` and ``request.params`` are set to ``QueryDict``.
+
+		**IMPORTANT**
+
+		Forms cannot contain fields named ``data`` (yet) because it'll confuse the code above and result in strange behavior.
+
+		"""
+
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
 		coerce_put_post(request)
 		if request.method=='POST' and request.META['CONTENT_TYPE'].startswith('multipart/form-data'):
@@ -138,6 +177,16 @@ class ExtResource(Resource):
 		return kwargs.pop('emitter_format', request.GET.get('format', 'ext-json'))
 
 	def urls(self, *args, **kwargs):
+		"""Generates all urls handled by this resource
+
+		This includes:
+
+		- Two standard piston urls: name/$ for all GET/POST, and name/(?P<id>\d+)$ to GET/PUT/DELETE a specific record.
+
+		  Subresources (those that have parents) don't generate any urls except the default ones.
+		  *Primary* resources additionally generate urls for getting js components, related fields and rpc methods for handler and model.
+		"""
+
 		#args are numbers by default
 		urls=[]
 		#TODO zrobić z tego jakieś RPC
