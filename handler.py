@@ -218,7 +218,7 @@ class ExtHandler(BaseHandler):
 		proc = kwargs.pop('procname')
 		obj = self.read(request,*args,**kwargs)
 		proc = getattr(obj,proc)
-		res = proc()
+		res = proc(request = request)
 		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http
 
 class ManyToManyHandler(ExtHandler):
