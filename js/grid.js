@@ -74,11 +74,13 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				}
 				actions_count++;
 				this.actions.add(key, act);
-				if (act.initialConfig.name == 'edit')
+				if (act.initialConfig.name == 'edit') {
+					var action = act;
 					this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
 						grid.getSelectionModel().selectRow(rowIndex);
-						act.execute();
+						action.execute();
 					});
+				}
 			}
 		};
 
