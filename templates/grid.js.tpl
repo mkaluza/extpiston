@@ -39,7 +39,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					panel.store.reload();
 				}
 			       }],
-			itemId: '{{ name|lower }}'
+			itemId: '{{ name|lower }}',
+			childUrl: '{{ name|lower }}'		//URL part, that is appended to baseUrl, when the component is a child component
 		}; //config
 		for (var name in {{app_label|title}}.{{name}}.gridColumnNames) {
 			name = {{app_label|title}}.{{name}}.gridColumnNames[name]
@@ -58,6 +59,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		this.setBaseUrl = function(baseUrl) {
 			//TODO zrobić to lepiej... dużo lepiej...
 			var url = baseUrl+'/{{ name|lower }}';
+			var url = baseUrl+'/' + this.childUrl;
 			//this.store.url = url;		//optional for unified look
 			this.store.proxy.setUrl(url,true);
 		}
@@ -75,7 +77,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		//dynamic base url setting
 		var setDynamicBaseUrl = function(store) {
 			//if it's a function, call it to get current base url
-			if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}');
+			//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
+			if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
 		}
 		config.store.on('beforeload', setDynamicBaseUrl, this);
 		config.store.on('beforesave', setDynamicBaseUrl, this);
