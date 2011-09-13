@@ -45,7 +45,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {
 						this.showWindow(this,true);
-					} else Ext.MessageBox.alert('B³±d','Proszê wybraæ pozycjê');
+					} else Ext.MessageBox.alert('BÅ‚Ä…d','ProszÄ™ wybraÄ‡ pozycjÄ™');
 
 				},
 				name: 'edit',
@@ -59,7 +59,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		if (this.initialConfig.actions) {
 			var key,act;
 			for each([key, act] in Iterator(this.initialConfig.actions)) {
-				//TODO jesli this.iC.actions jest obiektem (czyli key bêdzie stringiem i bêdzie nazw± predefiniowanej akcji), to robiæ apply/applyIf z predefiniowanymi akcjami jako¶ (nadpisuj±c lub nie) - do ustalenia, w któr± stronê
+				//TODO jesli this.iC.actions jest obiektem (czyli key bÄ™dzie stringiem i bÄ™dzie nazwÄ… predefiniowanej akcji), to robiÄ‡ apply/applyIf z predefiniowanymi akcjami jakoÅ› (nadpisujÄ…c lub nie) - do ustalenia, w ktÃ³rÄ… stronÄ™
 				if (typeof(act) == "string") {
 					key = act;
 					if (act in _actions) act = _actions[act]		//use default action by that name
@@ -91,7 +91,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		//initiate context menu
 		var menu = new Ext.menu.Menu();
 		this.menu = menu;
-		//co¶ jest nei tak z kolejno¶ci± odpalania tych zdarzeñ, bo tak dzia³a, a jako osobne metody nie dzia³a
+		//coÅ› jest nei tak z kolejnoÅ›ciÄ… odpalania tych zdarzeÅ„, bo tak dziaÅ‚a, a jako osobne metody nie dziaÅ‚a
 		this.on('rowcontextmenu', function(grid, index, event){
 			grid.getSelectionModel().selectRow(index);
 		});
@@ -124,7 +124,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				action.enable();
 			});
 		}
-		//TODO kiedy robiæ t± inicjalizacjê z akcjami? przed czy po superclass.initComponent??
+		//TODO kiedy robiÄ‡ tÄ… inicjalizacjÄ™ z akcjami? przed czy po superclass.initComponent??
 
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 
