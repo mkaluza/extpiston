@@ -110,6 +110,15 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
 
+		for(var n = 0; n < this.columns.length; n++)
+		{
+			//TODO merge this with code in editorgrid
+			var col = this.columns[n];
+			if (col.hidden && !col.hideable || !col.fk) continue;
+			if (!col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
+			if (col.fk && !col.renderer) col.renderer = fkrenderer;
+		}
+
 		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
