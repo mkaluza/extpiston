@@ -84,39 +84,41 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			}
 		};
 
-		//initiate toolbar
-		if (this.actions.length>0)
+		//initiate toolbar and context menu if there are any actions defined
+		if (this.actions.length>0) {
 			if (!this.tbar) {
 				this.tbar = [];
 			}
 			else this.tbar.push('-');
 
-		//initiate context menu
-		var menu = new Ext.menu.Menu();
-		this.menu = menu;
-		//coś jest nei tak z kolejnością odpalania tych zdarzeń, bo tak działa, a jako osobne metody nie działa
-		this.on('rowcontextmenu', function(grid, index, event){
-			grid.getSelectionModel().selectRow(index);
-		});
+			//initiate context menu
+			var menu = new Ext.menu.Menu();
+			this.menu = menu;
+			//events fired this way work, however when defined as separate methods, they don't...
+			this.on('rowcontextmenu', function(grid, index, event){
+				grid.getSelectionModel().selectRow(index);
+			});
 
-		this.on('contextmenu', function(event){
-			event.stopEvent();
-			menu.showAt(event.xy);
-		});
+			this.on('contextmenu', function(event){
+				event.stopEvent();
+				menu.showAt(event.xy);
+			});
 
-		/*
-		for each([index, action] in Iterator(this.actions)) {
-			this.tbar.push(action);
-			menu.add(action);
-			if (index<actions.length-1) this.tbar.push('-');
+			/*
+			for each([index, action] in Iterator(this.actions)) {
+				this.tbar.push(action);
+				menu.add(action);
+				if (index<actions.length-1) this.tbar.push('-');
+			}
+			*/
+			//TODO actions shoud be some kind of an objects/collection (a class shoud be defined for it)
+			this.actions.each(function(action,index,length) {
+				this.tbar.push(action);
+				menu.add(action);
+				if (index<length-1) this.tbar.push('-');
+			}, this);
 		}
-		*/
-		//TODO actions shoud be some kind of an objects/collection (a class shoud be defined for it)
-		this.actions.each(function(action,index,length) {
-			this.tbar.push(action);
-			menu.add(action);
-			if (index<length-1) this.tbar.push('-');
-		}, this);
+
 		this.actions.disable = function() {
 			this.each(function(action,index,length) {
 				action.disable();
