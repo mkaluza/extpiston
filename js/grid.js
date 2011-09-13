@@ -10,7 +10,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			autoHeight: true,
 			width: 400,
 			items: {
-				xtype: formClass
+				xtype: formClass		//TODO accept form definition as well, not only xtype (as with editWindow)
 			}
 		}
 		//if (this.editWindow) editWindow = this.editWindow	//TODO po co to?
@@ -69,6 +69,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				if (!(act instanceof Ext.Action)) {
 					//if it's an object, create Ext.Action (assume it's a config object), else do nothing
 					act.scope = act.scope || this;
+					act.width = act.width || 90;
 					act = new Ext.Action(act);
 				}
 				actions_count++;

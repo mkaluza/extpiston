@@ -36,6 +36,12 @@ class ExtResource(Resource):
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 		"""Initialize fields based on either handler's fields or handlers model fields"""
 
+		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
+		"""Resource name, if not set, is taken from: kwargs, handler.name"""
+
+		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
+		"""Resource verbose name, if not set, is taken from the handler"""
+
 		#TODO to powinno byc w handlerze
 		self.columns = {}
 		col_num = 0
@@ -72,12 +78,6 @@ class ExtResource(Resource):
 		deepUpdate(self.forms['default'], kwargs.pop('form',None))
 		deepUpdate(self.grids['default'], kwargs.pop('grid',None))
 		"""default grid and form definition can be provided with grid and form fields set in a resource subclass"""
-
-		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
-		"""Resource name, if not set, is taken from: kwargs, handler.name"""
-
-		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
-		"""Resource verbose name, if not set, is taken from the handler"""
 
 		self.base_url = self.name
 		"""Default base_url is self.name"""
