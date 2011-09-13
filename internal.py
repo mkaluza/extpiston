@@ -154,7 +154,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 
 def deepUpdate(dst,src):
 	if not src: return dst
-	if not dst: return src
+	if dst == None: return src
 	if isinstance(src,dict): src = src.iteritems()
 	for name, data in src:
 		if name in dst: dst[name].update(data)
