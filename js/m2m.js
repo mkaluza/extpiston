@@ -59,20 +59,21 @@ ExtPiston.m2m.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		//TODO zrobić to lepiej... dużo lepiej...
 		var url = baseUrl+this.url;
 		this.baseUrl = baseUrl;
-		//this.store.url = url;		//optional for unified look
+		this.store.url = url;		//optional for unified look
 		this.store.proxy.setUrl(url,true);
 	}
 });
 
 Ext.reg('extpiston.m2m.grid',ExtPiston.m2m.GridPanel);
 
+//TODO many of this code is common with ExtPiston.grid... do something about it...
 ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 	initComponent: function () {
 		var config = {
 			valueField: 'id',
 			displayField: '__str__',
 			baseUrl: '',	//url part that comes from parent component like /name/pk_value/ - may be a function to set it dynamically
-			url: '',	//url that will be added to baseUrl and set as url of the grids
+			url: this.initialConfig.name || '',	//url that will be added to baseUrl and set as url of the grids
 			layout: 'column',
 			defaults: {columnWidth: 0.5},
 			height: 200
@@ -97,34 +98,65 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 
 		ExtPiston.m2m.Panel.superclass.initComponent.apply(this, arguments);
 
-		var grid1 = this.find('itemId','left')[0];
-		var grid2 = this.find('itemId','right')[0];
+		this.grid1 = this.find('itemId','left')[0];
+		this.grid2 = this.find('itemId','right')[0];
 
-		grid1.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
-			var rec = grid.getStore().getAt(rowIndex);
-			var st = grid2.getStore();
+		this.grid1.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
+			var s_st = grid.getStore();
+			var rec = s_st.getAt(rowIndex);
+			var d_st = this.grid2.getStore();
 			rec.phantom = true;
-			st.add(rec);
-			st.save();
-		});
+			s_st.remove(rec);
+			d_st.add(rec);
+			if (!d_st.autoSave) d_st.save();
+		}, this);
 
-		grid2.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
-			var rec = grid.getStore().getAt(rowIndex);
-			var st = grid1.getStore();
-			st.add(rec);
-		});
-		var name = this.initialConfig.name;
-		this.ownerCt.form.on('setvalues', function(form,values) {
-			var pk = form.getPk();
-			this.baseUrl = form.url+'/'+pk;
-			grid1.store.proxy.setUrl(this.baseUrl+'/'+name, true);
-			grid1.store.setBaseParam('all',1);
-			grid1.store.load();
-			grid2.store.proxy.setUrl(this.baseUrl+'/'+name, true);
-			grid2.store.load();
-		});
+		this.grid2.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
+			var s_st = grid.getStore();
+			var rec = s_st.getAt(rowIndex);
+			var d_st = this.grid1.getStore();
+			d_st.add(rec);
+			s_st.remove(rec);
+		}, this);
 
-	} //initComponent
+		//TODO look for parent form
+		if (this.ownerCt.form) 
+			this.ownerCt.form.on('setvalues', function(form,values) {
+				var pk = form.getPk();
+				this.setBaseUrl(form.url+'/'+pk);
+			});
+
+		//TODO move these functions somewhere, so they are more 'common'
+		function _getByPath(obj,path) {
+			if (path[0] == '..') return getByPath(obj.ownerCt,path.slice(1));
+			obj = obj.find('itemId',path[0])[0];
+			if (path.length == 1) return obj;
+			return getByPath(obj,a.slice(1));
+		}
+
+		function getByPath(obj,path) {
+			return _getByPath(obj, path.split('/'));
+		}
+
+		if (this.initialConfig.masterComponent) {
+			var m = this.initialConfig.masterComponent;
+			var obj = getByPath(this.ownerCt,m.path);
+			obj.on(m.event, function() {
+					var url = m.handler.apply(obj,arguments);
+					this.setBaseUrl(url);
+					}, this);
+		}
+	}, //initComponent
+	setBaseUrl: function(baseUrl) {
+		this.baseUrl = baseUrl;
+		var url = this.initialConfig.url;		//TODO this should be taken from this.initialConfig or this only ?
+
+		this.grid1.store.proxy.setUrl(this.baseUrl+'/'+url, true);
+		this.grid1.store.setBaseParam('all',1);
+		this.grid1.store.load();
+		this.grid2.store.proxy.setUrl(this.baseUrl+'/'+url, true);
+		this.grid2.store.load();
+	    }
 });
 
 Ext.reg('extpiston.m2m',ExtPiston.m2m.Panel);
