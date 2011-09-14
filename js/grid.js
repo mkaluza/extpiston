@@ -59,8 +59,11 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		var actions_count = 0;
 		if (this.initialConfig.actions) {
 			var key,act;
-			for each([key, act] in Iterator(this.initialConfig.actions)) {
+			//for each([key, act] in Iterator(this.initialConfig.actions)) {		//TODO can't use this - Google Chrome does not support it for compatibility with safari (fail...)
+			for(var i = 0;i < this.initialConfig.actions.length; i++) {
 				//TODO jesli this.iC.actions jest obiektem (czyli key będzie stringiem i będzie nazwą predefiniowanej akcji), to robić apply/applyIf z predefiniowanymi akcjami jakoś (nadpisując lub nie) - do ustalenia, w którą stronę
+				act = this.initialConfig.actions[i];
+				key = i.toString();
 				if (typeof(act) == "string") {
 					key = act;
 					if (act in _actions) act = _actions[act]		//use default action by that name

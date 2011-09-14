@@ -96,7 +96,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 		//if column names are given as strings, substitute them to column definitions - this allows to change columns easily
 		if (this.columns && this.columns.length > 0) {			//TODO dangerous if this.columns is not an array
-			for (var [index,column] in Iterator(this.columns)) {
+			var index, column;
+			//for (column in Iterator(this.columns)) {
+			for (index in this.columns) {
+				column = this.columns[index];
 				if (typeof(column) != 'string') continue;		//if it's not a name, we're not interested
 				try {
 					column = {{app_label|title}}.{{name}}.gridColumns[column]
@@ -109,8 +112,11 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		} else {
 			//no columns were defined - add all available predefined columns
 			this.columns = [];
-			for (var [index,name] in Iterator({{app_label|title}}.{{name}}.gridColumnNames)) {
-				this.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
+			var index, column;
+			//iterators and deconstricting assignments don't work in fuckin chrome... :/
+			for (column in {{app_label|title}}.{{name}}.gridColumnNames) {
+				column = {{app_label|title}}.{{name}}.gridColumnNames[column];
+				if (typeof(column)=='string') this.columns.push({{app_label|title}}.{{name}}.gridColumns[column]);
 			}
 		}
 }
