@@ -15,7 +15,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		var config = {
 			store: {{name}}StoreConfig,
 			autoHeight: true,
-			columns: [],
+			//columns: [],
 			loadMask: true,
 			{% if page_size %}
 			autoScroll: false,
@@ -42,10 +42,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			itemId: '{{ name|lower }}',
 			childUrl: '{{ name|lower }}'		//URL part, that is appended to baseUrl, when the component is a child component
 		}; //config
-		for (var name in {{app_label|title}}.{{name}}.gridColumnNames) {
-			name = {{app_label|title}}.{{name}}.gridColumnNames[name]
-			if (typeof(name)=='string') config.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
-		}
 
 		if (this.initialConfig.storeConfig)
 			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
@@ -84,7 +80,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		config.store.on('beforesave', setDynamicBaseUrl, this);
 		config.store.on('beforewrite', setDynamicBaseUrl, this); //is this necessary?
 
-		Ext.applyIf(this.initialConfig, config);
+		Ext.applyIf(this.initialConfig, config);		//shouldn't initialConfig be immutable?
 
 		if (this.initialConfig.filterBy) {
 			this.initialConfig.tbar = this.initialConfig.tbar || [];
@@ -96,7 +92,27 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet
 				this.initialConfig.bbar.store = this.initialConfig.store;	//than set it
 
-		Ext.apply(this, this.initialConfig);
+		Ext.apply(this, this.initialConfig);		//this apply stuff actually sux - when we're here, initialConfig is already applied to 'this' (constructor of Ext.Component does this)
+
+		//if column names are given as strings, substitute them to column definitions - this allows to change columns easily
+		if (this.columns && this.columns.length > 0) {			//TODO dangerous if this.columns is not an array
+			for (var [index,column] in Iterator(this.columns)) {
+				if (typeof(column) != 'string') continue;		//if it's not a name, we're not interested
+				try {
+					column = {{app_label|title}}.{{name}}.gridColumns[column]
+					this.columns[index] = column; //replace column name with the real column definition
+				} catch(e) {
+					//invalid column name
+					//TODO print warning
+				}
+			};
+		} else {
+			//no columns were defined - add all available predefined columns
+			this.columns = [];
+			for (var [index,name] in Iterator({{app_label|title}}.{{name}}.gridColumnNames)) {
+				this.columns.push({{app_label|title}}.{{name}}.gridColumns[name]);
+			}
+		}
 }
 
 {{app_label|title}}.{{name}}.gridPostInit = function() {
