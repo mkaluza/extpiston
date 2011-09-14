@@ -258,6 +258,21 @@ class ManyToManyHandler(ExtHandler):
 		h = self.find_handler_for_model(self.model)()
 		self.fields[0]=h.value_field
 		self.fields[1]=h.display_field
+
+		def to_tuple(lst):
+			if len(lst)>1:
+				return (lst[0],to_tuple(lst[1:]))
+			else:
+				return (lst[0],)
+
+		_fields = []
+		for f in self.fields:
+			if '__' in f and not f.startswith('__'):
+				_fields.append(to_tuple(f.split('__')))
+			else:
+				_fields.append(f)
+		self.fields = tuple(_fields)
+
 		#print "m2m init", self.fields
 		super(ManyToManyHandler,self).__init__()
 
