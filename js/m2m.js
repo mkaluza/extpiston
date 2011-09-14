@@ -139,11 +139,26 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			return _getByPath(obj, path.split('/'));
 		}
 
+		//TODO move this somewhere else so that it can be more generic
+		function EditorGridPanelHandler(sm,rowIndex,colIndex) {
+			var st = sm.grid.store;
+			return st.url+'/'+st.getAt(rowIndex).id;
+		}
+
 		if (this.initialConfig.masterComponent) {
 			var m = this.initialConfig.masterComponent;
 			var obj = getByPath(this.ownerCt,m.path);
+			if (!m.event) {
+				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
+				else throw "masterComponent.event must be defined";
+			}
+
+			if (!m.handler) {
+				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = EditorGridPanelHandler;
+				else throw "masterComponent.handler must be defined";
+			}
 			obj.on(m.event, function() {
-					var url = m.handler.apply(obj,arguments);
+					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
 					this.setBaseUrl(url);
 					}, this);
 		}
