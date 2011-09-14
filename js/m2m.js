@@ -22,7 +22,7 @@ ExtPiston.m2m.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			restful: true
 		};
 		var store = new Ext.data.JsonStore(StoreConfig);
-		
+
 		this.initialConfig.columns = [
 			{hidden: true, header: 'ID', hideable: false, dataIndex: this.initialConfig.valueField || 'id'},
 			{header: '&#160;', dataIndex: this.initialConfig.displayField || '__str__'}
@@ -82,17 +82,18 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		Ext.apply(this,this.initialConfig);
 
 		var grid = {
-			xtype: 'extpiston.m2m.grid'
+			xtype: 'extpiston.m2m.grid',
+			title: undefined
 		}
 
 		this.items = [];
 
 		var grid1 = {itemId: 'left'};
 		var grid2 = {itemId: 'right'};
-		
+
 		Ext.apply(grid1, grid, this.initialConfig);
 		Ext.apply(grid2, grid, this.initialConfig);
-		
+
 		this.items.push(grid1);
 		this.items.push(grid2);
 
@@ -120,7 +121,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		}, this);
 
 		//TODO look for parent form
-		if (this.ownerCt.form) 
+		if (this.ownerCt.form)
 			this.ownerCt.form.on('setvalues', function(form,values) {
 				var pk = form.getPk();
 				this.setBaseUrl(form.url+'/'+pk);
