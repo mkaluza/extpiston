@@ -60,7 +60,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			//TODO zrobić to lepiej... dużo lepiej...
 			var url = baseUrl+'/{{ name|lower }}';
 			var url = baseUrl+'/' + this.childUrl;
-			//this.store.url = url;		//optional for unified look
+			this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
 			this.store.proxy.setUrl(url,true);
 		}
 
