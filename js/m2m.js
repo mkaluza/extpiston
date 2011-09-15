@@ -121,11 +121,13 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		}, this);
 
 		//TODO look for parent form
-		if (this.ownerCt.form)
+		if (this.ownerCt.form) {
 			this.ownerCt.form.on('setvalues', function(form,values) {
 				var pk = form.getPk();
 				this.setBaseUrl(form.url+'/'+pk);
-			});
+			}, this);
+			this.url = this.initialConfig.name;
+		}
 
 		//TODO move these functions somewhere, so they are more 'common'
 		function _getByPath(obj,path) {
@@ -165,7 +167,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 	}, //initComponent
 	setBaseUrl: function(baseUrl) {
 		this.baseUrl = baseUrl;
-		var url = this.initialConfig.url;		//TODO this should be taken from this.initialConfig or this only ?
+		var url = this.url;		//TODO this should be taken from this.initialConfig or this only ?
 
 		this.grid1.store.proxy.setUrl(this.baseUrl+'/'+url, true);
 		this.grid1.store.setBaseParam('all',1);
