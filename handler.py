@@ -230,6 +230,7 @@ class ExtHandler(BaseHandler):
 
 class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
+	register = False
 
 	def __init__(self, field = None):
 		"""
