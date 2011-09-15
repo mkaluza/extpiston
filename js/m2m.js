@@ -1,5 +1,71 @@
 Ext.namespace('ExtPiston.m2m');
 
+ExtPiston.MasterSlavePlugin = (function() {
+	function _getByPath(obj,path) {
+		if (path[0] == '..') return getByPath(obj.ownerCt,path.slice(1));
+		var newobj = obj.find('itemId',path[0])[0];	//TODO change to get (nonrecursive)
+		//TODO fix it for better logic
+		if (path.length == 1) {
+			if (newobj) return newobj;
+			if (!path[0]) return obj;		//path was empty which means the owner object itself
+			//TODO raise an error
+			return;
+		}
+		return getByPath(newobj,a.slice(1));
+	}
+
+	function getByPath(obj,path) {
+		return _getByPath(obj, path.split('/'));
+	}
+
+	function EditorGridPanelHandler(sm,rowIndex,colIndex) {
+		var st = sm.grid.store;
+		return st.url+'/'+st.getAt(rowIndex).id;
+	}
+
+	function FormPanelHandler(form,values) {
+		var pk = form.getPk();
+		return form.url+'/'+pk;
+	}
+
+	return {
+		init: function(o) {
+			var obj;
+			var m = o.initialConfig.masterComponent;
+
+			if (o.ownerCt instanceof Ext.FormPanel) {		//autodetect forms
+				o.url = o.initialConfig.name;
+				if (!m) m = {path: ''}
+				obj = o.ownerCt.form;				//we need the form, not panel, and form can't be found with 'find'
+			}
+
+			if (!m) return;		//neither we're part of a form nor master-slave relation has been defined
+
+			obj = obj || getByPath(o.ownerCt,m.path);
+
+			if (!m.event) {
+				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
+				//else if (obj instanceof Ext.FormPanel) m.event = 'setvalues';
+				else if (obj instanceof Ext.form.BasicForm) m.event = 'setvalues';
+				else throw "masterComponent.event must be defined";
+			}
+
+			if (!m.handler) {
+				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = EditorGridPanelHandler;
+				//else if (obj instanceof Ext.FormPanel) m.handler = FormPanelHandler;
+				else if (obj instanceof Ext.form.BasicForm) m.handler = FormPanelHandler;
+				else throw "masterComponent.handler must be defined";
+			}
+
+			obj.on(m.event, function() {
+					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
+					this.setBaseUrl(url);
+					}, o);
+		}
+	}
+})();
+
+Ext.preg('masterslave',ExtPiston.MasterSlavePlugin);
 
 ExtPiston.m2m.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent: function () {
@@ -76,14 +142,16 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			url: this.initialConfig.name || '',	//url that will be added to baseUrl and set as url of the grids
 			layout: 'column',
 			defaults: {columnWidth: 0.5},
-			height: 200
+			height: 200,
+			plugins: ['masterslave']
 		}
 		Ext.applyIf(this.initialConfig, config);
 		Ext.apply(this,this.initialConfig);
 
 		var grid = {
 			xtype: 'extpiston.m2m.grid',
-			title: undefined
+			title: undefined,
+			plugins: undefined
 		}
 
 		this.items = [];
@@ -119,51 +187,6 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			d_st.add(rec);
 			s_st.remove(rec);
 		}, this);
-
-		//TODO look for parent form
-		if (this.ownerCt.form) {
-			this.ownerCt.form.on('setvalues', function(form,values) {
-				var pk = form.getPk();
-				this.setBaseUrl(form.url+'/'+pk);
-			}, this);
-			this.url = this.initialConfig.name;
-		}
-
-		//TODO move these functions somewhere, so they are more 'common'
-		function _getByPath(obj,path) {
-			if (path[0] == '..') return getByPath(obj.ownerCt,path.slice(1));
-			obj = obj.find('itemId',path[0])[0];
-			if (path.length == 1) return obj;
-			return getByPath(obj,a.slice(1));
-		}
-
-		function getByPath(obj,path) {
-			return _getByPath(obj, path.split('/'));
-		}
-
-		//TODO move this somewhere else so that it can be more generic
-		function EditorGridPanelHandler(sm,rowIndex,colIndex) {
-			var st = sm.grid.store;
-			return st.url+'/'+st.getAt(rowIndex).id;
-		}
-
-		if (this.initialConfig.masterComponent) {
-			var m = this.initialConfig.masterComponent;
-			var obj = getByPath(this.ownerCt,m.path);
-			if (!m.event) {
-				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
-				else throw "masterComponent.event must be defined";
-			}
-
-			if (!m.handler) {
-				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = EditorGridPanelHandler;
-				else throw "masterComponent.handler must be defined";
-			}
-			obj.on(m.event, function() {
-					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
-					this.setBaseUrl(url);
-					}, this);
-		}
 	}, //initComponent
 	setBaseUrl: function(baseUrl) {
 		this.baseUrl = baseUrl;
