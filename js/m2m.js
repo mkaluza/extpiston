@@ -32,6 +32,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 		init: function(o) {
 			var obj;
 			var m = o.initialConfig.masterComponent;
+			if (typeof(m) == 'string') m = {path: m};		//allow master component to be given directly by name
 
 			if (o.ownerCt instanceof Ext.FormPanel) {		//autodetect forms
 				o.url = o.initialConfig.name;
