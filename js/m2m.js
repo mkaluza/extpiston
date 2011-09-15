@@ -18,7 +18,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 		return _getByPath(obj, path.split('/'));
 	}
 
-	function EditorGridPanelHandler(sm,rowIndex,colIndex) {
+	function GridPanelHandler(sm,rowIndex,param3) {		//for gridpanel param3=record, for editorgridpanel param3=colindex
 		var st = sm.grid.store;
 		return st.url+'/'+st.getAt(rowIndex).id;
 	}
@@ -45,13 +45,15 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 			if (!m.event) {
 				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
+				else if (obj instanceof Ext.grid.GridPanel) m.event = 'rowselect';
 				//else if (obj instanceof Ext.FormPanel) m.event = 'setvalues';
 				else if (obj instanceof Ext.form.BasicForm) m.event = 'setvalues';
 				else throw "masterComponent.event must be defined";
 			}
 
 			if (!m.handler) {
-				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = EditorGridPanelHandler;
+				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = GridPanelHandler;
+				else if (obj instanceof Ext.grid.GridPanel) m.handler = GridPanelHandler;
 				//else if (obj instanceof Ext.FormPanel) m.handler = FormPanelHandler;
 				else if (obj instanceof Ext.form.BasicForm) m.handler = FormPanelHandler;
 				else throw "masterComponent.handler must be defined";
@@ -60,6 +62,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 			obj.on(m.event, function() {
 					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
 					this.setBaseUrl(url);
+					if (this.store && !this.store.autoLoad) this.store.load();		//not everything has a store (i.e m2mpanel)
 					}, o);
 		}
 	}
