@@ -82,14 +82,7 @@ class ExtResource(Resource):
 		self.base_url = self.name
 		"""Default base_url is self.name"""
 
-		#for related relations
-		self.parent = kwargs.pop('parent', None)
-		"""If resource is a subresource (for reverse relations), parent is given in kwargs and base_url is prefixed with parent's base_url and a parent pk parameter, which name is self.handler.parent_fk_name
-		"""
-
-		if self.parent:
-			self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.handler.parent_fk_name, self.base_url)
-			#TODO a co, jesli handler nie ma parenta?
+		self.parent = None
 
 		#TODO to powinno byc w handlerze
 		#handle related fields and handlers
@@ -210,7 +203,7 @@ class ExtResource(Resource):
 
 		#handle related fields
 		for f, params in self.reverse_related_fields.iteritems():
-			sub_resource = RelatedExtResource(params['handler'], parent = self)
+			sub_resource = RelatedExtResource(params['handler'], parent = self, field = f)
 			urls += sub_resource.urls()
 
 		#rpc urls
@@ -338,8 +331,31 @@ class ExtResource(Resource):
 		raise
 
 class RelatedExtResource(ExtResource):
+	def __init__(self, handler, parent = None, field = None, *args,  **kwargs):
+		super(RelatedExtResource,self).__init__(handler, *args,**kwargs)
+
+		self.parent = parent
+		"""If resource is a subresource (for reverse relations), parent is given in kwargs and base_url is prefixed with parent's base_url and a parent pk parameter, which name is self.handler.parent_fk_name"""
+
+		if hasattr(self.handler,'parent_fk_name'):
+			#explicit parent fk name indicates that we'll be handling the relation manually - remove it from kwargs
+			self.parent_fk_name = self.handler.parent_fk_name
+			self.pop_parent_fk = True
+		else:
+			#otherwise handle it automatically
+			self.parent_fk_name = self.parent.handler.model._meta.get_field_by_name(field)[0].field.name
+			self.pop_parent_fk = False
+
+		self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.parent_fk_name, self.base_url)
+		#TODO a co, jesli handler nie ma parenta?
+
 	def __call__(self, request, *args, **kwargs):
 		params = getattr(request,'params',{})
-		params[self.handler.parent_fk_name] = kwargs.pop(self.handler.parent_fk_name)
+		if self.pop_parent_fk:
+			#explicit parent fk name indicates that we'll be handling the relation manually - remove it from kwargs
+			params[self.parent_fk_name] = kwargs.pop(self.parent_fk_name)
+		else:
+			params[self.parent_fk_name] = kwargs.get(self.parent_fk_name)
+
 		setattr(request,'params',params)
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
