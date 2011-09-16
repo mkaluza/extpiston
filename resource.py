@@ -340,22 +340,27 @@ class RelatedExtResource(ExtResource):
 		if hasattr(self.handler,'parent_fk_name'):
 			#explicit parent fk name indicates that we'll be handling the relation manually - remove it from kwargs
 			self.parent_fk_name = self.handler.parent_fk_name
-			self.pop_parent_fk = True
+			self.auto_parent_fk = False
 		else:
 			#otherwise handle it automatically
-			self.parent_fk_name = self.parent.handler.model._meta.get_field_by_name(field)[0].field.name
-			self.pop_parent_fk = False
+			self.parent_fk = self.parent.handler.model._meta.get_field_by_name(field)[0].field
+			self.auto_parent_fk = True
 
-		self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, self.parent_fk_name, self.base_url)
+		self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, 'parent_id', self.base_url)
 		#TODO a co, jesli handler nie ma parenta?
 
 	def __call__(self, request, *args, **kwargs):
 		params = getattr(request,'params',{})
-		if self.pop_parent_fk:
-			#explicit parent fk name indicates that we'll be handling the relation manually - remove it from kwargs
-			params[self.parent_fk_name] = kwargs.pop(self.parent_fk_name)
+		if self.auto_parent_fk:
+			#for GET/query, we can't give attname (parent_name_id), but we can give parent id naming it with field name
+			if request.method == 'GET': parent_fk_name = self.parent_fk.name
+			#for the rest, we either can give parent pk as parent_field_id, or parent instance as parent_field
+			else: parent_fk_name = self.parent_fk.attname
+			params[parent_fk_name] = kwargs.pop('parent_id')
+			kwargs[parent_fk_name] = params[parent_fk_name]
 		else:
-			params[self.parent_fk_name] = kwargs.get(self.parent_fk_name)
+			#handler takes care about parent-child relation
+			params[self.parent_fk_name] = kwargs.pop('parent_id')
 
 		setattr(request,'params',params)
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
