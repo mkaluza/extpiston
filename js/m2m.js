@@ -25,7 +25,8 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 	function FormPanelHandler(form,values) {
 		var pk = form.getPk();
-		return form.url+'/'+pk;
+		var url = form.origUrl || form.url;
+		return url+'/'+pk;
 	}
 
 	return {

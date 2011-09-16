@@ -21,7 +21,9 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		this.showWindow = function(grid, showRec) {
 			editWindow.baseUrl = grid.store.url;
 			var win = new Ext.create(editWindow,'window');
-			win.findByType('form')[0].getForm().url = grid.store.url;
+			var frm = win.findByType('form')[0].getForm();
+			frm.origUrl = frm.url;
+			frm.url = grid.store.url;
 			if (showRec) {
 				var rec = grid.getSelectionModel().getSelected();
 				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
