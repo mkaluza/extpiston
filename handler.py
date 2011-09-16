@@ -243,7 +243,9 @@ class ManyToManyHandler(ExtHandler):
 		The fields it returns are either (pk.name,__str__) or, if the model has a handler defined, value_field and display_field from the handler
 		"""
 
-		if field: self.field = field
+		if field: self.field = field		#field is either given as a param or as a class field
+		else: field = self.field
+		#TODO handle field given by name, when model is given?
 		#if not hasattr(self,'model'):
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
 			self.model = field.rel.to
@@ -277,6 +279,7 @@ class ManyToManyHandler(ExtHandler):
 		#print "m2m init", self.fields
 		super(ManyToManyHandler,self).__init__()
 
+	#TOOD obejrzec, co z tym main_id, bo troche tu tego za dużo?
 	def create(self, request, *args, **kwargs):
 		main_obj = self.owner_model.objects.get(pk=kwargs.get('main_id'))
 		related_obj = self.model.objects.get(pk=request.data.get(self.model._meta.pk.name))
