@@ -84,35 +84,7 @@ class ExtResource(Resource):
 
 		self.parent = None
 
-		#TODO to powinno byc w handlerze
-		#handle related fields and handlers
-		self.reverse_related_fields = {}
-		for f in self.handler.reverse_related_fields:
-			#if not f in self.columns: continue
-			if type(f) == tuple:
-				#some params are given
-				f_name = f[0]
-
-				if type(f[1])==dict:
-					#more params are given
-					params = f[1]
-				else:
-					#only a handler is given
-					params = {'handler': f[1]}
-
-				if isinstance(params['handler'],(str,unicode)):
-					#just a handler class name is given, so we have to find a class
-					params['handler'] = filter(lambda handler: handler.__name__ == params['handler'], typemapper)[0]
-			else:
-				#only a field name is given, search for a handler for the related model
-				f_name = f
-				f = self.handler.model._meta.get_field_by_name(f_name)[0]
-				sub_handler = filter(lambda handler: typemapper[handler][0] == f.model, typemapper)[0]	#get default handler for model - has to be defined
-				#TODO handle handlers as strings (just a class_name)
-				#TODO if no handler is defined, create a read-only handler with pk and __str__ only
-				params = {'handler': sub_handler}
-
-			self.reverse_related_fields[f_name] = params
+		self.reverse_related_fields = self.handler._reverse_related_fields or {}
 
 	def __call__(self, request, *args, **kwargs):
 		"""Main request handler
@@ -203,7 +175,7 @@ class ExtResource(Resource):
 
 		#handle related fields
 		for f, params in self.reverse_related_fields.iteritems():
-			sub_resource = RelatedExtResource(params['handler'], parent = self, field = f)
+			sub_resource = RelatedExtResource(parent = self, field = f, **params)
 			urls += sub_resource.urls()
 
 		#rpc urls

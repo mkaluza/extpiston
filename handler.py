@@ -88,10 +88,7 @@ class ExtHandler(BaseHandler):
 
 			if params['handler']: self._reverse_related_fields[f_name] = params
 
-		#catch rev fields given in 'fields' property only
-
-		for f in self.reverse_field_names:
-			self._reverse_related_fields[f] = self.find_handler_for_field(f)
+		#TODO catch rev fields given in 'fields' property only
 
 	def __init__(self):
 		super(ExtHandler,self).__init__()
