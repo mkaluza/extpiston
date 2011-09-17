@@ -206,7 +206,7 @@ class ExtResource(Resource):
 
 		for k,col in _columns:
 			#print k,col
-			if "__" in col['name'] and not col.get('fk',None): continue
+			#if "__" in col['name'] and not col.get('fk',None): continue		#TODO po co było to ograniczenie???
 			newcol = {'fieldLabel': col['header'], 'name': col['name'], '_col_num':col['_col_num']}
 			if 'width' in col: newcol['width'] = col['width']
 			if 'height' in col: newcol['height'] = col['height']
