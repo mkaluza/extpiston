@@ -18,9 +18,10 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
 		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 
-		this.showWindow = function(grid, showRec) {
+		this.showWindow = function(grid, showRec, params) {
 			editWindow.baseUrl = grid.store.url;
-			var win = new Ext.create(editWindow,'window');
+			var ew = Ext.apply({}, params, editWindow);
+			var win = new Ext.create(ew,'window');
 			var frm = win.findByType('form')[0].getForm();
 			frm.origUrl = frm.url;
 			frm.url = grid.store.url;
@@ -36,8 +37,8 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			add : {
 				text: "Nowy",
 				width: 90,
-				handler: function() {
-					this.showWindow(this,false);
+				handler: function(params) {
+					this.showWindow(this,false, params);
 				},
 				name: 'add',
 			},
