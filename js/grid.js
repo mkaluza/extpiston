@@ -71,6 +71,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					if (act in _actions) act = _actions[act]		//use default action by that name
 					else continue		//TODO error message
 				}
+				else if (act.name) key = act.name;
 
 				if (!(act instanceof Ext.Action)) {
 					//if it's an object, create Ext.Action (assume it's a config object), else do nothing
