@@ -10,25 +10,29 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			autoHeight: true,
 			width: 400,
 			items: {
-				xtype: formClass		//TODO accept form definition as well, not only xtype (as with editWindow)
+				xtype: formClass,		//TODO accept form definition as well, not only xtype (as with editWindow)
+				header: false
 			}
 		}
 		//if (this.editWindow) editWindow = this.editWindow	//TODO po co to?
 
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
 		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
+		if (this.initialConfig.editWindowConfig) Ext.apply(editWindow, this.initialConfig.editWindowConfig);
 
 		this.showWindow = function(grid, showRec, params) {
 			editWindow.baseUrl = grid.store.url;
 			var ew = Ext.apply({}, params, editWindow);
 			var win = new Ext.create(ew,'window');
-			var frm = win.findByType('form')[0].getForm();
+			var frmp = win.findByType('form')[0];
+			var frm = frmp.getForm();
 			frm.origUrl = frm.url;
 			frm.url = grid.store.url;
 			if (showRec) {
 				var rec = grid.getSelectionModel().getSelected();
 				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
 			};
+			if (frmp.initialConfig.title && !win.initialConfig.title) win.setTitle(frmp.initialConfig.title);
 			win.show();
 			win.on('close',grid.store.reload.createDelegate(grid.store));
 		};

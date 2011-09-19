@@ -17,7 +17,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			items: [],
 			loadMask: true,
 			labelWidth: 100,
-			defaults: {width: 200},
+			defaults: {anchor: '100%'},
 			itemId: '{{ name|lower }}form',
 			bubbleEvents: ['cancel','save'],
 			pkField: '{{pk}}',

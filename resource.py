@@ -234,6 +234,9 @@ class ExtResource(Resource):
 			else:
 				newcol['xtype'] = col['type']+'field'
 
+			newcol['hidden'] = col.get('hidden', False)
+			newcol['readOnly'] = not col.get('editable', True)
+			newcol['hideTrigger'] = not col.get('editable', True)
 			newcol.update(self.forms[name].get(k,{}))	#update generated column/field definition with value passwd to a Resource via form/forms parameter
 			columns[k]=newcol
 
