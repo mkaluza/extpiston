@@ -26,6 +26,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			name: '{{ name|lower }}',
 		}; //config
 		
+		if (this.initialConfig.storeConfig)
+			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
+
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 		this.hiddenName = this.hiddenName || this.name;
 

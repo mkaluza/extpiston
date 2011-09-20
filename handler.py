@@ -189,9 +189,9 @@ class ExtHandler(BaseHandler):
 			return rc.DUPLICATE_ENTRY
 
 	def update(self, request, *args, **kwargs):
-		super(ExtHandler, self).update(request,  *args, **kwargs)
+		super(ExtHandler, self).update(request, *args, **kwargs)
 
-		inst = self.read(request,*args, **kwargs)
+		inst = self.read(request, *args, **kwargs)
 
 		attrs = self.flatten_dict(request.data)
 		#potential fk fields
@@ -223,7 +223,14 @@ class ExtHandler(BaseHandler):
 		obj = self.read(request,*args,**kwargs)
 		proc = getattr(obj,proc)
 		res = proc(request = request)
-		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http
+		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http or json
+
+	@request_debug
+	def exec_rpc(self,request,*args,**kwargs):
+		proc = kwargs.pop('procname')
+		proc = getattr(self,proc)
+		res = proc(request = request, *args, **kwargs)
+		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http or json
 
 class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
