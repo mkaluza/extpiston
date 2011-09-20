@@ -35,6 +35,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			if (frmp.initialConfig.title && !win.initialConfig.title) win.setTitle(frmp.initialConfig.title);
 			win.show();
 			win.on('close',grid.store.reload.createDelegate(grid.store));
+			frmp.on('cancel',win.close.createDelegate(win));
 		};
 
 		var _actions = {
