@@ -99,12 +99,18 @@ class ExtHandler(BaseHandler):
 
 		m = self.model._meta
 
+		#provide defaults unless fields are already set
+		self.name = getattr(self,'name', self.model._meta.object_name)
+		self.pkfield = getattr(self, 'pkfield', self.model._meta.pk.name)
+		self.verbose_name = getattr(self,'verbose_name', self.model._meta.verbose_name)
+
 		#handler fields pseudofields and properties owned directly by the model
 		self.local_field_names = set(filter(lambda f: isinstance(f,(str,unicode)), self.fields))
 
 		#handler fields that are not model's fields
 		self.nonmodel_field_names = set(self.local_field_names)-set([f.name for f in m.fields])
 		#when we filter out m2m, all that's left is reverse related fields and properties
+		#TODO this is not used!!
 		self.reverse_field_names = self.nonmodel_field_names - set([f.name for f in m.many_to_many])
 		#TODO filter out properties?
 
@@ -116,11 +122,6 @@ class ExtHandler(BaseHandler):
 		self._reverse_related_fields = {}	#{'field_name': {params}}
 
 		self.rpc = getattr(self, 'rpc', [])
-
-		#provide defaults unless fields are already set
-		self.name = getattr(self,'name', self.model._meta.object_name)
-		self.pkfield = getattr(self, 'pkfield', self.model._meta.pk.name)
-		self.verbose_name = getattr(self,'verbose_name', self.model._meta.verbose_name)
 
 		self.setup_file_fields()
 		self.setup_m2m_fields()
