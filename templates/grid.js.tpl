@@ -10,10 +10,14 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.gridInit = function() {
 		{% if separate_store %}
-		{% include "mksoftware/store.js.tpl" with store_type="json" %}
+		{% include "mksoftware/store.js.tpl" with store_type="json" nocreate=1 %}
+		delete {{name}}StoreConfig['storeId'];
+		var store = {{name}}StoreConfig;
+		{% else %}
+		var store = {{name}}Store
 		{% endif %}
 		var config = {
-			store: {{name}}StoreConfig,
+			store: store,
 			autoHeight: true,
 			//columns: [],
 			loadMask: true,
@@ -49,8 +53,14 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.initialConfig.viewConfig)
 			Ext.applyIf(this.initialConfig.viewConfig, config.viewConfig);	//apply default configuration for view
 
+		//TODO fix this for shared store
 		if (!(this.initialConfig.store))
 			config.store = new Ext.data.JsonStore(config.store); 		//if no store is supplied, create one from config
+
+		config.store.on('save', function() {
+				var st = Ext.StoreMgr.get('{{name}}Store');
+				if (st) st.load();
+				});		//reload global store when data change
 
 		this.setBaseUrl = function(baseUrl) {
 			//TODO zrobić to lepiej... dużo lepiej...

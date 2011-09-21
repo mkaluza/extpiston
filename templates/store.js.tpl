@@ -16,7 +16,10 @@ var {{ name }}StoreConfig = {
 	restful: true
 };
 
+{% if not nocreate %}
+{# TODO only shared stores shoud have storeId set #}
 var {{ name }}Store = new Ext.data.JsonStore({{ name}}StoreConfig);
+{% endif %}
 {% endif %}
 
 {% if store_type == 'array' %}
