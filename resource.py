@@ -34,6 +34,12 @@ class ExtResource(Resource):
 			self.fields = flatten_fields(self.handler.fields)
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
+
+		#Remove m2m fields from fields list
+		for k in self.handler.m2m_handlers.keys():
+			if k in self.fields:
+				self.fields.remove(k)
+
 		"""Initialize fields based on either handler's fields or handlers model fields"""
 
 		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
