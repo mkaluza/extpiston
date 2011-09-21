@@ -24,10 +24,14 @@ class ExtHandler(BaseHandler):
 		try:
 			handlers = filter(lambda handler: getattr(handler,'model',None) == model, typemapper)
 			if len(handlers) > 1:
-				print 'WARNING: multiple (%d) handlers for model %s' % (len(handler), str(model))
+				print 'WARNING: multiple (%d) handlers for model %s' % (len(handlers), str(model))
+			if len(handlers) == 0:
+				print 'cant find handler for model %s' % str(model)
+				return None
 			return handlers[0]
 		except:
-			print 'cant find handler for model %s' % str(model)
+			print 'error searching for handler for model %s' % str(model)
+			raise
 			return None
 
 	def find_handler_for_field(self,field):
