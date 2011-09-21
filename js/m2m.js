@@ -20,11 +20,15 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 	function GridPanelHandler(sm,rowIndex,param3) {		//for gridpanel param3=record, for editorgridpanel param3=colindex
 		var st = sm.grid.store;
-		return st.url+'/'+st.getAt(rowIndex).id;
+		var rec = st.getAt(rowIndex);
+		if (rec.phantom) return null;
+		return st.url+'/'+rec.id;
 	}
 
 	function FormPanelHandler(form,values) {
+		if (!form.getPk) return null;
 		var pk = form.getPk();
+		if (pk == null || pk == undefined) return null;
 		var url = form.origUrl || form.url;
 		return url+'/'+pk;
 	}
@@ -63,6 +67,10 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 			obj.on(m.event, function() {
 					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
+					if (!url) {
+						this.disable()
+						return;
+					}
 					this.setBaseUrl(url);
 					if (this.store && !this.store.autoLoad) this.store.load();		//not everything has a store (i.e m2mpanel)
 					}, o);
@@ -202,6 +210,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		this.grid1.store.load();
 		this.grid2.store.proxy.setUrl(this.baseUrl+'/'+url, true);
 		this.grid2.store.load();
+		this.enable();
 	    }
 });
 
