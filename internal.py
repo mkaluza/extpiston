@@ -148,6 +148,14 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 			if not module_name: module_name = 'main'
 			field_dict['type'] = "%s.%s" % (module_name,m2mhandler.model.__name__.lower())
 
+		if field in handler._reverse_related_fields:
+			field_dict['rev'] = True
+			revhandler = handler._reverse_related_fields[field]['handler']
+			module_name = ".".join(revhandler.model.__module__.split('.')[1:-1])
+			if not module_name: module_name = 'main'
+			field_dict['type'] = "%s.%s" % (module_name,revhandler.model.__name__.lower())
+			field_dict['actions'] = ['add', 'edit', 'delete', 'remove']
+
 		res.append((field, field_dict))
 
 	return res
