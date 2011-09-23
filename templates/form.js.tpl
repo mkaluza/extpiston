@@ -83,6 +83,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
 		{{app_label|title}}.{{name}}.FormPanel.superclass.initComponent.apply(this, arguments);
+		//TODO do it on create sequence, move to ExtPiston.form
 		var old_f = this.form.setValues.createDelegate(this.form);
 		var setValues = function(values) {
 			old_f(values);

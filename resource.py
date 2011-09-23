@@ -230,7 +230,7 @@ class ExtResource(Resource):
 				newcol['xtype'] = col['type']+'.m2m'
 			elif  col.get('rev',False):
 				newcol['xtype'] = col['type']+'.grid'
-				newcol['actions'] = col['actions']
+				newcol['actions'] = col.get('actions', None)
 				if 'formClass' in col: newcol['formClass'] = col['formClass']
 				if 'windowClass' in col: newcol['windowClass'] = col['windowClass']
 				if 'editWindow' in col: newcol['editWindow'] = col['editWindow']

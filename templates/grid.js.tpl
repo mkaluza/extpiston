@@ -245,7 +245,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 			if (col.editable) {
 			       if (!col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
 			       if (!(col.editor.xtype in Ext.ComponentMgr.types)) console.log('type ' +col.editor.xtype+ ' not available');
-			       if (col.fk && !col.renderer) col.renderer = fkrenderer;
+			       if ((col.fk || col.editor.xtype.endsWith('combo')) && !col.renderer) col.renderer = fkrenderer;
 			}
 		}
 		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);

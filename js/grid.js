@@ -30,7 +30,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			frm.url = grid.store.url;
 			if (showRec) {
 				var rec = grid.getSelectionModel().getSelected();
-				if (rec) win.findByType(formClass)[0].getForm().loadRecord(rec);
+				if (rec) win.findByType('form')[0].getForm().loadRecord(rec);		//TODO 'form' instead of formClass to make it more generic- a good way would be to add ref to main form...
 			};
 			if (frmp.initialConfig.title && !win.initialConfig.title) win.setTitle(frmp.initialConfig.title);
 			win.show();
