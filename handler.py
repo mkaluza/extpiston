@@ -241,7 +241,7 @@ class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
 	register = False
 
-	def __init__(self, field = None):
+	def __init__(self, field = None, **kwargs):
 		"""
 		Initialize m2m handler.
 
@@ -257,13 +257,13 @@ class ManyToManyHandler(ExtHandler):
 		#TODO handle field given by name, when model is given?
 		#if not hasattr(self,'model'):
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
-			self.model = field.rel.to
-			self.owner_model = field.model
-			self.field_name = field.name
+			self.model = kwargs.get('model',getattr(self,'model',field.rel.to))
+			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.model))
+			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.name))
 		else:
-			self.model = field.model
-			self.owner_model = field.parent_model
-			self.field_name = field.field.rel.related_name
+			self.model = kwargs.get('model',getattr(self,'model',field.model))
+			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.parent_model))
+			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.field.rel.related_name))
 
 		#TODO either get value_field/display_field from a default handler if a model has one or get pk/__str__
 		self.fields = [self.model._meta.pk.name, '__str__']
