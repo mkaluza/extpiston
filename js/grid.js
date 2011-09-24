@@ -58,8 +58,20 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 				},
 				name: 'edit',
-			}	
-			      //TODO delete action
+			},
+			delete: {
+				text: "Usuń",
+				width: 90,
+				handler: function(button, event, params) {
+					var rec = this.getSelectionModel().getSelected();
+					if (rec) {
+						if (prompt("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?"))
+							this.store.remove(rec);
+					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
+
+				},
+				name: 'delete',
+			}
 		}
 
 		//add any actions given by the user to our actions
