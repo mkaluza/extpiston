@@ -2,7 +2,7 @@ Ext.namespace('ExtPiston.m2m');
 
 ExtPiston.MasterSlavePlugin = (function() {
 	function _getByPath(obj,path) {
-		if (path[0] == '..') return getByPath(obj.ownerCt,path.slice(1));
+		if (path[0] == '..') return _getByPath(obj.ownerCt,path.slice(1));
 		var newobj = obj.find('itemId',path[0])[0];	//TODO change to get (nonrecursive)
 		//TODO fix it for better logic
 		if (path.length == 1) {
@@ -172,8 +172,11 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		var grid1 = {itemId: 'left'};
 		var grid2 = {itemId: 'right'};
 
-		Ext.apply(grid1, grid, this.initialConfig);
-		Ext.apply(grid2, grid, this.initialConfig);
+		Ext.applyIf(grid1, this.initialConfig);
+		Ext.applyIf(grid2, this.initialConfig);
+
+		Ext.apply(grid1, grid);
+		Ext.apply(grid2, grid);
 
 		this.items.push(grid1);
 		this.items.push(grid2);
