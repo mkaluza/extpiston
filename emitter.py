@@ -41,6 +41,20 @@ class ExtJSONEmitter(Emitter):
 
 		return seria
 
+	def method_fields(self, handler, fields):
+		if not handler:
+			return { }
+
+		ret = super(ExtJSONEmitter,self).method_fields(handler, fields)
+
+		for field in fields - Emitter.RESERVED_FIELDS:
+			t = getattr(handler.model, str(field), None)		#check model methods as well, not only handler methods
+
+			if t and callable(t) and field not in ret:
+				ret[field] = t
+
+		return ret
+
 Emitter.register('ext-json', ExtJSONEmitter, 'application/json; charset=utf-8')
 
 class ArrayJSONEmitter(Emitter):
