@@ -267,9 +267,11 @@ class ManyToManyHandler(ExtHandler):
 
 		#TODO either get value_field/display_field from a default handler if a model has one or get pk/__str__
 		self.fields = [self.model._meta.pk.name, '__str__']
-		h = self.find_handler_for_model(self.model)()
-		self.fields[0]=h.value_field
-		self.fields[1]=h.display_field
+		h = self.find_handler_for_model(self.model)
+		if h:
+			h=h()
+			self.fields[0]=self.value_field=h.value_field
+			self.fields[1]=self.display_field=h.display_field
 
 		def to_tuple(lst):
 			if len(lst)>1:
