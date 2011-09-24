@@ -312,8 +312,9 @@ class ManyToManyHandler(ExtHandler):
 
 		main_obj = self.owner_model.objects.get(pk = self.main_id)
 		if request.params.get('all',False):
-			return self.model.objects.exclude(pk__in=getattr(main_obj,self.field.name).all().values('pk'))		#return remaining objects not assigned to our parent object
+			return self.model.objects.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
 		else:
+			return self.model.objects.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
 			return getattr(main_obj,self.field_name).all()
 
 	def read(self, request, *args, **kwargs):
