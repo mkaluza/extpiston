@@ -35,18 +35,18 @@ class ExtResource(Resource):
 		except:
 			self.fields = [f.name for f in self.handler.model._meta.fields]
 
+		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
+		"""Resource name, if not set, is taken from: kwargs, handler.name"""
+
+		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
+		"""Resource verbose name, if not set, is taken from the handler"""
+
 		#Remove m2m fields from fields list
 		for k in self.handler.m2m_handlers.keys():
 			if k in self.fields:
 				self.fields.remove(k)
 
 		"""Initialize fields based on either handler's fields or handlers model fields"""
-
-		self.name = getattr(self, 'name', kwargs.pop('name', getattr(self.handler, 'name')).lower())
-		"""Resource name, if not set, is taken from: kwargs, handler.name"""
-
-		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
-		"""Resource verbose name, if not set, is taken from the handler"""
 
 		#TODO to powinno byc w handlerze
 		self.columns = {}
