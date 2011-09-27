@@ -108,7 +108,9 @@ ExtPiston.m2m.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		];
 
 		var config = {
-			forceFit: true,
+			viewConfig: {
+				forceFit: true
+			},
 			enableHdMenu: false,
 			hideHeaders: true,
 			store: store
@@ -162,9 +164,8 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		Ext.apply(this,this.initialConfig);
 
 		var grid = {
-			xtype: 'extpiston.m2m.grid',
-			title: undefined,
-			plugins: undefined
+			xtype: 'extpiston.m2m.grid'
+			//border: false
 		}
 
 		this.items = [];
@@ -172,8 +173,20 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		var grid1 = {itemId: 'left'};
 		var grid2 = {itemId: 'right'};
 
+		/*
 		Ext.applyIf(grid1, this.initialConfig);
 		Ext.applyIf(grid2, this.initialConfig);
+		*/
+		var props_to_copy = [
+			'childUrl',
+			'displayField',
+			'height',
+			'name',
+			'url',
+			'valueField'
+		];
+		Ext.copyTo(grid1, this.initialConfig, props_to_copy);
+		Ext.copyTo(grid2, this.initialConfig, props_to_copy);
 
 		Ext.apply(grid1, grid);
 		Ext.apply(grid2, grid);
