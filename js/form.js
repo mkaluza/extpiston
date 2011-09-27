@@ -73,6 +73,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 
 		ExtPiston.form.FormPanel.superclass.initComponent.apply(this, arguments);
 
+		/*
 		//TODO do it using create sequence
 		var old_f = this.form.setValues.createDelegate(this.form);
 		var setValues = function(values) {
@@ -80,6 +81,14 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			this.fireEvent('setvalues',this,values);
 		}
 		this.form.setValues = setValues.createDelegate(this.form);
+		*/
+
+		this.form.setValues = this.form.setValues.createSequence(function(values) {
+				this.fireEvent('setvalues',this,values);
+			},
+			this.form			//TODO to nie jest do konca potrzebne chyba
+		);
+
 		this.form.addEvents('setvalues');
 		this.form.getPk = this.getPk.createDelegate(this);
 
