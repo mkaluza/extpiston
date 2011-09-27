@@ -77,40 +77,16 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 		}
 
 		//add any actions given by the user to our actions
-		this.actions = new Ext.util.MixedCollection();
+		this.actions = processActions(this.initialConfig.actions, _actions, this);
 
-		var actions_count = 0;
-		if (this.initialConfig.actions) {
-			var key,act;
-			//for each([key, act] in Iterator(this.initialConfig.actions)) {		//TODO can't use this - Google Chrome does not support it for compatibility with safari (fail...)
-			for(var i = 0;i < this.initialConfig.actions.length; i++) {
-				//TODO jesli this.iC.actions jest obiektem (czyli key będzie stringiem i będzie nazwą predefiniowanej akcji), to robić apply/applyIf z predefiniowanymi akcjami jakoś (nadpisując lub nie) - do ustalenia, w którą stronę
-				act = this.initialConfig.actions[i];
-				key = i.toString();
-				if (typeof(act) == "string") {
-					key = act;
-					if (act in _actions) act = _actions[act]		//use default action by that name
-					else continue		//TODO error message
-				}
-				else if (act.name) key = act.name;
-
-				if (!(act instanceof Ext.Action)) {
-					//if it's an object, create Ext.Action (assume it's a config object), else do nothing
-					act.scope = act.scope || this;
-					act.width = act.width || 90;
-					act = new Ext.Action(act);
-				}
-				actions_count++;
-				this.actions.add(key, act);
-				if (act.initialConfig.name == 'edit') {
-					var action = act;
-					this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
-						grid.getSelectionModel().selectRow(rowIndex);
-						action.execute();
-					});
-				}
-			}
-		};
+		//if defined, bind edit action with double click event
+		var editAction = this.actions.get('edit')
+		if (editAction) {
+			this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
+				grid.getSelectionModel().selectRow(rowIndex);
+				editAction.execute();
+			});
+		}
 
 		//initiate toolbar and context menu if there are any actions defined
 		if (this.actions.length>0) {
