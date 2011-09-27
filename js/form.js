@@ -107,7 +107,6 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			return null;
 	},
 	getPk: function() {
-		var url = this.form.url;
 		var pk = this.form.findField(this.pkField);
 		if (!pk) return null;
 		var pkv = pk.getValue();

@@ -116,7 +116,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					this.columns[index] = column; //replace column name with the real column definition
 				} catch(e) {
 					//invalid column name
-					//TODO print warning
+					console.log('Column not found: ' + column);
 				}
 			};
 		} else {
