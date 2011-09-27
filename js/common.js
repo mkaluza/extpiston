@@ -23,3 +23,45 @@ String.prototype.startsWith = function(str)
 
 String.prototype.endsWith = function(str)
 {return (this.match(str+"$")==str)};
+
+function processActions(acts, _actions, scope) {
+	/*
+	 * params:
+	 * 	acts - actions given in initialConfig.actions,
+	 * 	_actions - list of predefined actions
+	 */
+	var actions = new Ext.util.MixedCollection();
+
+	if (!acts) return actions;
+
+	_actions = _actions || {};
+
+	var key,act;
+	for(var i = 0;i < acts.length; i++) {
+		//TODO jesli this.iC.actions jest obiektem (czyli key będzie stringiem i będzie nazwą predefiniowanej akcji), to robić apply/applyIf z predefiniowanymi akcjami jakoś (nadpisując lub nie) - do ustalenia, w którą stronę
+		act = acts[i];
+		key = i.toString();
+		if (typeof(act) == "string") {		//predefined action
+			key = act;
+			if (act in _actions) act = _actions[act]		//use predefined action with that name
+			else continue		//TODO error message
+		}
+		else if (act.name) key = act.name;	//we can define new action and give it a name
+
+		if (!(act instanceof Ext.Action)) {
+			//if it's an object, create Ext.Action (assume it's a config object), else do nothing
+			act.scope = act.scope || scope || this;
+			act.width = act.width || 90;
+			act = new Ext.Action(act);
+		}
+		actions.add(key, act);
+	}
+	return actions;
+};
+
+Ext.onReady(function() {
+	Ext.create = Ext.ComponentMgr.create.createInterceptor(function(config, defaultType) {
+		var t = config.xtype || defaultType;
+		if (!(t in this.types)) console.log("Type " + t + " not found");
+	}, Ext.ComponentMgr);
+})
