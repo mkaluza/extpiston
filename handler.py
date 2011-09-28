@@ -258,6 +258,7 @@ class ManyToManyHandler(ExtHandler):
 
 		#TODO handle field given by name, when model is given?
 		#if not hasattr(self,'model'):
+		#TODO jeśli znajdzie się handler poniżej, to trzeba ustalać priorytety, co jest ważniejsze (ewentualnie handler też może być podany w argumentach)
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
 			self.model = kwargs.get('model',getattr(self,'model',field.rel.to))
 			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.model))
@@ -275,6 +276,8 @@ class ManyToManyHandler(ExtHandler):
 			self.fields[0]=self.value_field=h.value_field
 			self.fields[1]=self.display_field=h.display_field
 			self.pkfield = getattr(self,'pkfield',h.pkfield)
+
+		self.orig_handler = h
 
 		def to_tuple(lst):
 			if len(lst)>1:
@@ -314,9 +317,17 @@ class ManyToManyHandler(ExtHandler):
 		else: self.main_id = main_id
 
 		main_obj = self.owner_model.objects.get(pk = self.main_id)
+
+		if self.orig_handler:		#TODO trzeba to jakoś pogodzić z parametrem model przekazywanym do init w argumentach
+			q = self.orig_handler.queryset(request)
+		else:
+			q = self.model.objects.all()
+
 		if request.params.get('all',False):
+			return q.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
 			return self.model.objects.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
 		else:
+			return q.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
 			return self.model.objects.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
 			return getattr(main_obj,self.field_name).all()
 
