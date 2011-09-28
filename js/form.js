@@ -20,27 +20,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			save: {
 				text: 'Zapisz',
 				handler: function() {
-					this.form.submit({
-						failure: function(form,action) {
-							switch (action.failureType) {
-								case Ext.form.Action.CLIENT_INVALID:
-									App.setAlert(false, 'Błąd danych w formularzu');
-									break;
-								case Ext.form.Action.CONNECT_FAILURE:
-									App.setAlert(false, 'Błąd serwera');
-									break;
-								case Ext.form.Action.SERVER_INVALID:
-									App.setAlert(false, action.result.message || 'PROCESSING ERROR');
-									break;
-							}
-						},
-						success: function(form,action) {
-							App.setAlert(true, action.result.message || 'OK');
-							form.setValues(action.result.data);
-							this.fireEvent('save',form,action);		//TODO shouldn't we load recieved values into form here?
-						},
-						scope: this
-					});
+					this.form.submit();
 					//this.fireEvent('save');
 				},
 				name: 'save'
@@ -93,6 +73,8 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.form.getPk = this.getPk.createDelegate(this);
 
 		this.on('beforeaction',this.beforeAction,this);
+		this.on('actioncomplete',this.actionComplete,this);
+		this.on('actionfailed',this.actionFailed,this);
 	}, //initComponent
 	getBaseUrl: function(param1) {
 		var pk = this.getPk();
@@ -124,6 +106,30 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		} else o.method = 'POST';
 
 		o.url = url;
+	},
+	actionComplete: function(form, action) {
+		App.setAlert(true, action.result.message || 'OK');
+		if (action.type == 'submit') {
+			form.setValues(action.result.data);
+			this.fireEvent('save',form,action);
+			if (this.closeOnSave || true) {
+				if (this.ownerCt instanceof Ext.Window)
+					this.ownerCt.close();
+			}
+		}
+	},
+	actionFailed: function(form, action) {
+		switch (action.failureType) {
+			case Ext.form.Action.CLIENT_INVALID:
+				App.setAlert(false, 'Błąd danych w formularzu');
+				break;
+			case Ext.form.Action.CONNECT_FAILURE:
+				App.setAlert(false, 'Błąd serwera');
+				break;
+			case Ext.form.Action.SERVER_INVALID:
+				App.setAlert(false, action.result.message || 'PROCESSING ERROR');
+				break;
+		}
 	}
 });
 

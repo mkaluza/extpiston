@@ -26,6 +26,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			var win = new Ext.create(ew,'window');
 			var frmp = win.findByType('form')[0];
 			var frm = frmp.getForm();
+			frmp.closeOnSave = this.initialConfig.closeOnSave;
 			frm.origUrl = frm.url;
 			frm.url = grid.store.url;
 			if (showRec) {
