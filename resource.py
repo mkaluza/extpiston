@@ -360,4 +360,6 @@ class RelatedExtResource(ExtResource):
 			params[self.parent_fk_name] = kwargs.pop('parent_id')
 
 		setattr(request,'params',params)
+		self.handler.success = True
+		self.handler.message = None
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
