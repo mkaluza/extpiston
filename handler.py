@@ -241,7 +241,7 @@ class ManyToManyHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
 	register = False
 
-	def __init__(self, field = None, **kwargs):
+	def __init__(self, field = None, pkfield = None, **kwargs):
 		"""
 		Initialize m2m handler.
 
@@ -254,6 +254,8 @@ class ManyToManyHandler(ExtHandler):
 
 		if field: self.field = field		#field is either given as a param or as a class field
 		else: field = self.field
+		if pkfield != None: self.pkfield = pkfield
+
 		#TODO handle field given by name, when model is given?
 		#if not hasattr(self,'model'):
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
@@ -272,6 +274,7 @@ class ManyToManyHandler(ExtHandler):
 			h=h()
 			self.fields[0]=self.value_field=h.value_field
 			self.fields[1]=self.display_field=h.display_field
+			self.pkfield = getattr(self,'pkfield',h.pkfield)
 
 		def to_tuple(lst):
 			if len(lst)>1:
@@ -293,13 +296,13 @@ class ManyToManyHandler(ExtHandler):
 	#TOOD obejrzec, co z tym main_id, bo troche tu tego za dużo?
 	def create(self, request, *args, **kwargs):
 		main_obj = self.owner_model.objects.get(pk=kwargs.get('main_id'))
-		related_obj = self.model.objects.get(pk=request.data.get(self.model._meta.pk.name))
+		related_obj = self.model.objects.get(pk=request.data.get(self.pkfield))
 		getattr(main_obj,self.field_name).add(related_obj)
 		return related_obj
 
 	def delete(self, request, *args, **kwargs):
 		main_obj = self.owner_model.objects.get(pk=kwargs.get('main_id'))
-		related_obj = self.queryset(request,*args,**kwargs).get(pk=kwargs.get('id'))
+		related_obj = self.queryset(request,*args,**kwargs).get(pk=kwargs.get(self.pkfield))
 		getattr(main_obj,self.field_name).remove(related_obj)
 		return rc.DELETED
 
