@@ -71,9 +71,11 @@ ExtPiston.MasterSlavePlugin = (function() {
 						this.disable()
 						return;
 					}
+					this.enable();
 					this.setBaseUrl(url);
 					if (this.store && !this.store.autoLoad) this.store.load();		//not everything has a store (i.e m2mpanel)
 					}, o);
+			o.disable();
 		}
 	}
 })();
