@@ -236,7 +236,7 @@ class ExtResource(Resource):
 				if 'editWindow' in col: newcol['editWindow'] = col['editWindow']
 				newcol['plugins'] = ['masterslave']
 			elif col.get('choices',None):
-				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybież...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
+				newcol.update({'xtype': 'combo', 'store': col['choices'], 'triggerAction': 'all', 'emptyText':'Wybierz...', 'forceSelection': True, 'name': col['name'], 'hiddenName': col['name']})
 			elif col['type'] == 'bool':
 				newcol['xtype'] = 'checkbox'
 			elif col['type'] == 'textarea':
