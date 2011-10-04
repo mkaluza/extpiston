@@ -12,16 +12,25 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			frame: true,
 			items: [],
 			labelWidth: 100,
+			closeOnCreate: true,
 			loadMask: true
 		}
 
 		//TODO change save to submit
 		var _actions = {
-			save: {
-				text: 'Zapisz',
+			apply: {
+				text: 'Zastosuj',
 				handler: function() {
-					this.form.submit();
-					//this.fireEvent('save');
+					var o = {saveMode: 'apply'}
+					this.form.submit(o);
+				},
+				name: 'save'
+			},
+			save: {
+				text: 'OK',
+				handler: function() {
+					var o = {saveMode: 'save'}
+					this.form.submit(o);
 				},
 				name: 'save'
 			},
@@ -35,7 +44,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		}
 
 		//add any actions given by the user to our actions
-		this.actions = processActions(this.initialConfig.actions || ['save','cancel'], _actions, this);
+		this.actions = processActions(this.initialConfig.actions || ['save','cancel', 'apply'], _actions, this);
 
 		if (this.actions.length>0) {
 			if (this.initialConfig.buttons)
@@ -78,30 +87,25 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	}, //initComponent
 	getBaseUrl: function(param1) {
 		var pk = this.getPk();
-		if (pk !== undefined && pk !== null && pk != "") {
-			if (url.charAt(url.length-1)!='/') url+='/';
-			url+=pk;
-			return url;
+		if (pk != null) {
+			return urljoin(url,pk);
 		}
-		if (param1)
-			return url;
 		else
-			return null;
+			return url;
 	},
 	getPk: function() {
 		var pk = this.form.findField(this.pkField);
 		if (!pk) return null;
 		var pkv = pk.getValue();
+		if (pkv == undefined || pkv == null || pkv == "") return null;
 		return pkv;
 	},
 	beforeAction: function(form, action) {
 		var url = this.form.url;
 		var pkv = this.getPk();
-		var method = 'POST';
 		var o = action.options;
-		if (pkv !== undefined && pkv !== null && pkv != "") {
-			if (url.charAt(url.length-1)!='/') url+='/';
-			url+=pkv;
+		if (pkv != null) {
+			url = urljoin(url,pkv);
 			o.method = 'PUT';
 		} else o.method = 'POST';
 
@@ -110,9 +114,10 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	actionComplete: function(form, action) {
 		App.setAlert(true, action.result.message || 'OK');
 		if (action.type == 'submit') {
+			var oldpk = this.getPk();
 			form.setValues(action.result.data);
 			this.fireEvent('save',form,action);
-			if (this.closeOnSave || true) {
+			if (action.options.saveMode == 'save' && (oldpk == null && this.closeOnCreate || oldpk != null)) {
 				if (this.ownerCt instanceof Ext.Window)
 					this.ownerCt.close();
 			}
