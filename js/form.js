@@ -13,6 +13,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			items: [],
 			labelWidth: 100,
 			closeOnCreate: true,
+			trackResetOnLoad: true,
 			loadMask: true
 		}
 

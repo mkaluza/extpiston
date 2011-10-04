@@ -39,6 +39,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			win.show();
 			win.on('close',grid.store.reload.createDelegate(grid.store));
 			frmp.on('cancel',win.close.createDelegate(win));
+			win.on('beforeclose', this.beforeClose, frmp);
 		};
 
 		var _actions = {
@@ -137,7 +138,11 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 
-	} //initComponent
+	}, //initComponent
+	beforeClose: function(panel) {
+		if (this.form.isDirty())
+			return confirm('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?');
+	}
 });
 Ext.reg('extpiston.grid',ExtPiston.grid.GridPanel);
 
