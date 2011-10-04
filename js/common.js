@@ -49,7 +49,12 @@ function processActions(acts, _actions, scope) {
 				continue;
 			}
 		}
-		else if (act.name) key = act.name;	//we can define new action and give it a name
+		else if (act.name) {
+			key = act.name;	//we can define new action and give it a name
+			if (key in _actions && !(act instanceof Ext.Action)) {		//we are subclassing an existing action
+				act = Ext.apply({}, act, _actions[key]);
+			}
+		}
 
 		if (!(act instanceof Ext.Action)) {
 			//if it's an object, create Ext.Action (assume it's a config object), else do nothing
