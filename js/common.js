@@ -58,6 +58,13 @@ function processActions(acts, _actions, scope) {
 			act = new Ext.Action(act);
 		}
 		actions.add(key, act);
+		if (act.initialConfig.listeners) {
+			var ll = act.initialConfig.listeners;
+			var obj = act.initialConfig.scope;
+			for (var event in ll) {
+				obj.on(event, ll[event], act)
+			}
+		}
 	}
 	return actions;
 };
