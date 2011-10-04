@@ -44,7 +44,10 @@ function processActions(acts, _actions, scope) {
 		if (typeof(act) == "string") {		//predefined action
 			key = act;
 			if (act in _actions) act = _actions[act]		//use predefined action with that name
-			else continue		//TODO error message
+			else  {
+				console.log('invalid action name: ' + key);
+				continue;
+			}
 		}
 		else if (act.name) key = act.name;	//we can define new action and give it a name
 
@@ -65,3 +68,11 @@ Ext.onReady(function() {
 		if (!(t in this.types)) console.log("Type " + t + " not found");
 	}, Ext.ComponentMgr);
 })
+
+function urljoin(url1, url2) {
+	//TODO recognize GET params in the url
+	if (url1.charAt(url1.length-1)!='/')
+		return url1+'/'+url2;
+	else
+		return url1+url2;
+}

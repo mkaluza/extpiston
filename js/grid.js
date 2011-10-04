@@ -14,11 +14,13 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				header: false
 			}
 		}
-		//if (this.editWindow) editWindow = this.editWindow	//TODO po co to?
+
+		if (this.initialConfig.editFormConfig) Ext.apply(editWindow.items, this.initialConfig.editFormConfig);
+		if (this.initialConfig.editForm) editWindow.items = this.initialConfig.editForm
 
 		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
-		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 		if (this.initialConfig.editWindowConfig) Ext.apply(editWindow, this.initialConfig.editWindowConfig);
+		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
 
 		this.showWindow = function(grid, showRec, params) {
 			editWindow.baseUrl = grid.store.url;

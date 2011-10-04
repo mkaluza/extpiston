@@ -26,6 +26,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 	}
 
 	function FormPanelHandler(form,values) {
+		//TODO use getBaseUrl?
 		if (!form.getPk) return null;
 		var pk = form.getPk();
 		if (pk == null || pk == undefined) return null;

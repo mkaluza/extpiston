@@ -222,6 +222,8 @@ class ExtResource(Resource):
 			if 'width' in col: newcol['width'] = col['width']
 			if 'height' in col: newcol['height'] = col['height']
 			if 'format' in col: newcol['format'] = col['format']
+			if 'value' in col: newcol['value'] = col['value']	#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
+			if 'disabled' in col: newcol['disabled'] = col['disabled']
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
 			elif 'fk' in col and col['fk']:
