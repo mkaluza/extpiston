@@ -111,6 +111,31 @@ class ExtResource(Resource):
 		Forms cannot contain fields named ``data`` (yet) because it'll confuse the code above and result in strange behavior.
 
 		"""
+		#check security
+		print "security", self.handler.security
+		if self.handler.security:
+			def check_security(request, handler):
+				perms = {'GET': 'view', 'PUT': 'change', 'DELETE': 'delete', 'POST': 'add'}
+				perm = perms[request.method]
+				m = handler.model._meta
+				name = m.module_name
+				app = m.app_label
+				codename = "%s.%s_%s" % (app, perm, name)
+				print "checking permission", codename, 'for', request.user
+				return request.user.has_perm(codename)
+
+			h = self.handler
+			s = h.security
+			if s == True:
+				res = check_security(request, h)
+			elif s == 'write':
+				if request.method != 'GET':
+					res = check_security(request, h)
+				else: 
+					res = True
+			else: res = True
+			#elif type(s) == dict:
+			if not res: return rc.FORBIDDEN
 
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
 		coerce_put_post(request)

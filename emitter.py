@@ -84,3 +84,11 @@ class ArrayJSONEmitter(Emitter):
 		return seria
 
 Emitter.register('array-json', ArrayJSONEmitter, 'application/json; charset=utf-8')
+
+"""
+class FileEmitter(Emitter):
+	"File emitter - returns file field contents"
+
+	def render(self, request):
+		for f in self.handler.file_fields
+"""

@@ -85,6 +85,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('beforeaction',this.beforeAction,this);
 		this.on('actioncomplete',this.actionComplete,this);
 		this.on('actionfailed',this.actionFailed,this);
+		this.on('beforeclose',this.beforeClose,this);
 	}, //initComponent
 	getBaseUrl: function(param1) {
 		var pk = this.getPk();
@@ -136,6 +137,10 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				App.setAlert(false, action.result.message || 'PROCESSING ERROR');
 				break;
 		}
+	},
+	beforeClose: function(panel) {
+		if (panel.form.isDirty())
+			return confirm('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?');
 	}
 });
 

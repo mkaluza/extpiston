@@ -44,6 +44,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				}
 			       }],
 			itemId: '{{ name|lower }}',
+			singleSelect: true,
 			childUrl: '{{ name|lower }}'		//URL part, that is appended to baseUrl, when the component is a child component
 		}; //config
 
@@ -91,12 +92,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		config.store.on('beforewrite', setDynamicBaseUrl, this); //is this necessary?
 
 		Ext.applyIf(this.initialConfig, config);		//shouldn't initialConfig be immutable?
-
-		if (this.initialConfig.filterBy) {
-			this.initialConfig.tbar = this.initialConfig.tbar || [];
-			var tb = this.initialConfig.tbar;
-			tb.push(new Ext.ux.form.SearchField({paramName: 'filter__'+this.initialConfig.filterBy, store: this.initialConfig.store}));
-		}
 
 		if (this.initialConfig.bbar) 		//if has a bbar
 			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet

@@ -2,6 +2,7 @@ Ext.namespace('ExtPiston.grid');
 
 ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	initComponent:function() {
+		this.namespace = this.namespace || '';
 		var formClass = this.initialConfig.formClass || this.namespace.toLowerCase()+'.form';
 
 		var editWindow = {
@@ -135,6 +136,11 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			});
 		}
 		//TODO kiedy robić tą inicjalizację z akcjami? przed czy po superclass.initComponent??
+
+		if (this.initialConfig.filterBy) {
+			var tb = this.tbar = this.tbar || [];
+			tb.push(new Ext.ux.form.SearchField({paramName: 'filter__'+this.initialConfig.filterBy, store: this.initialConfig.store}));
+		}
 
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 

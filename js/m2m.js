@@ -83,7 +83,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 Ext.preg('masterslave',ExtPiston.MasterSlavePlugin);
 
-ExtPiston.m2m.GridPanel = Ext.extend(Ext.grid.GridPanel, {
+ExtPiston.m2m.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 	initComponent: function () {
 		/*
 		 * it needs valueField, displayField, url, baseUrl
@@ -186,6 +186,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			'height',
 			'name',
 			'url',
+			'filterBy',
 			'valueField'
 		];
 		Ext.copyTo(grid1, this.initialConfig, props_to_copy);

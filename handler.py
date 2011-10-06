@@ -104,6 +104,11 @@ class ExtHandler(BaseHandler):
 		self.pkfield = getattr(self, 'pkfield', self.model._meta.pk.name)
 		self.verbose_name = getattr(self,'verbose_name', self.model._meta.verbose_name)
 
+		self.value_field = getattr(self,'value_field',self.pkfield)
+		self.display_field = getattr(self,'display_field','__str__')
+
+		self.security = getattr(self, 'security', False)
+
 		#handler fields pseudofields and properties owned directly by the model
 		self.local_field_names = set(filter(lambda f: isinstance(f,(str,unicode)), self.fields))
 
@@ -127,13 +132,12 @@ class ExtHandler(BaseHandler):
 		self.setup_m2m_fields()
 		self.setup_reverse_related_fields()
 
-		self.value_field = getattr(self,'value_field',self.pkfield)
-		self.display_field = getattr(self,'display_field','__str__')
-
 		if 'data' in self.local_field_names:
 			raise ValueError("Handler %s: There can't be (yet) a field named 'data'" % self.name)
 
 	def queryset(self,request,*args, **kwargs):
+		#if self.security:
+		#	if not request.user.has_module_perms(self.
 		only = flatten_fields(self.fields, model=self.model, include_fk_pk = True)
 		#print only
 		fk = filter(lambda x: '__' in x,only)
