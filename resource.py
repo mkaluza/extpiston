@@ -91,6 +91,36 @@ class ExtResource(Resource):
 		self.parent = None
 
 		self.reverse_related_fields = self.handler._reverse_related_fields or {}
+		self.security = getattr(self, 'security', self.handler.security)
+
+	def authorize(self, request):
+		s = self.security
+		if not s: return True
+
+		def check_security(request, handler):
+			perms = {'GET': 'view', 'PUT': 'change', 'DELETE': 'delete', 'POST': 'add'}
+			#TODO make it smarter
+			perm = perms[request.method]
+			m = handler.model._meta
+			name = m.module_name
+			app = m.app_label
+			codename = "%s.%s_%s" % (app, perm, name)
+			res = request.user.has_perm(codename)
+			print "checking permission", codename, 'for', request.user, res
+			return res
+
+		h = self.handler
+
+		if s == True:
+			return check_security(request, h)
+		elif s == 'write':
+			if request.method != 'GET':
+				return check_security(request, h)
+			else:
+				return True
+		#elif type(s) == dict:	#TODO...
+		else:
+			return True
 
 	def __call__(self, request, *args, **kwargs):
 		"""Main request handler
@@ -112,30 +142,7 @@ class ExtResource(Resource):
 
 		"""
 		#check security
-		print "security", self.handler.security
-		if self.handler.security:
-			def check_security(request, handler):
-				perms = {'GET': 'view', 'PUT': 'change', 'DELETE': 'delete', 'POST': 'add'}
-				perm = perms[request.method]
-				m = handler.model._meta
-				name = m.module_name
-				app = m.app_label
-				codename = "%s.%s_%s" % (app, perm, name)
-				print "checking permission", codename, 'for', request.user
-				return request.user.has_perm(codename)
-
-			h = self.handler
-			s = h.security
-			if s == True:
-				res = check_security(request, h)
-			elif s == 'write':
-				if request.method != 'GET':
-					res = check_security(request, h)
-				else: 
-					res = True
-			else: res = True
-			#elif type(s) == dict:
-			if not res: return rc.FORBIDDEN
+		if not self.authorize(request): return rc.FORBIDDEN
 
 		#TODO to dziala tylko, jka jest encode: true w jsonWriter
 		coerce_put_post(request)

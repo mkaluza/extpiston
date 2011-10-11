@@ -282,6 +282,7 @@ class ManyToManyHandler(ExtHandler):
 			self.fields[0]=self.value_field=h.value_field
 			self.fields[1]=self.display_field=h.display_field
 			self.pkfield = getattr(self,'pkfield',h.pkfield)
+			self.security = getattr(self,'security', h.security)
 
 		self.orig_handler = h
 
