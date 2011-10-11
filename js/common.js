@@ -88,3 +88,9 @@ function urljoin(url1, url2) {
 	else
 		return url1+url2;
 }
+
+//placeholder for translation function
+if (!_)
+	function _(text) {
+		return text;
+	}

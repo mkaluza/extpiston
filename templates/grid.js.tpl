@@ -169,7 +169,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		var onSave = function onSave(btn, ev) {
 			this.getStore().save();
 		}
-
+		//TODO zamienić to na akcje
 		var onAdd = function onAdd(btn, ev) {
 			//TODO
 			var rec = {};

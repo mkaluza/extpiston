@@ -17,6 +17,8 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			loadMask: true
 		}
 
+		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
+
 		//TODO change save to submit
 		var _actions = {
 			apply: {
@@ -59,9 +61,8 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			}, this);
 		}
 
-		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
-
 		ExtPiston.form.FormPanel.superclass.initComponent.apply(this, arguments);
+		this.form.actions = this.actions
 
 		/*
 		//TODO do it using create sequence
@@ -74,6 +75,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		*/
 
 		this.form.setValues = this.form.setValues.createSequence(function(values) {
+				if (this.onSetValues) this.onSetValues(values);
 				this.fireEvent('setvalues',this,values);
 			},
 			this.form			//TODO to nie jest do konca potrzebne chyba

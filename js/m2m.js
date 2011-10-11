@@ -160,7 +160,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			url: this.initialConfig.name || '',	//url that will be added to baseUrl and set as url of the grids
 			layout: 'column',
 			defaults: {columnWidth: 0.5},
-			height: 200,
+			height: 220,
 			plugins: ['masterslave']
 		}
 		Ext.applyIf(this.initialConfig, config);
@@ -183,14 +183,13 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		var props_to_copy = [
 			'childUrl',
 			'displayField',
-			'height',
 			'name',
 			'url',
 			'filterBy',
 			'valueField'
 		];
-		Ext.copyTo(grid1, this.initialConfig, props_to_copy);
-		Ext.copyTo(grid2, this.initialConfig, props_to_copy);
+		Ext.copyTo(grid, this.initialConfig, props_to_copy);
+		grid.height = (this.initialConfig.height || config.height)-37;
 
 		Ext.apply(grid1, grid);
 		Ext.apply(grid2, grid);
