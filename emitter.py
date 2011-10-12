@@ -6,11 +6,21 @@ from piston.emitters import Emitter
 from django.contrib.auth.models import Permission,Group,User
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
+from django.utils.encoding import force_unicode
+from django.utils.functional import Promise
 
 import settings
 
 from functions import Timer
 from internal import *
+
+class LazyJSONEncoder(DateTimeAwareJSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, Promise):
+			return force_unicode(obj)
+		return super(LazyJSONEncoder, self).default(obj)
+
+DefaultJSONEncoder = LazyJSONEncoder
 
 class ExtJSONEmitter(Emitter):
 	"""
@@ -33,7 +43,7 @@ class ExtJSONEmitter(Emitter):
 		if hasattr(self.handler,'extra'): ext_dict['extra']=self.handler.extra
 		if hasattr(self.handler,'errors'): ext_dict['errors']=self.handler.errors
 		if self.total != None: ext_dict['total'] = self.total
-		seria = simplejson.dumps(ext_dict, cls=DateTimeAwareJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
+		seria = simplejson.dumps(ext_dict, cls=DefaultJSONEncoder, ensure_ascii=False, indent=4, sort_keys = settings.DEBUG)
 
 		# Callback
 		if cb:
@@ -75,7 +85,7 @@ class ArrayJSONEmitter(Emitter):
 		else:
 			#TODO zrobic z tego array wtedy?
 			data = flatten_dict(data)
-		seria = simplejson.dumps(data, cls=DateTimeAwareJSONEncoder, ensure_ascii=False)
+		seria = simplejson.dumps(data, cls=DefaultJSONEncoder, ensure_ascii=False)
 
 		# Callback
 		if cb:

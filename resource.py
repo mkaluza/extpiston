@@ -16,6 +16,7 @@ from django.utils import simplejson
 
 import settings
 
+from emitter import LazyJSONEncoder as DefaultJSONEncoder
 from functions import Timer, request_debug
 from internal import *
 
@@ -294,7 +295,7 @@ class ExtResource(Resource):
 
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
-		return {'formFields':  simplejson.dumps(columns,sort_keys = False, indent = 3), 'formFieldNames':simplejson.dumps(sorted_column_names, indent = 3)}
+		return {'formFields':  simplejson.dumps(columns,sort_keys = False, indent = 3, cls=DefaultJSONEncoder), 'formFieldNames':simplejson.dumps(sorted_column_names, indent = 3, cls=DefaultJSONEncoder)}
 
 	def render_grid(self, request, name = 'default', dictionary = None):
 		columns = {}
@@ -318,7 +319,7 @@ class ExtResource(Resource):
 
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
-		return {'gridColumns': simplejson.dumps(columns, indent = 3), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3)}
+		return {'gridColumns': simplejson.dumps(columns, indent = 3, cls=DefaultJSONEncoder), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3, cls=DefaultJSONEncoder)}
 
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
@@ -350,7 +351,7 @@ class ExtResource(Resource):
 
 		defaults.update(self.render_grid(request))
 		defaults.update(self.render_form(request))
-		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3)
+		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3, cls=DefaultJSONEncoder)
 		defaults.update(dictionary or {})
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
