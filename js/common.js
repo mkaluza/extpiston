@@ -94,3 +94,19 @@ if (!_)
 	function _(text) {
 		return text;
 	}
+
+function fixDjangoTranslation() {
+	//remove django utf-8 encoding
+	//unescape strings
+	if (catalog != undefined) {
+		var k, k2;
+		for(k in catalog) {
+			if (typeof(catalog[k]) != 'string') continue;
+			k2 = unescape(decodeURIComponent(k)).replace("\\n","\n");		//django.view.i18n.javascript_catalog -> django.utils.text.javascript_quote
+			if (k != k2)
+				catalog[k2]=catalog[k];
+		}
+	}
+}
+
+fixDjangoTranslation();
