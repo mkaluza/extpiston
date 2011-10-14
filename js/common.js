@@ -110,3 +110,12 @@ function fixDjangoTranslation() {
 }
 
 fixDjangoTranslation();
+
+String.prototype.format = function() {
+	return String.format.apply(this, [this].concat(Ext.toArray(arguments)));
+	//old
+	var b = Ext.toArray(arguments);
+	var a = [this].concat(b);
+	var res = String.format.apply(this, a);
+	return res;
+}
