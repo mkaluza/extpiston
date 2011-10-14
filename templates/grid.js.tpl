@@ -63,33 +63,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				if (st) st.load();
 				});		//reload global store when data change
 
-		this.setBaseUrl = function(baseUrl) {
-			//TODO zrobić to lepiej... dużo lepiej...
-			var url = baseUrl+'/{{ name|lower }}';
-			var url = baseUrl+'/' + this.childUrl;
-			this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
-			this.store.proxy.setUrl(url,true);
-		}
-
-		if (this.initialConfig.baseUrl) {				//if a component handles a related field, baseUrl is added to url
-			var baseUrl = this.initialConfig.baseUrl;
-			if (typeof(baseUrl) == "string")
-				this.setBaseUrl(baseUrl);
-			//TODO to zrobić jako eventy, bo jak jest funkcja, to znaczy, że ma być dynamiczne
-			//else if (typeof(baseUrl) == "function")
-			//	config.store.url = baseUrl()+'/'+config.store.url
-			//	else
-			//		throw "{{app_label|title}}.{{name}}.gridInit: invalid baseUrl: "+baseUrl;
-		}
-		//dynamic base url setting
-		var setDynamicBaseUrl = function(store) {
-			//if it's a function, call it to get current base url
-			//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
-			if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
-		}
-		config.store.on('beforeload', setDynamicBaseUrl, this);
-		config.store.on('beforesave', setDynamicBaseUrl, this);
-		config.store.on('beforewrite', setDynamicBaseUrl, this); //is this necessary?
+		config.store.on('beforeload', this.setDynamicBaseUrl, this);
+		config.store.on('beforesave', this.setDynamicBaseUrl, this);
+		config.store.on('beforewrite', this.setDynamicBaseUrl, this); //is this necessary?
 
 		Ext.applyIf(this.initialConfig, config);		//shouldn't initialConfig be immutable?
 

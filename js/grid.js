@@ -144,7 +144,29 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 
+		if (this.initialConfig.baseUrl) {				//if a component handles a related field, baseUrl is added to url
+			var baseUrl = this.initialConfig.baseUrl;
+			if (typeof(baseUrl) == "string")
+				this.setBaseUrl(baseUrl);
+			//TODO to zrobić jako eventy, bo jak jest funkcja, to znaczy, że ma być dynamiczne
+			//else if (typeof(baseUrl) == "function")
+			//	config.store.url = baseUrl()+'/'+config.store.url
+			//	else
+			//		throw "{{app_label|title}}.{{name}}.gridInit: invalid baseUrl: "+baseUrl;
+		}
+		//dynamic base url setting
 	}, //initComponent
+	setBaseUrl: function(baseUrl) {
+		//TODO zrobić to lepiej... dużo lepiej...
+		var url = baseUrl+'/' + this.childUrl;
+		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
+		this.store.proxy.setUrl(url,true);
+	},
+	setDynamicBaseUrl: function(store) {
+		//if it's a function, call it to get current base url
+		//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
+		if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
+	},
 	beforeClose: function(panel) {
 		if (this.form.isDirty())
 			return confirm(_('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?'));
