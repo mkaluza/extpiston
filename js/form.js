@@ -15,7 +15,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			closeOnCreate: true,
 			trackResetOnLoad: true,
 			loadMask: true
-		}
+		};
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
@@ -44,7 +44,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				},
 				name: 'cancel'
 			}
-		}
+		};
 
 		//add any actions given by the user to our actions
 		this.actions = processActions(this.initialConfig.actions || ['save','cancel', 'apply'], _actions, this);
@@ -59,10 +59,10 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				this.buttons.push(action);
 				if (index<length-1) this.buttons.push('-');
 			}, this);
-		}
+		};
 
 		ExtPiston.form.FormPanel.superclass.initComponent.apply(this, arguments);
-		this.form.actions = this.actions
+		this.form.actions = this.actions;
 
 		/*
 		//TODO do it using create sequence
@@ -125,7 +125,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				if (this.ownerCt instanceof Ext.Window)
 					this.ownerCt.close();
 			}
-		}
+		};
 	},
 	actionFailed: function(form, action) {
 		switch (action.failureType) {
@@ -138,7 +138,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			case Ext.form.Action.SERVER_INVALID:
 				App.setAlert(false, action.result.message || 'PROCESSING ERROR');
 				break;
-		}
+		};
 	},
 	beforeClose: function(panel) {
 		if (panel.form.isDirty())

@@ -14,14 +14,14 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				xtype: formClass,		//TODO accept form definition as well, not only xtype (as with editWindow)
 				header: false
 			}
-		}
+		};
 
 		if (this.initialConfig.editFormConfig) Ext.apply(editWindow.items, this.initialConfig.editFormConfig);
-		if (this.initialConfig.editForm) editWindow.items = this.initialConfig.editForm
+		if (this.initialConfig.editForm) editWindow.items = this.initialConfig.editForm;
 
-		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass}
+		if (this.initialConfig.windowClass) editWindow = {xtype: this.initialConfig.windowClass};
 		if (this.initialConfig.editWindowConfig) Ext.apply(editWindow, this.initialConfig.editWindowConfig);
-		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow
+		if (this.initialConfig.editWindow) editWindow = this.initialConfig.editWindow;
 
 		this.showWindow = function(grid, showRec, params) {
 			editWindow.baseUrl = grid.store.url;
@@ -58,7 +58,6 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					if (rec) {
 						this.showWindow(this,true);
 					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
-
 				},
 				name: 'edit'
 			},
@@ -72,17 +71,16 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 							this.store.save();
 						}
 					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
-
 				},
 				name: 'delete'
 			}
-		}
+		};
 
 		//add any actions given by the user to our actions
 		this.actions = processActions(this.initialConfig.actions, _actions, this);
 
 		//if defined, bind edit action with double click event
-		var editAction = this.actions.get('edit')
+		var editAction = this.actions.get('edit');
 		if (editAction) {
 			this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
 				grid.getSelectionModel().selectRow(rowIndex);
