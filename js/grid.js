@@ -57,7 +57,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {
 						this.showWindow(this,true);
-					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
+					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
 
 				},
 				name: 'edit'
@@ -67,11 +67,11 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				handler: function(button, event, params) {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {
-						if (confirm("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?")) {
+						if (confirm(_("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?"))) {
 							this.store.remove(rec);
 							this.store.save();
 						}
-					} else Ext.MessageBox.alert('Błąd','Proszę wybrać pozycję');
+					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
 
 				},
 				name: 'delete'
@@ -147,7 +147,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 	}, //initComponent
 	beforeClose: function(panel) {
 		if (this.form.isDirty())
-			return confirm('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?');
+			return confirm(_('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?'));
 	}
 });
 Ext.reg('extpiston.grid',ExtPiston.grid.GridPanel);
