@@ -42,6 +42,8 @@ class ExtResource(Resource):
 		self.verbose_name = getattr(self, 'verbose_name', self.handler.verbose_name)
 		"""Resource verbose name, if not set, is taken from the handler"""
 
+		self.app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
+
 		#Remove m2m fields from fields list
 		for k in self.handler.m2m_handlers.keys():
 			if k in self.fields:
@@ -52,7 +54,9 @@ class ExtResource(Resource):
 		#TODO to powinno byc w handlerze
 		self.columns = {}
 		col_num = 0
-		for k,v in flatten_fields2(self.handler):
+		self.fields2 = flatten_fields2(self.handler)
+
+		for k,v in self.fields2:
 			self.columns[k]=v
 			v['_col_num']=col_num
 			col_num += 1
@@ -321,6 +325,57 @@ class ExtResource(Resource):
 
 		return {'gridColumns': simplejson.dumps(columns, indent = 3, cls=DefaultJSONEncoder), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3, cls=DefaultJSONEncoder)}
 
+	def render_store(self):
+		def copy(d, keys):
+			return dict([(k,d[k]) for k in keys if k in d])
+
+		def fixtype(f):
+			if 'type' not in f: return f
+			if f['type'] == 'text': f['type'] = 'string'
+			elif f['type'] == 'bool': f['type'] = 'boolean'
+			elif f['type'] not in ['auto', 'boolean', 'date', 'float', 'int', 'string', ]: del f['type']		#TODO what about custon types?
+			return f
+
+		store = {
+			'fields': [],
+			'idProperty': self.handler.pkfield,
+			'storeId': '%sStore' % self.name,
+		}
+		jsonstore = {
+			'xtype': 'jsonstore',
+			'method': 'GET',
+			'root': 'data',		#TODO make it settable, use it here and in emitter
+			'fields': [],
+			'url': '/%s/api/%s' % (self.app_label, self.name),
+			'idProperty': self.handler.pkfield,
+			'messageProperty': 'message',
+			'restful': True,
+			'autoSave': False,
+			'storeId': '%sStore' % self.name,
+		}
+		jsonstore.update(store)
+		if set(self.handler.allowed_methods) & set(['PUT', 'POST', 'DELETE']):
+			jsonstore['xtype'] = 'writeablejsonstore'
+
+		arraystore = {
+			'xtype': 'arraystore',
+		}
+		arraystore.update(store)
+
+		if self.store_type == 'array' and name != 'grid':
+			resp = self(request,emitter_format='array-json')
+			arraystore['data'] = resp.content
+
+		for f in self.fields2:
+			ff = copy(f[1], ['name','type', 'default'])
+			fixtype(ff)
+			store['fields'].append(ff)
+
+		if self.store_type == 'array':
+			return arraystore
+		else:
+			return jsonstore
+
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
 		JS can be rendered by calling api/$name/js/X, where X is a file name with or without .js extension.
@@ -329,14 +384,14 @@ class ExtResource(Resource):
 		name = (name or 'all').lower().replace('.js','') #normal default value doesn't work with (P..)? since django then passes None as a value
 		name2 = (name2 or '').lower().replace('.js','')
 		#print 'render', name
-		if name not in ['form','store','grid','combo','all']:
+		if name not in ['form','store','grid','combo','all', 'store2']:
 			raise Http404
-
-		app_label = re.sub('\.?api.handlers','',self.handler.__module__) or 'main'
+		if name == 'store2':
+			return HttpResponse(simplejson.dumps(self.render_store(), indent = 3, cls=DefaultJSONEncoder),mimetype='application/javascript')
 
 		if name2 in ['default','all']: name2 = ''
 
-		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':app_label, 'settings': settings, 'pk': self.handler.pkfield}
+		defaults = {'fields': self.fields, 'verbose_name': self.verbose_name,'name':self.name, 'name2': name2, 'app_label':self.app_label, 'settings': settings, 'pk': self.handler.pkfield}
 		defaults.update(dict([(f, getattr(self,f)) for f in self.params.keys()]))
 
 		if name == 'combo' and not getattr(self.handler,'separate_store', False): defaults['separate_store'] = False		#combos shouldn't have separate store

@@ -17,6 +17,7 @@ from piston.utils import rc, require_mime, require_extended, validate, coerce_pu
 from django.contrib.auth.models import Permission,Group,User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.serializers.json import DateTimeAwareJSONEncoder
+import django
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, Http404
@@ -129,6 +130,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
 			if type(ff.verbose_name) in [str,unicode]: field_dict['header'] = ff.verbose_name
 			if ff.help_text and type(ff.help_text) in [str,unicode]: field_dict['tooltip'] = ff.help_text
+			if ff.default != django.db.models.fields.NOT_PROVIDED: field_dict['default']=ff.default
 			if ff.choices: field_dict['choices'] = ff.choices
 			if ff.primary_key:
 				field_dict.update({'hidden':True, 'hideable':False})
