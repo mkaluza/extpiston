@@ -223,7 +223,19 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		this.addEvents(['addItem','removeItem']);
 
 		this.ns.gridPostInit.apply(this,arguments);
-	} //initComponent
+	}, //initComponent
+	//TODO przeniesc to do jakiegoś wspólnego komponentu albo coś...
+	setBaseUrl: function(baseUrl) {
+		//TODO zrobić to lepiej... dużo lepiej...
+		var url = baseUrl+'/' + this.childUrl;
+		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
+		this.store.proxy.setUrl(url,true);
+	},
+	setDynamicBaseUrl: function(store) {
+		//if it's a function, call it to get current base url
+		//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
+		if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
+	}
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
 
