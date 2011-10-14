@@ -4,6 +4,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.JsonStore = Ext.extend(ExtPiston.data.JsonStore, {
 	constructor: function(config) {
+		var config = config || {};
 		var cfg = {{ json_config }};
 		Ext.applyIf(config,cfg);
 		{{app_label|title}}.{{name}}.JsonStore.superclass.constructor.call(this, config);
@@ -17,6 +18,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.ArrayStore = Ext.extend(Ext.data.ArrayStore, {
 	constructor: function(config) {
+		var config = config || {};
 		var cfg = {{ array_config }};
 		Ext.applyIf(config,cfg);
 		{{app_label|title}}.{{name}}.ArrayStore.superclass.constructor.call(this, config);

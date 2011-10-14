@@ -351,6 +351,8 @@ class ExtResource(Resource):
 			'writeable': bool(set(self.handler.allowed_methods) & set(['PUT', 'POST', 'DELETE'])),
 		}
 		jsonstore.update(store)
+		if self.page_size:
+			jsonstore['baseParams'] = { 'start': 0, 'limit': self.page_size}
 
 		arraystore = {
 			#'xtype': 'arraystore',
@@ -363,7 +365,8 @@ class ExtResource(Resource):
 			arraystore['data'] = resp.content
 
 		for f in self.fields2:
-			ff = copy(f[1], ['name','type', 'default'])
+			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
+			ff = copy(f[1], ['name', 'default'])
 			fixtype(ff)
 			store['fields'].append(ff)
 

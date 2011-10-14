@@ -3,6 +3,7 @@
 Ext.namespace("ExtPiston.data");
 ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 	constructor: function(config) {
+		var config = config || {};
 		var cfg = {
 			autoSave: false,
 			messageProperty: 'message',
@@ -13,7 +14,7 @@ ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 		}
 		Ext.applyIf(config, cfg);
 
-		if (this.writeable) {
+		if (config.writeable) {
 			var writer = new Ext.data.JsonWriter(config);
 			Ext.apply(config, {writer: writer});
 		}
