@@ -398,3 +398,11 @@ class RelatedExtResource(ExtResource):
 		self.handler.success = True
 		self.handler.message = None
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
+
+def get_all_js(request, resources):
+	resp = []
+	for res in resources:
+		resp += [res.render_js(request,item).content for item in ['store', 'combo', 'form', 'grid']]
+		#resp.append(res.render_js(request,'store').content)
+
+	return HttpResponse("\n".join(resp), mimetype='application/javascript')
