@@ -30,3 +30,5 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 {% else %}
 {{app_label|title}}.{{name}}.Store = {{app_label|title}}.{{name}}.ArrayStore;
 {% endif %}
+
+{{app_label|title}}.{{name}}.GlobalStoreName = "{{ name }}Store";

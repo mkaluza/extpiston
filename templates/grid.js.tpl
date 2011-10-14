@@ -44,15 +44,15 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (!this.store) {
 			//no store was given or defined
 			if (config.separateStore) {
-				this.store = new this.ns.JsonStore(this.storeConfig);		//TODO force json store or use default?
+				this.store = new this.ns.JsonStore(Ext.applyIf({storeId: undefined},this.storeConfig));		//TODO force json store or use default?
 
 				this.store.on('save', function() {
-						var st = Ext.StoreMgr.get('{{name}}Store');
+						var st = Ext.StoreMgr.get(this.ns.GlobalStoreName);
 						if (st) st.load();
 						});		//reload global store when data change
 			} else {
-				this.store =  Ext.StoreMgr.get(this.ns.Store.storeId);
-				this.store =  Ext.StoreMgr.get('{{name}}Store');
+				//this.store =  Ext.StoreMgr.get(this.ns.Store.storeId);	//TODO tak nei działa, musi być (new this.ns.Store()).storeId
+				this.store =  Ext.StoreMgr.get(this.ns.GlobalStoreName);
 			}
 		}
 
