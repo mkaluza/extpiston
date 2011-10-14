@@ -83,7 +83,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				column = this.columns[index];
 				if (typeof(column) != 'string') continue;		//if it's not a name, we're not interested
 				try {
-					column = {{app_label|title}}.{{name}}.gridColumns[column]
+					column = this.ns.gridColumns[column]
 					this.columns[index] = column; //replace column name with the real column definition
 				} catch(e) {
 					//invalid column name
@@ -95,9 +95,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			this.columns = [];
 			var index, column;
 			//iterators and deconstricting assignments don't work in fuckin chrome... :/
-			for (column in {{app_label|title}}.{{name}}.gridColumnNames) {
-				column = {{app_label|title}}.{{name}}.gridColumnNames[column];
-				if (typeof(column)=='string') this.columns.push({{app_label|title}}.{{name}}.gridColumns[column]);
+			for (column in this.ns.gridColumnNames) {
+				column = this.ns.gridColumnNames[column];
+				if (typeof(column)=='string') this.columns.push(this.ns.gridColumns[column]);
 			}
 		}
 };
@@ -110,29 +110,31 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 	initComponent:function() {
 		this.namespace = '{{app_label|title}}.{{name|lower}}';
+		this.ns = {{app_label|title}}.{{name}};
 
-		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
+		this.ns.gridInit.apply(this,arguments);
 
 		for(var n = 0; n < this.columns.length; n++)
 		{
 			//TODO merge this with code in editorgrid
 			var col = this.columns[n];
 			if (col.hidden && !col.hideable || !col.fk) continue;
-			if (!col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
+			if (!col.editor) col.editor = this.ns.formFields[col.name];
 			if (col.fk && !col.renderer) col.renderer = fkrenderer;
 		}
 
-		{{app_label|title}}.{{name}}.GridPanel.superclass.initComponent.apply(this, arguments);
+		this.ns.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
 
-		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
+		this.ns.gridPostInit.apply(this,arguments);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
 
 {{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 	initComponent:function() {
+		this.ns = {{app_label|title}}.{{name}};
 		var storeConfig = {
 		};
 		if (this.initialConfig.storeConfig)
@@ -140,7 +142,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		else
 			this.initialConfig.storeConfig = storeConfig;
 
-		{{app_label|title}}.{{name}}.gridInit.apply(this,arguments);
+		this.ns.gridInit.apply(this,arguments);
 
 		var onSave = function onSave(btn, ev) {
 			this.getStore().save();
@@ -214,17 +216,17 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		{
 			var col = this.columns[n]
 			if (col.editable) {
-			       if (!col.editor) col.editor = {{app_label|title}}.{{name}}.{{name2|title}}formFields[col.name];
+			       if (!col.editor) col.editor = this.ns.formFields[col.name];
 			       if (!(col.editor.xtype in Ext.ComponentMgr.types)) console.log('type ' +col.editor.xtype+ ' not available');
 			       if ((col.fk || col.editor.xtype.endsWith('combo')) && !col.renderer) col.renderer = fkrenderer;
 			}
 		}
-		{{app_label|title}}.{{name}}.EditorGridPanel.superclass.initComponent.apply(this, arguments);
+		this.ns.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange', 'cellselect']);
 		this.addEvents(['addItem','removeItem']);
 
-		{{app_label|title}}.{{name}}.gridPostInit.apply(this,arguments);
+		this.ns.gridPostInit.apply(this,arguments);
 	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
