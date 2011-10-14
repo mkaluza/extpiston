@@ -12,18 +12,18 @@ ExtPiston.MasterSlavePlugin = (function() {
 			return;
 		}
 		return getByPath(newobj,a.slice(1));
-	}
+	};
 
 	function getByPath(obj,path) {
 		return _getByPath(obj, path.split('/'));
-	}
+	};
 
 	function GridPanelHandler(sm,rowIndex,param3) {		//for gridpanel param3=record, for editorgridpanel param3=colindex
 		var st = sm.grid.store;
 		var rec = st.getAt(rowIndex);
 		if (rec.phantom) return null;
 		return st.url+'/'+rec.id;
-	}
+	};
 
 	function FormPanelHandler(form,values) {
 		//TODO use getBaseUrl?
@@ -32,7 +32,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 		if (pk == null || pk == undefined) return null;
 		var url = form.origUrl || form.url;
 		return url+'/'+pk;
-	}
+	};
 
 	return {
 		init: function(o) {
@@ -44,7 +44,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 				o.url = o.initialConfig.name;
 				if (!m) m = {path: ''}
 				obj = o.ownerCt.form;				//we need the form, not panel, and form can't be found with 'find'
-			}
+			};
 
 			if (!m) return;		//neither we're part of a form nor master-slave relation has been defined
 
@@ -53,23 +53,23 @@ ExtPiston.MasterSlavePlugin = (function() {
 			if (!m.event) {
 				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
 				else if (obj instanceof Ext.grid.GridPanel) m.event = 'rowselect';
-				//else if (obj instanceof Ext.FormPanel) m.event = 'setvalues';
 				else if (obj instanceof Ext.form.BasicForm) m.event = 'setvalues';
 				else throw "masterComponent.event must be defined";
-			}
+			};
+			//else if (obj instanceof Ext.FormPanel) m.event = 'setvalues';
 
 			if (!m.handler) {
 				if (obj instanceof Ext.grid.EditorGridPanel) m.handler = GridPanelHandler;
 				else if (obj instanceof Ext.grid.GridPanel) m.handler = GridPanelHandler;
-				//else if (obj instanceof Ext.FormPanel) m.handler = FormPanelHandler;
 				else if (obj instanceof Ext.form.BasicForm) m.handler = FormPanelHandler;
 				else throw "masterComponent.handler must be defined";
-			}
+			};
+			//else if (obj instanceof Ext.FormPanel) m.handler = FormPanelHandler;
 
 			obj.on(m.event, function() {
 					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
 					if (!url) {
-						this.disable()
+						this.disable();
 						return;
 					}
 					this.enable();
@@ -92,9 +92,9 @@ ExtPiston.m2m.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 		var StoreConfig = {
 			url: this.initialConfig.url || 'set_me',
 			//url: '/test',
-			baseParams: {
+//			baseParams: {
 //				{% if page_size %}limit:{{ page_size }},start: 0,{% endif %}
-			},
+//			},
 			method: 'GET',
 			root: 'data',
 			fields: [ this.initialConfig.valueField || 'id', this.initialConfig.displayField || '__str__'],

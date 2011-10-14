@@ -42,7 +42,7 @@ mk.ProgressWindow = Ext.extend(Ext.Window, {
 				{ 
 					border: false,
 					itemId: 'message',
-					html: '<p class="x-window-mc" style="padding: 0px 0px 15px 0px"> Trwa wykonywanie zadania </p>',
+					html: '<p class="x-window-mc" style="padding: 0px 0px 15px 0px"> Trwa wykonywanie zadania </p>'
 					//html: '<p class="x-window-mc"> Trwa wykonywanie zadania </p>',
 				},
 				pbar
@@ -95,7 +95,7 @@ mk.ProgressWindow = Ext.extend(Ext.Window, {
 		this.failureCallback=config.failure;
 		this.checkTaskStatusJob.delay(1000);
 		mk.ProgressWindow.superclass.show.apply(this);
-		this.updateProgress(0,'Trwa przygotowanie danych')
+		this.updateProgress(0,'Trwa przygotowanie danych');
 	}
 
 }); //extend

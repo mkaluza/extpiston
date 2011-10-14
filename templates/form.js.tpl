@@ -4,8 +4,8 @@
 {# na podstawie http://blog.extjs.eu/know-how/writing-a-big-application-in-ext/ #}
 
 Ext.namespace('{{app_label|title}}.{{name}}');
-{{app_label|title}}.{{name}}.{{name2|title}}formFields = {{ formFields }}
-{{app_label|title}}.{{name}}.{{name2|title}}formFieldNames = {{ formFieldNames }}
+{{app_label|title}}.{{name}}.{{name2|title}}formFields = {{ formFields }};
+{{app_label|title}}.{{name}}.{{name2|title}}formFieldNames = {{ formFieldNames }};
 
 {{app_label|title}}.{{name}}.{{name2|title}}FormPanel = Ext.extend(ExtPiston.form.FormPanel, {
 	initComponent:function() {
@@ -23,7 +23,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 					//TODO handle field definitions
 		} else
 			for (var name in {{app_label|title}}.{{name}}.{{name2|title}}formFieldNames) {
-				name = {{app_label|title}}.{{name}}.{{name2|title}}formFieldNames[name]
+				name = {{app_label|title}}.{{name}}.{{name2|title}}formFieldNames[name];
 				var field = {{app_label|title}}.{{name}}.{{name2|title}}formFields[name];
 				if (field) config.items.push(field);
 			}

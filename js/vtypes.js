@@ -23,11 +23,11 @@ Ext.apply(Ext.form.VTypes,{
 			if (tab[1]<1 || tab[1]>32) return false;
 			return testIP(tab[0]);
 		};
-		var t=v.split('-')
+		var t=v.split('-');
 		if (t.length==1) return testSub(v);
 		if (t.length==2) return testIP(t[0]) && testIP(t[1]);
 		return false;
 	},
-	SubnetSpecText:'Podaj adres sieci z maską lub zakres adresów IP',
+	SubnetSpecText:'Podaj adres sieci z maską lub zakres adresów IP'
 });
 

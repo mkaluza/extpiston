@@ -23,7 +23,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			bubbleEvents: ['change','select'],
 			valueField: '{{ value_field|default:"id" }}',
 			displayField: '{{ display_field|default:"id" }}',
-			name: '{{ name|lower }}',
+			name: '{{ name|lower }}'
 		}; //config
 		
 		if (this.initialConfig.storeConfig)

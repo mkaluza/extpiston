@@ -5,8 +5,8 @@
 
 Ext.namespace('{{app_label|title}}.{{name}}');
 
-{{app_label|title}}.{{name}}.gridColumns = {{ gridColumns }}
-{{app_label|title}}.{{name}}.gridColumnNames = {{ gridColumnNames }}
+{{app_label|title}}.{{name}}.gridColumns = {{ gridColumns }};
+{{app_label|title}}.{{name}}.gridColumnNames = {{ gridColumnNames }};
 
 {{app_label|title}}.{{name}}.gridInit = function() {
 		{% if separate_store %}
@@ -14,7 +14,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		delete {{name}}StoreConfig['storeId'];
 		var store = {{name}}StoreConfig;
 		{% else %}
-		var store = {{name}}Store
+		var store = {{name}}Store;
 		{% endif %}
 		var config = {
 			store: store,
@@ -100,12 +100,12 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				if (typeof(column)=='string') this.columns.push({{app_label|title}}.{{name}}.gridColumns[column]);
 			}
 		}
-}
+};
 
 {{app_label|title}}.{{name}}.gridPostInit = function() {
 	this.relayEvents(this.getStore(),['load','save']);
 	this.getStore().enableBubble(['load','save']);
-}
+};
 
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
 	initComponent:function() {

@@ -39,7 +39,7 @@ mk.RestfulEditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 		}
 		
 		var proxyConfig = {		
-			url: this.initialConfig.url,
+			url: this.initialConfig.url
 		};
 		if (this.initialConfig.proxyConfig) proxyConfig = Ext.apply(proxyConfig,this.initialConfig.proxyConfig);
 
@@ -68,7 +68,7 @@ mk.RestfulEditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 				var name=fieldParams[fp];
 				if (!(c[name]===undefined) ) f[name]=c[name];
 			}
-			fields.push(f)
+			fields.push(f);
 		};
 		var reader = new Ext.data.JsonReader({
 			totalProperty: 'total',
@@ -86,7 +86,7 @@ mk.RestfulEditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
 			reader: reader,
 			autoSave: false,
 			sortInfo: this.initialConfig.sortInfo,
-			writer: writer,	// <-- plug a DataWriter into the store just as you would a Reader
+			writer: writer	// <-- plug a DataWriter into the store just as you would a Reader
 		}; //storeConfig
 		if (this.initialConfig.grouping) {
 			var grouping=this.initialConfig.grouping;
