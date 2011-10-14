@@ -9,15 +9,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 {{app_label|title}}.{{name}}.gridColumnNames = {{ gridColumnNames }};
 
 {{app_label|title}}.{{name}}.gridInit = function() {
-		{% if separate_store %}
-		{% include "mksoftware/store.js.tpl" with store_type="json" nocreate=1 %}
-		delete {{name}}StoreConfig['storeId'];
-		var store = {{name}}StoreConfig;
-		{% else %}
-		var store = {{name}}Store;
-		{% endif %}
 		var config = {
-			store: store,
 			autoHeight: true,
 			//columns: [],
 			loadMask: true,
@@ -45,33 +37,37 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			       }],
 			itemId: '{{ name|lower }}',
 			singleSelect: true,
+			separateStore: {{ separate_store|lower }},
 			childUrl: '{{ name|lower }}'		//URL part, that is appended to baseUrl, when the component is a child component
 		}; //config
 
-		if (this.initialConfig.storeConfig)
-			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
+		if (!this.store) {
+			//no store was given or defined
+			if (config.separateStore) {
+				this.store = new this.ns.JsonStore(this.storeConfig);		//TODO force json store or use default?
+
+				this.store.on('save', function() {
+						var st = Ext.StoreMgr.get('{{name}}Store');
+						if (st) st.load();
+						});		//reload global store when data change
+			} else {
+				this.store =  Ext.StoreMgr.get(this.ns.Store.storeId);
+				this.store =  Ext.StoreMgr.get('{{name}}Store');
+			}
+		}
 
 		if (this.initialConfig.viewConfig)
 			Ext.applyIf(this.initialConfig.viewConfig, config.viewConfig);	//apply default configuration for view
 
-		//TODO fix this for shared store
-		if (!(this.initialConfig.store))
-			config.store = new Ext.data.JsonStore(config.store); 		//if no store is supplied, create one from config
-
-		config.store.on('save', function() {
-				var st = Ext.StoreMgr.get('{{name}}Store');
-				if (st) st.load();
-				});		//reload global store when data change
-
-		config.store.on('beforeload', this.setDynamicBaseUrl, this);
-		config.store.on('beforesave', this.setDynamicBaseUrl, this);
-		config.store.on('beforewrite', this.setDynamicBaseUrl, this); //is this necessary?
+		this.store.on('beforeload', this.setDynamicBaseUrl, this);
+		this.store.on('beforesave', this.setDynamicBaseUrl, this);
+		this.store.on('beforewrite', this.setDynamicBaseUrl, this); //is this necessary?
 
 		Ext.applyIf(this.initialConfig, config);		//shouldn't initialConfig be immutable?
 
 		if (this.initialConfig.bbar) 		//if has a bbar
 			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet
-				this.initialConfig.bbar.store = this.initialConfig.store;	//than set it
+				this.initialConfig.bbar.store = this.store;	//than set it
 
 		Ext.apply(this, this.initialConfig);		//this apply stuff actually sux - when we're here, initialConfig is already applied to 'this' (constructor of Ext.Component does this)
 

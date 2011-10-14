@@ -20,6 +20,9 @@ from emitter import LazyJSONEncoder as DefaultJSONEncoder
 from functions import Timer, request_debug
 from internal import *
 
+def JS(obj):
+	return simplejson.dumps(obj,indent = 3, cls=DefaultJSONEncoder)
+
 class ExtResource(Resource):
 	"""ExtResource Class
 
@@ -325,7 +328,7 @@ class ExtResource(Resource):
 
 		return {'gridColumns': simplejson.dumps(columns, indent = 3, cls=DefaultJSONEncoder), 'gridColumnNames':simplejson.dumps(sorted_column_names, indent = 3, cls=DefaultJSONEncoder)}
 
-	def render_store(self):
+	def render_store(self, request):
 		def copy(d, keys):
 			return dict([(k,d[k]) for k in keys if k in d])
 
@@ -350,11 +353,12 @@ class ExtResource(Resource):
 		jsonstore.update(store)
 
 		arraystore = {
-			'xtype': 'arraystore',
+			#'xtype': 'arraystore',
+			'data': [],
 		}
 		arraystore.update(store)
 
-		if self.store_type == 'array' and name != 'grid':
+		if self.store_type == 'array':
 			resp = self(request,emitter_format='array-json')
 			arraystore['data'] = resp.content
 
@@ -363,10 +367,7 @@ class ExtResource(Resource):
 			fixtype(ff)
 			store['fields'].append(ff)
 
-		if self.store_type == 'array':
-			return arraystore
-		else:
-			return jsonstore
+		return {'json_config': JS(jsonstore), 'array_config': JS(arraystore)}
 
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
@@ -400,7 +401,8 @@ class ExtResource(Resource):
 		defaults.update(dictionary or {})
 
 		if name == 'store2':
-			defaults['config'] = simplejson.dumps(self.render_store(), indent = 3, cls=DefaultJSONEncoder)
+			defaults.update(self.render_store(request))
+			#defaults['config'] = simplejson.dumps(self.render_store(), indent = 3, cls=DefaultJSONEncoder)
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
@@ -450,7 +452,7 @@ class RelatedExtResource(ExtResource):
 def get_all_js(request, resources):
 	resp = []
 	for res in resources:
-		resp += [res.render_js(request,item).content for item in ['store', 'combo', 'form', 'grid']]
+		resp += [res.render_js(request,item).content for item in ['store', 'store2', 'combo', 'form', 'grid']]
 		#resp.append(res.render_js(request,'store').content)
 
 	return HttpResponse("\n".join(resp), mimetype='application/javascript')
