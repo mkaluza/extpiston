@@ -342,20 +342,12 @@ class ExtResource(Resource):
 			'storeId': '%sStore' % self.name,
 		}
 		jsonstore = {
-			'xtype': 'jsonstore',
-			'method': 'GET',
-			'root': 'data',		#TODO make it settable, use it here and in emitter
-			'fields': [],
+			#'xtype': 'jsonstore',	#TODO put correct xtype
+			#'root': 'data',		#TODO make it settable, use it here and in emitter
 			'url': '/%s/api/%s' % (self.app_label, self.name),
-			'idProperty': self.handler.pkfield,
-			'messageProperty': 'message',
-			'restful': True,
-			'autoSave': False,
-			'storeId': '%sStore' % self.name,
+			'writeable': bool(set(self.handler.allowed_methods) & set(['PUT', 'POST', 'DELETE'])),
 		}
 		jsonstore.update(store)
-		if set(self.handler.allowed_methods) & set(['PUT', 'POST', 'DELETE']):
-			jsonstore['xtype'] = 'writeablejsonstore'
 
 		arraystore = {
 			'xtype': 'arraystore',
@@ -386,8 +378,6 @@ class ExtResource(Resource):
 		#print 'render', name
 		if name not in ['form','store','grid','combo','all', 'store2']:
 			raise Http404
-		if name == 'store2':
-			return HttpResponse(simplejson.dumps(self.render_store(), indent = 3, cls=DefaultJSONEncoder),mimetype='application/javascript')
 
 		if name2 in ['default','all']: name2 = ''
 
@@ -408,6 +398,9 @@ class ExtResource(Resource):
 		defaults.update(self.render_form(request))
 		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3, cls=DefaultJSONEncoder)
 		defaults.update(dictionary or {})
+
+		if name == 'store2':
+			defaults['config'] = simplejson.dumps(self.render_store(), indent = 3, cls=DefaultJSONEncoder)
 
 		body = loader.get_template('mksoftware/%s.js.tpl'%name).render(Context(defaults,autoescape=False))
 		body = re.sub("(?m)^[ \t]*\n",'',body) #remove whitespace in empty lines
