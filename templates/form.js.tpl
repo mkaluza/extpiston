@@ -31,6 +31,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
 		{{app_label|title}}.{{name}}.FormPanel.superclass.initComponent.apply(this, arguments);
-	}, //initComponent
+	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.{{name2|lower}}form',{{app_label|title}}.{{name}}.FormPanel);

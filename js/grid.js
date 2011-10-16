@@ -61,7 +61,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 				},
 				name: 'edit'
 			},
-			delete: {
+			remove: {
 				text: "Usuń",
 				handler: function(button, event, params) {
 					var rec = this.getSelectionModel().getSelected();
@@ -72,7 +72,7 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 						}
 					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
 				},
-				name: 'delete'
+				name: 'remove'
 			}
 		};
 
