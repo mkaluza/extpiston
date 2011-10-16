@@ -10,8 +10,8 @@ ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 			root: 'data',
 			restful: true,
 			method: 'GET',
-			idProperty: 'id',
-		}
+			idProperty: 'id'
+		};
 		Ext.applyIf(config, cfg);
 
 		if (config.writeable) {

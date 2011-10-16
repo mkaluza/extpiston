@@ -49,7 +49,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				this.store.on('save', function() {
 						var st = Ext.StoreMgr.get(this.ns.GlobalStoreName);
 						if (st) st.load();
-						});		//reload global store when data change
+						}, this);		//reload global store when data change
 			} else {
 				//this.store =  Ext.StoreMgr.get(this.ns.Store.storeId);	//TODO tak nei działa, musi być (new this.ns.Store()).storeId
 				this.store =  Ext.StoreMgr.get(this.ns.GlobalStoreName);

@@ -4,7 +4,7 @@
 var {{ name }}StoreConfig = {
 	url: '/{{app_label}}/api/{{ name|lower }}',
 	baseParams: {
-		{% if page_size %}limit:{{ page_size }},start: 0,{% endif %}
+		{% if page_size %}limit:{{ page_size }},start: 0{% endif %}
 	},
 	method: 'GET',
 	root: 'data',
