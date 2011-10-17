@@ -128,85 +128,11 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
 
-{{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(Ext.grid.EditorGridPanel, {
+{{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(ExtPiston.grid.EditorGridPanel, {
 	initComponent:function() {
 		this.ns = {{app_label|title}}.{{name}};
-		var storeConfig = {
-		};
-		if (this.initialConfig.storeConfig)
-			Ext.applyIf(this.initialConfig.storeConfig, storeConfig);
-		else
-			this.initialConfig.storeConfig = storeConfig;
 
 		this.ns.gridInit.apply(this,arguments);
-
-		var onSave = function onSave(btn, ev) {
-			this.getStore().save();
-		}
-		//TODO zamienić to na akcje
-		var onAdd = function onAdd(btn, ev) {
-			//TODO
-			var rec = {};
-			var store = this.getStore();
-			for(var i=0; i<store.fields.keys.length; i++) {
-				var f = store.fields.keys[i];
-				if (f != store.reader.meta.idProperty) rec[f]='';
-			}
-			var u = new store.recordType(rec);	//nie trzeba, ale wtedy cały się podświetla i jest wyraźniej
-			u.markDirty();
-			this.stopEditing();
-			store.insert(0, u);
-			this.startEditing(0,1);	//TODO - to sie musi samo wymyslac albo znajdywac
-			this.fireEvent('addItem', this, u);
-		}
-
-		var onDelete = function onDelete() {
-			var sm = this.getSelectionModel();
-			var rec = sm.getSelectedCell();
-			var store = this.getStore();
-			if (!rec) {
-				return false;
-			}
-			store.removeAt(rec[0]);
-			var cnt = store.getCount();
-			if (cnt<=rec[0]) sm.select(cnt-1,1);
-			else sm.select(rec[0],1);
-			this.fireEvent('removeItem', this, rec);
-		}
-
-		var buttons = {
-			add: {
-				text: 'Dodaj',
-				handler: onAdd.createDelegate(this)
-			},
-			remove:  {
-				text: 'Usuń',
-				handler: onDelete.createDelegate(this)
-			},
-			save: {
-				text: 'Zapisz',
-				handler: onSave.createDelegate(this)
-			}
-		};
-
-		//TODO zrobić to mądrzej
-		if (!this.initialConfig.tbar) {
-			this.initialConfig.tbar = [];
-		}
-		else this.initialConfig.tbar.unshift('-');
-
-		var tbar = this.initialConfig.tbar;
-		if (!this.initialConfig.RESTbuttons) this.initialConfig.RESTbuttons=['add','remove','save'];
-
-		for (var n = this.initialConfig.RESTbuttons.length-1;n>=0; n--) {
-			tbar.unshift(buttons[this.initialConfig.RESTbuttons[n]]);
-			if (n>0) tbar.unshift('-');
-		}
-		/*for (var n=0;n<this.initialConfig.RESTbuttons.length;n++) {
-			tbar.push(buttons[this.initialConfig.RESTbuttons[n]]);
-			if (n<this.initialConfig.RESTbuttons.length-1) tbar.push('-');
-		}*/
-		Ext.apply(this, this.initialConfig);
 
 		for(var n = 0; n < this.columns.length; n++)
 		{
@@ -224,18 +150,6 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 
 		this.ns.gridPostInit.apply(this,arguments);
 	}, //initComponent
-	//TODO przeniesc to do jakiegoś wspólnego komponentu albo coś...
-	setBaseUrl: function(baseUrl) {
-		//TODO zrobić to lepiej... dużo lepiej...
-		var url = baseUrl+'/' + this.childUrl;
-		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
-		this.store.proxy.setUrl(url,true);
-	},
-	setDynamicBaseUrl: function(store) {
-		//if it's a function, call it to get current base url
-		//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
-		if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
-	}
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
 

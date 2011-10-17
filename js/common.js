@@ -83,7 +83,7 @@ function processActions(acts, _actions, scope) {
 			action.enable();
 		});
 	}
-	
+
 	return actions;
 };
 
