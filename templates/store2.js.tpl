@@ -6,7 +6,29 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 	constructor: function(config) {
 		var config = config || {};
 		var cfg = {{ json_config }};
+
+		if (config.fields) {
+			var fields = new Ext.util.MixedCollection();
+			fields.addAll(cfg.fields);
+
+			//we can only give names, and type and other options will be applied from default config
+			for (var i in config.fields) {
+				var f = config.fields[i];
+				if (typeof(f) == 'string') {
+					var ff = fields.find(function(item) {return item.name==f;});
+					if (ff) {
+						config.fields[i] = ff;
+					}
+				}  else if (f.name && typeof(f) == 'object') {
+					var ff = fields.find(function(item) {return item.name==f.name;});
+					if (ff) {
+						Ext.applyIf(config.fields[i], ff);
+					}
+				}
+			}
+		}
 		Ext.applyIf(config,cfg);
+
 		{{app_label|title}}.{{name}}.JsonStore.superclass.constructor.call(this, config);
 	}//constructor
 });

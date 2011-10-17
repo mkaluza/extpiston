@@ -44,7 +44,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (!this.store) {
 			//no store was given or defined
 			if (config.separateStore) {
-				this.store = new this.ns.JsonStore(Ext.applyIf({storeId: undefined},this.storeConfig));		//TODO force json store or use default?
+				this.store = new this.ns.JsonStore(Ext.applyIf({storeId: null},this.storeConfig));		//TODO force json store or use default?
 
 				this.store.on('save', function() {
 						var st = Ext.StoreMgr.get(this.ns.GlobalStoreName);

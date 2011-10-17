@@ -379,6 +379,7 @@ class ExtResource(Resource):
 		for f in self.fields2:
 			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
 			ff = copy(f[1], ['name', 'default'])
+			if ff['name'] not in self.fields: continue
 			fixtype(ff)
 			store['fields'].append(ff)
 
