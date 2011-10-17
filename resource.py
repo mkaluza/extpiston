@@ -88,9 +88,21 @@ class ExtResource(Resource):
 		deepUpdate(self.forms, kwargs.pop('forms',None))
 		deepUpdate(self.grids, kwargs.pop('grids',None))
 
+		def f1(p):
+			d = {}
+			if not p: return None
+			if not isinstance(p, (list, tuple)): return p
+			for k in p:
+				if isinstance(k, (str, unicode)):
+					d[k]={}
+				else:
+					#assume its a tuple (name, params:dict)
+					d[k[0]]=d[k[1]]
+			return d
+
 		#to shorten arguments, default grid/form can be given as grid/form
-		deepUpdate(self.forms['default'], kwargs.pop('form',None))
-		deepUpdate(self.grids['default'], kwargs.pop('grid',None))
+		deepUpdate(self.forms['default'], f1(kwargs.pop('form',None)))
+		deepUpdate(self.grids['default'], f1(kwargs.pop('grid',None)))
 		"""default grid and form definition can be provided with grid and form fields set in a resource subclass"""
 
 		self.base_url = self.name
