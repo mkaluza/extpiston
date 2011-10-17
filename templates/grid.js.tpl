@@ -56,20 +56,18 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			}
 		}
 
-		if (this.initialConfig.viewConfig)
-			Ext.applyIf(this.initialConfig.viewConfig, config.viewConfig);	//apply default configuration for view
+		if (this.viewConfig)
+			Ext.applyIf(this.viewConfig, config.viewConfig);	//apply default configuration for view
 
 		this.store.on('beforeload', this.setDynamicBaseUrl, this);
 		this.store.on('beforesave', this.setDynamicBaseUrl, this);
 		this.store.on('beforewrite', this.setDynamicBaseUrl, this); //is this necessary?
 
-		Ext.applyIf(this.initialConfig, config);		//shouldn't initialConfig be immutable?
+		Ext.applyIf(this, config);
 
-		if (this.initialConfig.bbar) 		//if has a bbar
-			if (!this.initialConfig.bbar.store) 	//that doesnt have a store yet
-				this.initialConfig.bbar.store = this.store;	//than set it
-
-		Ext.apply(this, this.initialConfig);		//this apply stuff actually sux - when we're here, initialConfig is already applied to 'this' (constructor of Ext.Component does this)
+		if (this.bbar) 		//if has a bbar
+			if (!this.bbar.store) 	//that doesnt have a store yet
+				this.bbar.store = this.store;	//than set it
 
 		//if column names are given as strings, substitute them to column definitions - this allows to change columns easily
 		if (this.columns && this.columns.length > 0) {			//TODO dangerous if this.columns is not an array
@@ -104,7 +102,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 };
 
 {{app_label|title}}.{{name}}.GridPanel = Ext.extend(ExtPiston.grid.GridPanel, {
-	initComponent:function() {
+	initComponent: function initComponent() {
 		this.namespace = '{{app_label|title}}.{{name|lower}}';
 		this.ns = {{app_label|title}}.{{name}};
 
@@ -129,7 +127,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.GridPanel);
 
 {{app_label|title}}.{{name}}.EditorGridPanel = Ext.extend(ExtPiston.grid.EditorGridPanel, {
-	initComponent:function() {
+	initComponent: function initComponent() {
 		this.ns = {{app_label|title}}.{{name}};
 
 		this.ns.gridInit.apply(this,arguments);
@@ -154,7 +152,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
 
 {{app_label|title}}.{{name}}.m2m = Ext.extend(ExtPiston.m2m.Panel, {
-	initComponent: function() {
+	initComponent: function initComponent() {
 		var config = {
 			valueField: '{{ value_field|default:"id" }}',
 			displayField: '{{ display_field|default:"id" }}',
