@@ -19,6 +19,27 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 
+		if (this.ns) {
+			/*
+			 * if our local namespace is defined, we can setup items property given field names only
+			 *
+			 * If names are given - add only those fields, otherwise add all available fields
+			 */
+			if (this.initialConfig.fields) {
+				for (var name in this.initialConfig.fields)
+					if (typeof(name)=="string")
+						config.items.push(this.nsformFields[name]);
+						//TODO handle field definitions
+			} else {
+				for (var name in this.ns.formFieldNames) {
+					name = this.ns.formFieldNames[name];
+					var field = this.ns.formFields[name];
+					if (field) config.items.push(field);
+				}
+			}
+		} //if (this.ns)
+
+		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 		//TODO change save to submit
 		var _actions = {
 			apply: {
