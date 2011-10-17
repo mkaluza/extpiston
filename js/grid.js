@@ -123,16 +123,6 @@ ExtPiston.grid.GridPanel = Ext.extend(Ext.grid.GridPanel, {
 			}, this);
 		}
 
-		this.actions.disable = function() {
-			this.each(function(action,index,length) {
-				action.disable();
-			});
-		}
-		this.actions.enable = function() {
-			this.each(function(action,index,length) {
-				action.enable();
-			});
-		}
 		//TODO kiedy robić tą inicjalizację z akcjami? przed czy po superclass.initComponent??
 
 		if (this.initialConfig.filterBy) {

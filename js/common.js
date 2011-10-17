@@ -71,6 +71,19 @@ function processActions(acts, _actions, scope) {
 			}
 		}
 	}
+
+	actions.disable = function disable() {
+		this.each(function(action,index,length) {
+			action.disable();
+		});
+	}
+
+	actions.enable = function enable() {
+		this.each(function(action,index,length) {
+			action.enable();
+		});
+	}
+	
 	return actions;
 };
 
