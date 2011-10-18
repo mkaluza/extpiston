@@ -156,6 +156,8 @@ ExtPiston.grid.GridPanel = Ext.extend(
 
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 
+		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);
+
 		if (this.initialConfig.baseUrl) {				//if a component handles a related field, baseUrl is added to url
 			var baseUrl = this.initialConfig.baseUrl;
 			if (typeof(baseUrl) == "string")
