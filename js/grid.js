@@ -1,6 +1,7 @@
 Ext.namespace('ExtPiston.grid');
 
 ExtPiston.grid.Grid = {
+	loadMask: true,
 	preInit: function preInit() {
 	},
 	postInit: function postInit() {
