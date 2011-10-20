@@ -156,7 +156,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 			module_name = ".".join(revhandler.model.__module__.split('.')[1:-1])
 			if not module_name: module_name = 'main'
 			field_dict['type'] = "%s.%s" % (module_name,revhandler.model.__name__.lower())
-			field_dict['actions'] = ['add', 'edit', 'delete', 'remove']
+			field_dict['actions'] = ['add', 'edit', 'remove']
 
 		res.append((field, field_dict))
 
