@@ -148,3 +148,19 @@ if (!Array.prototype.map) {
 		return res;
 	};
 }
+
+Ext.override(Ext.Component, {
+	getXTypes: function getXTypes() {
+		var tc = this.constructor;
+		if(!tc.xtypes){
+			var c = [], sc = this;
+			while(sc && sc.constructor){
+				if (sc.constructor.xtype) c.unshift(sc.constructor.xtype);
+				sc = sc.constructor.superclass;
+			}
+			tc.xtypeChain = c;
+			tc.xtypes = c.join('/');
+		}
+		return tc.xtypes;
+	}
+});
