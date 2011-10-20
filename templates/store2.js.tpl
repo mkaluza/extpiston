@@ -42,6 +42,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 	constructor: function(config) {
 		var config = config || {};
 		var cfg = {{ array_config }};
+		{% if array_data %}cfg.data = {{ array_data|safe }} {% endif %}
 		Ext.applyIf(config,cfg);
 		{{app_label|title}}.{{name}}.ArrayStore.superclass.constructor.call(this, config);
 	}//constructor

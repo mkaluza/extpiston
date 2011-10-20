@@ -374,7 +374,10 @@ class ExtResource(Resource):
 
 		if self.store_type == 'array':
 			resp = self(request,emitter_format='array-json')
-			arraystore['data'] = resp.content
+			#arraystore['data'] = resp.content
+			data = resp.content
+		else:
+			data = None
 
 		for f in self.fields2:
 			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
@@ -383,7 +386,7 @@ class ExtResource(Resource):
 			fixtype(ff)
 			store['fields'].append(ff)
 
-		return {'json_config': JS(jsonstore), 'array_config': JS(arraystore)}
+		return {'json_config': JS(jsonstore), 'array_config': JS(arraystore), 'array_data': data}
 
 	def render_js(self, request, name, name2 = '', dictionary=None):
 		"""
