@@ -474,8 +474,8 @@ class RelatedExtResource(ExtResource):
 def get_all_js(request, resources):
 	resp = []
 	for res in resources:
-		#resp += [res.render_js(request,item).content for item in ['store2', 'combo', 'form', 'grid']]
-		resp += [res.render_js(request,item).content for item in ['store', 'store2', 'combo', 'form', 'grid']]
+		resp += [res.render_js(request,item).content for item in ['store2', 'combo', 'form', 'grid']]
+		#resp += [res.render_js(request,item).content for item in ['store', 'store2', 'combo', 'form', 'grid']]
 		#resp.append(res.render_js(request,'store').content)
 
 	return HttpResponse("\n".join(resp), mimetype='application/javascript')

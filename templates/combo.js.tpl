@@ -8,10 +8,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 {{app_label|title}}.{{name}}.ComboBox = Ext.extend(Ext.form.ComboBox, {
 	initComponent:function() {
 		{% if separate_store %}
-		{% include "mksoftware/store.js.tpl" %}
+		//TODO fix for global stores
 		{% endif %}
 		var config = {
-			store: {{name}}Store,
+			store: new {{app_label|title}}.{{name}}.Store({autoLoad: true}),
 			mode: 'local', 				//Automatically loads the store the first time the trigger is clicked. If you do not want the store to be automatically loaded the first time the trigger is clicked, set to 'local' and manually load the store. To force a requery of the store every time the trigger is clicked see lastQuery.
 			fieldLabel: '{{ verbose_name }}',
 			triggerAction: 'all',			//The action to execute when the trigger is clicked. (query/all)
@@ -26,8 +26,10 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			name: '{{ name|lower }}'
 		}; //config
 		
-		if (this.initialConfig.storeConfig)
+		if (this.initialConfig.storeConfig) {
+			console.log('error storeConfig in combo');
 			Ext.apply(config.store,this.initialConfig.storeConfig);	//apply extra configuration for the store
+		}
 
 		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
 		this.hiddenName = this.hiddenName || this.name;
