@@ -98,11 +98,13 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		for(var n = 0; n < this.columns.length; n++) {
 			//TODO some error checking
 			var col = this.columns[n];
-			if (col.hidden && !col.hideable || !col.fk) continue;
+			if ((col.hidden && !col.hideable || !col.fk) && !col.choices && !col.editable) continue;
 			try {
-				if (!col.editor) col.editor = this.ns.formFields[col.name];	//set editor even for normal grid since it's store (CHOICES) will be the source of data for renedere
+				if (!col.editor)
+					col.editor = this.ns.formFields[col.name];	//set editor even for normal grid since it's store (CHOICES) will be the source of data for renedere
 				if (!(col.editor.xtype in Ext.ComponentMgr.types)) console.log('type ' +col.editor.xtype+ ' not available');
-				if (!col.rendered && (col.fk || col.editor.xtype.endsWith('combo'))) col.renderer = fkrenderer;
+				if (!col.renderer && (col.fk || col.editor.xtype.endsWith('combo')))
+					col.renderer = fkrenderer;
 			} catch(e) {
 				console.log('error while assigning renderer');
 				console.log(e);
@@ -138,7 +140,7 @@ Ext.reg('{{app_label|lower}}.{{name|lower}}.grid',{{app_label|title}}.{{name}}.G
 		this.ns.EditorGridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.ns.gridPostInit.apply(this,arguments);
-	}, //initComponent
+	} //initComponent
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.editorgrid',{{app_label|title}}.{{name}}.EditorGridPanel);
 
