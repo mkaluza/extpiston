@@ -384,7 +384,10 @@ class ExtResource(Resource):
 			ff = copy(f[1], ['name', 'default'])
 			if ff['name'] not in self.fields: continue
 			fixtype(ff)
-			store['fields'].append(ff)
+			if len(ff)==1 and 'name' in ff:
+				store['fields'].append(ff['name'])
+			else:
+				store['fields'].append(ff)
 
 		return {'json_config': JS(jsonstore), 'array_config': JS(arraystore), 'array_data': data}
 
