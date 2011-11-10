@@ -193,6 +193,9 @@ class ExtResource(Resource):
 		data.update(getattr(request,'params',{}))	#if any inherited handler already set any params, keep them
 		setattr(request,'params',data)
 
+		self.handler.success = True
+		self.handler.message = None
+
 		response = super(ExtResource, self).__call__(request, *args, **kwargs)
 		#if it's a file upload, it's not XHR, it's via a hidden iframe and so response type must be text/html, otherwise browser shows 'save as' dialog for file 'application/json'
 		if extjs_file_post: response['content-type']=response['content-type'].replace('application/json','text/html')	#TODO swap any mime for this with re
@@ -469,8 +472,6 @@ class RelatedExtResource(ExtResource):
 			params[self.parent_fk_name] = kwargs.pop('parent_id')
 
 		setattr(request,'params',params)
-		self.handler.success = True
-		self.handler.message = None
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
 
 def get_all_js(request, resources):
