@@ -28,6 +28,9 @@ ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 				}
 			},
 			exception: function(DataProxy, type, action, options, response, arg) {
+				if (type == 'remote') {
+					App.setAlert(false, _("Wystąpił błąd:  {0} {1}").format(response.message, ''));
+				} else
 				App.setAlert(false, _("Wystąpił błąd:  {0} {1}").format(response.status, response.statusText));
 			}
 		};
