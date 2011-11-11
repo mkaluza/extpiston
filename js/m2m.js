@@ -1,5 +1,24 @@
 Ext.namespace('ExtPiston.m2m');
 
+/* usage:
+ * plugins: ['masterslave']
+ *
+ * and optionally:
+ * masterComponent: 'path/to/component' //starting from parent
+ * where empty path means direct parent
+ *
+ * or
+ *
+ * masterComponent: {path: 'path/to/component, event: 'eventname'}
+ * where eventname is optional
+ *
+ * or
+ *
+ * masterComponent: {component: path.to.created.component [, event: 'eventname]}
+ * where component is an object instance
+ *
+ */
+
 ExtPiston.MasterSlavePlugin = (function() {
 	function _getByPath(obj,path) {
 		if (path[0] == '..') return _getByPath(obj.ownerCt,path.slice(1));
@@ -37,18 +56,20 @@ ExtPiston.MasterSlavePlugin = (function() {
 	return {
 		init: function(o) {
 			var obj;
-			var m = o.initialConfig.masterComponent;
+			var m = o.initialConfig.masterComponent;		//TODO maybe we should assume, that if no master is given, it should always be our direct parent and only issue a warning
 			if (typeof(m) == 'string') m = {path: m};		//allow master component to be given directly by name
 
 			if (o.ownerCt instanceof Ext.FormPanel) {		//autodetect forms
 				o.url = o.initialConfig.name;
 				if (!m) m = {path: ''}
-				obj = o.ownerCt.form;				//we need the form, not panel, and form can't be found with 'find'
+				if (!m.path)					//if no path was given, assume we want parent form
+					obj = o.ownerCt.form;			//we need the form, not panel, and form can't be found with 'find'
 			};
 
-			if (!m) return;		//neither we're part of a form nor master-slave relation has been defined
+			if (!m) return;		//neither we're part of a form nor master-slave relation has been defined	TODO see todo above :)
 
-			obj = obj || getByPath(o.ownerCt,m.path);
+			obj = m.component || obj || getByPath(o.ownerCt,m.path);	//target object can either be given directly, implicitly (if we're form's child) or it will be searched by path
+			if (!obj) throw "MaterSlavePlugin: cant find master component";
 
 			if (!m.event) {
 				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
