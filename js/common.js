@@ -164,3 +164,50 @@ Ext.override(Ext.Component, {
 		return tc.xtypes;
 	}
 });
+
+/*
+ * add '*' to required form fields
+ * from http://blog.edseek.com/archives/2009/04/19/illuminate-required-fields-via-extjs/
+ * see also
+ * http://www.marcusschiesser.de/?p=259
+ */
+
+/*
+Ext.apply(Ext.layout.FormLayout.prototype, {
+	originalRenderItem:Ext.layout.FormLayout.prototype.renderItem,
+	renderItem:function(c, position, target){
+		/*
+		if(c && !c.rendered && c.isFormField && c.fieldLabel && c.allowBlank === false) {
+			c.fieldLabel = c.fieldLabel + " <span class=\"req\">*</span>";
+		}
+		* /
+		this.originalRenderItem.apply(this, arguments);
+
+		if(c && c.isFormField && c.fieldLabel && c.allowBlank === false) {
+			c.label.addClass('x-form-item-label-required');
+		}
+	}
+});
+*/
+Ext.ns('Extensive.components');
+
+Ext.apply(Ext.layout.FormLayout.prototype, {
+	originalRenderItem: Ext.layout.FormLayout.prototype.renderItem,
+	renderItem: function(c, position, target){
+		if (c && !c.rendered && c.isFormField && c.fieldLabel && !c.allowBlank) {
+			c.fieldLabel = c.fieldLabel + " <span " + ((c.requiredFieldCls !== undefined) ? 'class="' + c.requiredFieldCls + '"' : 'style="color:red;"') + " ext:qtip=\"" + ((c.blankText !== undefined) ? c.blankText : "This field is required") + "\">*</span>";
+		}
+		this.originalRenderItem.apply(this, arguments);
+	}
+});
+
+Extensive.components.RequiredFieldInfo = Ext.extend(Ext.form.Label, {
+	constructor: function(config){
+		Extensive.components.RequiredFieldInfo.superclass.constructor.call(this, Ext.apply({
+			html: "<span " + ((this.requiredFieldCls !== undefined) ? 'class="' + this.requiredFieldCls + '"' : 'style="color:red;"') + '>*</span> ' + ((this.requiredFieldText !== undefined) ? this.requiredFieldText : 'Required field')
+		}, config));
+	}
+});
+Ext.reg('reqFieldInfo', Extensive.components.RequiredFieldInfo);
+
+Extensive.components.RequiredFieldInfo.prototype.requiredFieldText = 'Pole wymagane';

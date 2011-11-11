@@ -17,3 +17,7 @@
 .icon-status-error { background-image: url(../../icons/fam/error.png) !important; }
 .icon-status-notice { background-image: url(../../icons/fam/information.png) !important; }
 
+.x-form-item-label-required {
+	font-weight: bold;
+}
+
