@@ -96,3 +96,6 @@ def request_debug2(show_sql):	#this can only decorate class methods
 			return func(self,request,*args,**kwargs)
 		return wrapper
 	return _request_debug
+
+def copy_dict(d, keys):
+	return dict([(k,d[k]) for k in keys if k in d])
