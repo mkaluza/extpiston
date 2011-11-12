@@ -231,7 +231,7 @@ class ExtResource(Resource):
 
 		#TODO przenieść część do __init__ oraz zrobić odwołanie do urls(), a nie generować palcem
 		for f, sub_handler in self.handler.m2m_handlers.iteritems():
-			if not f in self.columns: continue		#this should be commented - m2m fields need not
+			#if not f in self.columns: continue		#this should be commented - m2m fields need not
 			sub_resource = ExtResource(sub_handler)
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f},sub_resource))
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f},sub_resource))

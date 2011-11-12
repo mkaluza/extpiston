@@ -17,6 +17,7 @@ Ext.namespace('ExtPiston.m2m');
  * masterComponent: {component: path.to.created.component [, event: 'eventname]}
  * where component is an object instance
  *
+ * Paths are by itemId
  */
 
 ExtPiston.MasterSlavePlugin = (function() {

@@ -66,6 +66,7 @@ class ExtHandler(BaseHandler):
 
 	def setup_m2m_fields(self):
 		#TODO obsluga relacji odwrotnej, ktora sie w tej petli nie pojawi
+		#TODO fajnie by było, jakby wystarczała sama nazwa pola, jeśli dalej nie ma nic dziwnego
 		for f in self.model._meta.many_to_many:
 			if f.name in self.fields and f.name not in self.m2m_handlers:
 				self.m2m_handlers[f.name] = ManyToManyHandler(field=f)
@@ -261,6 +262,7 @@ class ManyToManyHandler(ExtHandler):
 		The fields it returns are either (pk.name,__str__) or, if the model has a handler defined, value_field and display_field from the handler
 		"""
 
+		#TODO dobrze by było, jakby można było podać tylko model, a on by sobie resztę ogarnał
 		if field: self.field = field		#field is either given as a param or as a class field
 		else: field = self.field
 		if pkfield != None: self.pkfield = pkfield
@@ -273,6 +275,7 @@ class ManyToManyHandler(ExtHandler):
 			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.model))
 			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.name))
 		else:
+			#odwrotna strona relacji - dla m2m i m2o jest taka sama
 			self.model = kwargs.get('model',getattr(self,'model',field.model))
 			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.parent_model))
 			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.field.rel.related_name))
