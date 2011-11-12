@@ -98,7 +98,7 @@ class ExtHandler(BaseHandler):
 
 		#TODO catch rev fields given in 'fields' property only
 
-	def __init__(self):
+	def __init__(self, _only_for_subhandler_init = False):
 		super(ExtHandler,self).__init__()
 
 		m = self.model._meta
@@ -131,6 +131,8 @@ class ExtHandler(BaseHandler):
 		self._reverse_related_fields = {}	#{'field_name': {params}}
 
 		self.rpc = getattr(self, 'rpc', [])
+
+		if _only_for_subhandler_init: return	#it's not a real init - a subhandler (for related field) is initializing and it needs the values from the real handler. This should help avoid infinite recursion
 
 		self.setup_file_fields()
 		self.setup_m2m_fields()
@@ -284,7 +286,7 @@ class RelatedBaseHandler(ExtHandler):
 		self.fields = [self.model._meta.pk.name, '__str__']
 		h = self.find_handler_for_model(self.model)
 		if h:
-			h=h()
+			h=h(_only_for_subhandler_init = True)		#this skips initialization of all related fields
 			self.fields[0]=self.value_field=h.value_field
 			self.fields[1]=self.display_field=h.display_field
 			self.pkfield = getattr(self,'pkfield',h.pkfield)
