@@ -1,6 +1,8 @@
 # $Revision: 1.9 $
 # vim: set fileencoding=utf-8
 
+import inspect
+
 from piston.handler import BaseHandler, typemapper
 from piston.utils import rc
 
@@ -65,9 +67,29 @@ class ExtHandler(BaseHandler):
 				pass
 
 	def setup_m2m_fields(self):
-		#TODO obsluga relacji odwrotnej, ktora sie w tej petli nie pojawi
-		#TODO fajnie by było, jakby wystarczała sama nazwa pola, jeśli dalej nie ma nic dziwnego
-		#pozwolić na inicjalizację nie tylko ze słownika, ale również jako tuple (tak jak reverse_related)
+		_m2m_handlers = {}
+		if isinstance(self.m2m_handlers, (list, tuple)):	#if it's a list
+			for f in self.m2m_handlers:			#iterate through it
+				#1. create handler based on field name
+				if isinstance(f, (str, unicode)):	#strings are our model's field names
+					field = self.model._meta.get_field_by_name(f)[0]	#get the field
+					_m2m_handlers[f] = type('TODO', (RelatedBaseHandler,), {'field': field})	#and create a subclass of RelatedBaseHandler configured to handle this relation TODO czy nazwy musza byc unikalne czy nie?
+				#2. it can be already defined class
+				elif inspect.isclass(f):
+					ff = f()
+					_m2m_handlers[ff.field_name] = f
+				elif isinstance(f, (list, tuple)):
+					name = f[0]
+					if isinstance(f[1], dict):
+						_m2m_handlers[f[0]] = type('TODO', (RelatedBaseHandler,), f[1])
+					else:
+						raise ValueError('invalid value: ' + repr(f[1]))
+				#3. tak jak w rev_rel poniżej (name, params {})
+				#3. tak jak w rev_rel poniżej (name, handler name/full.class.name)
+			self.m2m_handlers = _m2m_handlers
+
+		#moze to tez byc słownik w postaci nazwa: klasa lub nazwa: nazwa.klasy - bez sensu?
+		#TODO old (unneeded?) code
 		for f in self.model._meta.many_to_many:
 			if f.name in self.fields and f.name not in self.m2m_handlers:
 				self.m2m_handlers[f.name] = ManyToManyHandler(field=f)
