@@ -280,23 +280,34 @@ class RelatedBaseHandler(ExtHandler):
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
 			#TODO it should handle m2o as well, since all fields are the same
 			setup_params(self, [('model', field.rel.to), ('owner_model', field.model), ('field_name', field.name)])
+			self.rel_type = 'm2m'		#TODO for m2o it'll be different
 		else:
 			#reverse relation (RelatedObject) - for m2m i m2o its the same
 			#TODO - though for implicit reverse relations it's different - class has a field named 'something', while instances have field 'something_set' - it also looks different in get_field_by_name
 			setup_params(self, [('model', field.model), ('owner_model', field.parent_model), ('field_name', field.field.rel.related_name)])
-			#TODO check check what is the other side of relation (fk, m2m) and set some flag for queryset() to recognize and filter data accordingly - it will allow to use ManyToManyHandler for both m2m and m2o
+			if issubclass(field.field.__class__, django.db.models.fields.related.ManyToManyField):
+				self.rel_type = 'm2m'
+			elif issubclass(field.field.__class__, django.db.models.fields.related.ForeignKey):
+				self.rel_type = 'fk'
 
-		#TODO allow fields to be specified as class param or from kwargs
-		self.fields = [self.model._meta.pk.name, '__str__']
+		fields = [self.model._meta.pk.name, '__str__']
+		display_field = '__str__'
+		value_field = self.model._meta.pk.name
+
+		#TODO use handler parameter for this
 		h = self.find_handler_for_model(self.model)
 		if h:
 			h=h(_only_for_subhandler_init = True)		#this skips initialization of all related fields
-			self.fields[0]=self.value_field=h.value_field
-			self.fields[1]=self.display_field=h.display_field
+			fields[0] = value_field = h.value_field
+			fields[1] = display_field = h.display_field
 			self.pkfield = getattr(self,'pkfield',h.pkfield)
 			self.security = getattr(self,'security', h.security)
+		else:
+			print "RelatedBaseHandler: warning: can't find handler for model", self.model
 
 		self.orig_handler = h
+
+		setup_params(self, [('fields', fields), ('value_field', value_field), ('display_field', display_field)], kwargs)
 
 		def to_tuple(lst):
 			if len(lst)>1:
