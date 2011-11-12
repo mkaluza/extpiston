@@ -73,11 +73,18 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		if (this.columns && this.columns.length > 0) {			//TODO dangerous if this.columns is not an array
 			var index, column;
 			//for (column in Iterator(this.columns)) {
-			for (index in this.columns) {
+			for (var index = 0; index < this.columns.length; index++) {
 				column = this.columns[index];
 				if (typeof(column) != 'string') continue;		//if it's not a name, we're not interested
 				try {
 					column = this.ns.gridColumns[column]
+					if (!column) {
+						console.log('Column not found: ' + this.columns[index]);
+						this.columns.splice(index, 1);
+						index--;
+						continue;
+					}
+
 					this.columns[index] = column; //replace column name with the real column definition
 				} catch(e) {
 					//invalid column name
