@@ -352,13 +352,26 @@ class RelatedBaseHandler(ExtHandler):
 			q = self.orig_handler.queryset(request)
 		else:
 			q = self.model.objects.all()
-		return (main_obj,q)
+
+		if request.params.get('all',False):
+			if self.rel_type == 'fk': return q.filter(**{self.field.field.name+'__isnull':True})		#return only those not assigned to anybody
+			return q.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
+		else:
+			if self.rel_type == 'fk': return q.filter(**{self.field.field.name: main_obj})
+			return q.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
+		#return (main_obj,q)
 
 	def read(self, request, *args, **kwargs):
 		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac
 		self.main_id = kwargs.pop('main_id')
 		return super(RelatedBaseHandler,self).read(request,*args,**kwargs)
 
+class ManyToManyHandler(RelatedBaseHandler):
+	pass
+
+class ReverseRelatedHandler(RelatedBaseHandler):
+	pass
+"""
 class ManyToManyHandler(RelatedBaseHandler):
 	def queryset(self, request, *args, **kwargs):
 		main_obj, q = super(ManyToManyHandler, self).queryset(request, *args, **kwargs)
@@ -377,3 +390,4 @@ class ReverseRelatedHandler(RelatedBaseHandler):
 			return q.filter(**{self.field.field.name+'__isnull':True})		#return only those not assigned to anybody
 		else:
 			return q.filter(**{self.field.field.name: main_obj})
+"""
