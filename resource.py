@@ -454,6 +454,8 @@ class RelatedExtResource(ExtResource):
 			#otherwise handle it automatically
 			self.parent_fk = self.parent.handler.model._meta.get_field_by_name(field)[0].field
 			self.auto_parent_fk = True
+			#self.base_url = self.parent_fk.name
+			self.base_url = field
 
 		self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, 'parent_id', self.base_url)
 		#TODO a co, jesli handler nie ma parenta?
@@ -473,6 +475,13 @@ class RelatedExtResource(ExtResource):
 
 		setattr(request,'params',params)
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
+
+	def urls(self):
+		urls=[]
+		_urls = ['', r'(?P<id>\d+)']
+		urls += [url(r"^%s/*%s$" % (self.base_url,u),self) for u in _urls]
+
+		return urls		#if this is a related resource, generate only standard urls
 
 def get_all_js(request, resources):
 	resp = []
