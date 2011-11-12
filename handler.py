@@ -18,7 +18,10 @@ class ExtHandler(BaseHandler):
 
 	def find_handler_by_name(self,name):
 		#TODO handle 'not found'
-		return filter(lambda handler: handler.__name__ == name, typemapper)[0]
+		handlers = filter(lambda handler: handler.__name__ == name or handler.__module__+'.'+handler.__name__ == name, typemapper)
+		if len(handlers) > 1:
+			print "Warning: Multiple handlers for name %s found\n" % name, handlers
+		return handlers[0]
 
 	def find_handler_for_model(self,model):
 		try:
