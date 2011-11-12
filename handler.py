@@ -247,7 +247,7 @@ class ExtHandler(BaseHandler):
 		if isinstance(res, HttpResponse): return res
 		return HttpResponse(simplejson.dumps(res))	#TODO resource should do it - handler doesn't care for http or json
 
-class ManyToManyHandler(ExtHandler):
+class RelatedBaseHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
 	register = False
 
@@ -307,7 +307,7 @@ class ManyToManyHandler(ExtHandler):
 		self.fields = tuple(_fields)
 
 		#print "m2m init", self.fields
-		super(ManyToManyHandler,self).__init__()
+		super(RelatedBaseHandler,self).__init__()
 
 	#TOOD obejrzec, co z tym main_id, bo troche tu tego za dużo?
 	def create(self, request, *args, **kwargs):
@@ -335,7 +335,16 @@ class ManyToManyHandler(ExtHandler):
 			q = self.orig_handler.queryset(request)
 		else:
 			q = self.model.objects.all()
+		return (main_obj,q)
 
+	def read(self, request, *args, **kwargs):
+		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac
+		self.main_id = kwargs.pop('main_id')
+		return super(RelatedBaseHandler,self).read(request,*args,**kwargs)
+
+class ManyToManyHandler(RelatedBaseHandler):
+	def queryset(self, request, *args, **kwargs):
+		main_obj, q = super(ManyToManyHandler, self).queryset(request, *args, **kwargs)
 		if request.params.get('all',False):
 			return q.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
 			return self.model.objects.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
@@ -344,7 +353,10 @@ class ManyToManyHandler(ExtHandler):
 			return self.model.objects.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
 			return getattr(main_obj,self.field_name).all()
 
-	def read(self, request, *args, **kwargs):
-		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac
-		self.main_id = kwargs.pop('main_id')
-		return super(ManyToManyHandler,self).read(request,*args,**kwargs)
+class ReverseRelatedHandler(RelatedBaseHandler):
+	def queryset(self, request, *args, **kwargs):
+		main_obj, q = super(ReverseRelatedHandler, self).queryset(request, *args, **kwargs)
+		if request.params.get('all',False):
+			return q.filter(**{self.field.field.name+'__isnull':True})		#return only those not assigned to anybody
+		else:
+			return q.filter(**{self.field.field.name: main_obj})
