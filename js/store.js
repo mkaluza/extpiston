@@ -38,6 +38,9 @@ ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 		Ext.apply(config, {listeners: listeners});
 
 		ExtPiston.data.JsonStore.superclass.constructor.call(this, config);
+		if (!this.url)
+			console.log('ExtPiston.data.JsonStore warning: url not set in: ' + (this.xtype || 'xtype not set'));
+		this.origUrl = this.url;
 	}
 });
 

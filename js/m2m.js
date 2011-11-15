@@ -42,7 +42,8 @@ ExtPiston.MasterSlavePlugin = (function() {
 		var st = sm.grid.store;
 		var rec = st.getAt(rowIndex);
 		if (rec.phantom) return null;
-		return st.url+'/'+rec.id;
+		var url = st.origUrl || st.url;
+		return url+'/'+rec.id;
 	};
 
 	function FormPanelHandler(form,values) {
