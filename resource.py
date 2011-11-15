@@ -223,7 +223,7 @@ class ExtResource(Resource):
 
 		#standard piston urls
 		_urls = ['', r'(?P<id>\d+)']
-		urls += [url(r"^%s/*%s$" % (self.base_url,u),self) for u in _urls]
+		urls += [url(r"^%s/*%s$" % (self.base_url,u),self) for u in _urls]	#TODO what is '*' for?
 
 		if self.parent: return urls		#if this is a related resource, generate only standard urls
 
@@ -232,7 +232,7 @@ class ExtResource(Resource):
 		#TODO przenieść część do __init__ oraz zrobić odwołanie do urls(), a nie generować palcem
 		for f, sub_handler in self.handler.m2m_handlers.iteritems():
 			#if not f in self.columns: continue		#this should be commented - m2m fields need not
-			sub_resource = ExtResource(sub_handler)
+			sub_resource = ExtResource(sub_handler)	#TODO change to RelExtRes
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s$' % {'name':self.name,'m2m_name':f},sub_resource))
 			urls.append(url(r'^%(name)s/(?P<main_id>\d+)/%(m2m_name)s/(?P<id>\d+)$' % {'name':self.name,'m2m_name':f},sub_resource))
 
