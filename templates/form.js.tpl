@@ -17,9 +17,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		}; //config
 		this.ns = {{app_label|title}}.{{name}};
 
-		this.ns.FormPanel.superclass.constructor.call(this, cfg);
+		Ext.applyIf(cfg, config);
 
-		Ext.applyIf(this, config);
+		this.ns.FormPanel.superclass.constructor.call(this, cfg);
 	} //constructor
 });
 Ext.reg('{{app_label|lower}}.{{name|lower}}.{{name2|lower}}form',{{app_label|title}}.{{name}}.FormPanel);
