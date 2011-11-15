@@ -4,6 +4,13 @@
 Ext.namespace('ExtPiston.form');
 
 ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
+	constructor: function constructor(cfg) {
+		cfg = cfg || {};
+		ExtPiston.form.FormPanel.superclass.constructor.call(this, cfg);
+		if (!this.url)
+			console.log('ExtPiston.form.FormPanel warning: url not set in: ' + (this.xtype || 'xtype not set'));
+		this.origUrl = this.url;
+	},
 	initComponent: function() {
 		var config = {
 			bodyStyle:'padding:5px 5px 0',

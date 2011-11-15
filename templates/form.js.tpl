@@ -8,6 +8,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 
 {{app_label|title}}.{{name}}.{{name2|title}}FormPanel = Ext.extend(ExtPiston.form.FormPanel, {
 	constructor: function constructor(cfg) {
+		cfg = cfg || {};
 		var config = {
 			itemId: '{{ name|lower }}form',
 			pkField: '{{pk}}',
