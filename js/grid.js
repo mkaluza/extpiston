@@ -44,7 +44,7 @@ ExtPiston.grid.Grid = {
 	},
 	setBaseUrl: function(baseUrl) {
 		//TODO zrobić to lepiej... dużo lepiej...
-		var url = baseUrl+'/' + this.childUrl;
+		var url = baseUrl+'/' + this.childUrl || this.url;
 		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
 		this.store.proxy.setUrl(url,true);
 	},

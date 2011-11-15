@@ -63,6 +63,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 
 			if (o.ownerCt instanceof Ext.FormPanel) {		//autodetect forms
 				o.url = o.initialConfig.name;
+				o.childUrl = o.url;
 				if (!m) m = {path: ''}
 				if (!m.path)					//if no path was given, assume we want parent form
 					obj = o.ownerCt.form;			//we need the form, not panel, and form can't be found with 'find'
@@ -88,6 +89,9 @@ ExtPiston.MasterSlavePlugin = (function() {
 				else throw "masterComponent.handler must be defined";
 			};
 			//else if (obj instanceof Ext.FormPanel) m.handler = FormPanelHandler;
+			//if (obj instanceof Ext.grid.GridPanel)
+				if (!o.childUrl)
+					console.log("childUrl for related component not set: "+o.xtype);
 
 			obj.on(m.event, function() {
 					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
