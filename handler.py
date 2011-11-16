@@ -1,6 +1,8 @@
 # $Revision: 1.9 $
 # vim: set fileencoding=utf-8
 
+import inspect
+
 from piston.handler import BaseHandler, typemapper
 from piston.utils import rc
 
@@ -65,8 +67,29 @@ class ExtHandler(BaseHandler):
 				pass
 
 	def setup_m2m_fields(self):
-		#TODO obsluga relacji odwrotnej, ktora sie w tej petli nie pojawi
-		#TODO fajnie by było, jakby wystarczała sama nazwa pola, jeśli dalej nie ma nic dziwnego
+		_m2m_handlers = {}
+		if isinstance(self.m2m_handlers, (list, tuple)):	#if it's a list
+			for f in self.m2m_handlers:			#iterate through it
+				#1. create handler based on field name
+				if isinstance(f, (str, unicode)):	#strings are our model's field names
+					field = self.model._meta.get_field_by_name(f)[0]	#get the field
+					_m2m_handlers[f] = type('TODO', (RelatedBaseHandler,), {'field': field})	#and create a subclass of RelatedBaseHandler configured to handle this relation TODO czy nazwy musza byc unikalne czy nie?
+				#2. it can be already defined class
+				elif inspect.isclass(f):
+					ff = f()
+					_m2m_handlers[ff.field_name] = f
+				elif isinstance(f, (list, tuple)):
+					name = f[0]
+					if isinstance(f[1], dict):
+						_m2m_handlers[f[0]] = type('TODO', (RelatedBaseHandler,), f[1])
+					else:
+						raise ValueError('invalid value: ' + repr(f[1]))
+				#3. tak jak w rev_rel poniżej (name, params {})
+				#3. tak jak w rev_rel poniżej (name, handler name/full.class.name)
+			self.m2m_handlers = _m2m_handlers
+
+		#moze to tez byc słownik w postaci nazwa: klasa lub nazwa: nazwa.klasy - bez sensu?
+		#TODO old (unneeded?) code
 		for f in self.model._meta.many_to_many:
 			if f.name in self.fields and f.name not in self.m2m_handlers:
 				self.m2m_handlers[f.name] = ManyToManyHandler(field=f)
@@ -253,46 +276,60 @@ class RelatedBaseHandler(ExtHandler):
 	allowed_methods = ('GET','POST','DELETE')
 	register = False
 
-	def __init__(self, field = None, pkfield = None, **kwargs):
+	def __init__(self, **kwargs):
 		"""
 		Initialize m2m handler.
 
 		Force setting of fields:
 			- self.model contains the model field relates to,
 			- self.owner_model contains the model that owns the field,
-			- self.field_name contains actual field name(for reverse objects it's not field.name
+			- self.field_name contains actual field name of owner_model (for reverse objects it's not field.name)
 		The fields it returns are either (pk.name,__str__) or, if the model has a handler defined, value_field and display_field from the handler
 		"""
 
-		#TODO dobrze by było, jakby można było podać tylko model, a on by sobie resztę ogarnał
-		if field: self.field = field		#field is either given as a param or as a class field
-		else: field = self.field
-		if pkfield != None: self.pkfield = pkfield
+		field, field_name, model = setup_params(self, ['field', 'field_name', 'model', 'owner_model'], kwargs, ['field', 'field_name', 'model'])
+		if 'pkfield' in kwargs: self.pkfield = kwargs['pkfield']	#TODO patrz komentarz w setup_params
 
-		#TODO handle field given by name, when model is given?
-		#if not hasattr(self,'model'):
+		if not field:
+			if field_name and model:
+				field = model._meta.get_field_by_name(field_name)[0]
+			else:
+				raise Exception('Either field or field_name and model must be given')
+
+		#TODO dobrze by było, jakby można było podać tylko model, a on by sobie resztę ogarnał
+
 		#TODO jeśli znajdzie się handler poniżej, to trzeba ustalać priorytety, co jest ważniejsze (ewentualnie handler też może być podany w argumentach)
 		if issubclass(field.__class__, django.db.models.fields.related.ManyToManyField):
-			self.model = kwargs.get('model',getattr(self,'model',field.rel.to))
-			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.model))
-			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.name))
+			#TODO it should handle m2o as well, since all fields are the same
+			setup_params(self, [('model', field.rel.to), ('owner_model', field.model), ('field_name', field.name)])
+			self.rel_type = 'm2m'		#TODO for m2o it'll be different
 		else:
-			#odwrotna strona relacji - dla m2m i m2o jest taka sama
-			self.model = kwargs.get('model',getattr(self,'model',field.model))
-			self.owner_model = kwargs.get('owner_model',getattr(self,'owner_model',field.parent_model))
-			self.field_name = kwargs.get('field_name',getattr(self,'field_name',field.field.rel.related_name))
+			#reverse relation (RelatedObject) - for m2m i m2o its the same
+			#TODO - though for implicit reverse relations it's different - class has a field named 'something', while instances have field 'something_set' - it also looks different in get_field_by_name
+			setup_params(self, [('model', field.model), ('owner_model', field.parent_model), ('field_name', field.field.rel.related_name)])
+			if issubclass(field.field.__class__, django.db.models.fields.related.ManyToManyField):
+				self.rel_type = 'm2m'
+			elif issubclass(field.field.__class__, django.db.models.fields.related.ForeignKey):
+				self.rel_type = 'fk'
 
-		#TODO either get value_field/display_field from a default handler if a model has one or get pk/__str__
-		self.fields = [self.model._meta.pk.name, '__str__']
+		fields = [self.model._meta.pk.name, '__str__']
+		display_field = '__str__'
+		value_field = self.model._meta.pk.name
+
+		#TODO use handler parameter for this
 		h = self.find_handler_for_model(self.model)
 		if h:
 			h=h(_only_for_subhandler_init = True)		#this skips initialization of all related fields
-			self.fields[0]=self.value_field=h.value_field
-			self.fields[1]=self.display_field=h.display_field
+			fields[0] = value_field = h.value_field
+			fields[1] = display_field = h.display_field
 			self.pkfield = getattr(self,'pkfield',h.pkfield)
 			self.security = getattr(self,'security', h.security)
+		else:
+			print "RelatedBaseHandler: warning: can't find handler for model", self.model
 
 		self.orig_handler = h
+
+		setup_params(self, [('fields', fields), ('value_field', value_field), ('display_field', display_field)], kwargs)
 
 		def to_tuple(lst):
 			if len(lst)>1:
@@ -337,13 +374,26 @@ class RelatedBaseHandler(ExtHandler):
 			q = self.orig_handler.queryset(request)
 		else:
 			q = self.model.objects.all()
-		return (main_obj,q)
+
+		if request.params.get('all',False):
+			if self.rel_type == 'fk': return q.filter(**{self.field.field.name+'__isnull':True})		#return only those not assigned to anybody
+			return q.exclude(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#return remaining objects not assigned to our parent object
+		else:
+			if self.rel_type == 'fk': return q.filter(**{self.field.field.name: main_obj})
+			return q.filter(pk__in=getattr(main_obj,self.field_name).all().values('pk'))		#do it like this, because if self.model is different than field.model (like inherited model for example), some things dont work (i.e. properties defined on inherited model)
+		#return (main_obj,q)
 
 	def read(self, request, *args, **kwargs):
 		#TODO metoda read musi podmieniac klucze, wtedy wszystko bedzie dzialac
 		self.main_id = kwargs.pop('main_id')
 		return super(RelatedBaseHandler,self).read(request,*args,**kwargs)
 
+class ManyToManyHandler(RelatedBaseHandler):
+	pass
+
+class ReverseRelatedHandler(RelatedBaseHandler):
+	pass
+"""
 class ManyToManyHandler(RelatedBaseHandler):
 	def queryset(self, request, *args, **kwargs):
 		main_obj, q = super(ManyToManyHandler, self).queryset(request, *args, **kwargs)
@@ -362,3 +412,4 @@ class ReverseRelatedHandler(RelatedBaseHandler):
 			return q.filter(**{self.field.field.name+'__isnull':True})		#return only those not assigned to anybody
 		else:
 			return q.filter(**{self.field.field.name: main_obj})
+"""

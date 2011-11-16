@@ -44,7 +44,7 @@ ExtPiston.grid.Grid = {
 	},
 	setBaseUrl: function(baseUrl) {
 		//TODO zrobić to lepiej... dużo lepiej...
-		var url = baseUrl+'/' + this.childUrl;
+		var url = baseUrl+'/' + this.childUrl || this.url;
 		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
 		this.store.proxy.setUrl(url,true);
 	},
@@ -84,11 +84,10 @@ ExtPiston.grid.GridPanel = Ext.extend(
 			editWindow.baseUrl = grid.store.url;
 			var ew = Ext.apply({}, params, editWindow);
 			var win = new Ext.create(ew,'window');
-			var frmp = win.findByType('form')[0];
-			var frm = frmp.getForm();
+			var frmp = win.findByType('form')[0];		//TODO switch to using ref
 			frmp.closeOnSave = this.initialConfig.closeOnSave;
-			frm.origUrl = frm.url;
-			frm.url = grid.store.url;
+
+			frmp.setBaseUrl(grid.store.url);
 			if (showRec) {
 				var rec = grid.getSelectionModel().getSelected();
 				if (rec) win.findByType('form')[0].getForm().loadRecord(rec);		//TODO 'form' instead of formClass to make it more generic- a good way would be to add ref to main form...

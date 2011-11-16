@@ -37,8 +37,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			       }],
 			itemId: '{{ name|lower }}',
 			singleSelect: true,
-			separateStore: {{ separate_store|lower }},
-			childUrl: '{{ name|lower }}'		//URL part, that is appended to baseUrl, when the component is a child component
+			separateStore: {{ separate_store|lower }}
 		}; //config
 
 		if (!this.store) {

@@ -4,6 +4,13 @@
 Ext.namespace('ExtPiston.form');
 
 ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
+	constructor: function constructor(cfg) {
+		cfg = cfg || {};
+		ExtPiston.form.FormPanel.superclass.constructor.call(this, cfg);
+		if (!this.url)
+			console.log('ExtPiston.form.FormPanel warning: url not set in: ' + (this.xtype || 'xtype not set'));
+		this.origUrl = this.url;
+	},
 	initComponent: function() {
 		var config = {
 			bodyStyle:'padding:5px 5px 0',
@@ -110,13 +117,25 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('actionfailed',this.actionFailed,this);
 		this.on('beforeclose',this.beforeClose,this);
 	}, //initComponent
-	getBaseUrl: function(param1) {
+	setBaseUrl: function setBaseUrl(baseUrl) {
+		//TODO rethink it
+		var f = this.form;
+		f.origUrl = f.origUrl || f.url || this.url;
+		if (!f.origUrl) console.log('extpiston.form warning: origUrl still undefined');
+		f.url = baseUrl;
+	},
+	getBaseUrl: function() {
 		var pk = this.getPk();
 		if (pk != null) {
+			var url = this.form.origUrl || this.form.url;
+			if (!url) {
+				console.log('ExtPiston.form.FormPanel error: url not set in: '+(this.xtype || 'type not set'));
+				return null;
+			}
 			return urljoin(url,pk);
 		}
 		else
-			return url;
+			return null;
 	},
 	getPk: function() {
 		var pk = this.form.findField(this.pkField);
