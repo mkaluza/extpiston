@@ -27,6 +27,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 				}
 			}
 		}
+		Ext.applyIf(config.baseParams,cfg.baseParams);
 		Ext.applyIf(config,cfg);
 
 		{{app_label|title}}.{{name}}.JsonStore.superclass.constructor.call(this, config);
