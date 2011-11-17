@@ -132,6 +132,11 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 			if type(ff.verbose_name) in [str,unicode]: field_dict['header'] = ff.verbose_name
 			if ff.help_text and type(ff.help_text) in [str,unicode]: field_dict['tooltip'] = ff.help_text
 			if ff.default != django.db.models.fields.NOT_PROVIDED: field_dict['default']=ff.default
+			#TODO figure this out... can't be this way because if field is invisible and not allowed blank, the store will not save
+			#if parent_field:
+			#	field_dict['allowBlank'] = parent_field.blank
+			#else:
+			#	field_dict['allowBlank'] = ff.blank	#can't be this way
 			if ff.choices: field_dict['choices'] = ff.choices
 			if ff.primary_key:
 				field_dict.update({'hidden':True, 'hideable':False})
