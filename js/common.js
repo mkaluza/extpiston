@@ -211,3 +211,5 @@ Extensive.components.RequiredFieldInfo = Ext.extend(Ext.form.Label, {
 Ext.reg('reqFieldInfo', Extensive.components.RequiredFieldInfo);
 
 Extensive.components.RequiredFieldInfo.prototype.requiredFieldText = 'Pole wymagane';
+
+Ext.reg('floatfield', Ext.form.NumberField);

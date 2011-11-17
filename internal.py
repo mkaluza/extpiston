@@ -81,6 +81,7 @@ def get_field_type(cls, model = None, name = None):
 		'BooleanField': 'bool',
 		'TextField': 'textarea',
 		'FileField': 'file',
+		'FloatField': 'float',
 		'ImageField': 'image',
 	}
 	return field_map.get(cls,'text')
