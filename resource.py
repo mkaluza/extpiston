@@ -187,6 +187,7 @@ class ExtResource(Resource):
 			if type(data['data']) in [unicode,str]: data['data'] = simplejson.loads(data['data'])
 			setattr(request,'data',data['data'])
 			del data['data']
+			data = request.data
 		else:
 			setattr(request,'data',data)
 
@@ -455,7 +456,8 @@ class RelatedExtResource(ExtResource):
 			self.parent_fk = self.parent.handler.model._meta.get_field_by_name(field)[0].field
 			self.auto_parent_fk = True
 			#self.base_url = self.parent_fk.name
-			self.base_url = field
+
+		self.base_url = field
 
 		self.base_url = r"%s/(?P<%s>\d+)/%s" % (self.parent.base_url, 'parent_id', self.base_url)
 		#TODO a co, jesli handler nie ma parenta?
@@ -467,6 +469,7 @@ class RelatedExtResource(ExtResource):
 			if request.method == 'GET': parent_fk_name = self.parent_fk.name
 			#for the rest, we either can give parent pk as parent_field_id, or parent instance as parent_field
 			else: parent_fk_name = self.parent_fk.attname
+			#TODO check if there is field__id in data when our fk name is field_id, because it'll interfere
 			params[parent_fk_name] = kwargs.pop('parent_id')
 			kwargs[parent_fk_name] = params[parent_fk_name]
 		else:
