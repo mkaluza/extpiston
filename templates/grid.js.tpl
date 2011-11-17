@@ -108,7 +108,8 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			try {
 				if (!col.editor)
 					col.editor = this.ns.formFields[col.name];	//set editor even for normal grid since it's store (CHOICES) will be the source of data for renedere
-				if (!(col.editor.xtype in Ext.ComponentMgr.types)) console.log('type ' +col.editor.xtype+ ' not available');
+				if (!(col.editor.xtype in Ext.ComponentMgr.types))
+					console.log('type ' +col.editor.xtype+ ' not available');
 				if (!col.renderer && (col.fk || col.editor.xtype.endsWith('combo')))
 					col.renderer = fkrenderer;
 			} catch(e) {

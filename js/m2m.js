@@ -31,7 +31,7 @@ ExtPiston.MasterSlavePlugin = (function() {
 			//TODO raise an error
 			return;
 		}
-		return getByPath(newobj,a.slice(1));
+		return _getByPath(newobj,path.slice(1));
 	};
 
 	function getByPath(obj,path) {
