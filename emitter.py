@@ -4,23 +4,13 @@
 from piston.emitters import Emitter
 
 from django.contrib.auth.models import Permission,Group,User
-from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
-from django.utils.encoding import force_unicode
-from django.utils.functional import Promise
 
 import settings
 
 from functions import Timer
 from internal import *
-
-class LazyJSONEncoder(DateTimeAwareJSONEncoder):
-	def default(self, obj):
-		if isinstance(obj, Promise):
-			return force_unicode(obj)
-		return super(LazyJSONEncoder, self).default(obj)
-
-DefaultJSONEncoder = LazyJSONEncoder
+from json import DefaultJSONEncoder
 
 class ExtJSONEmitter(Emitter):
 	"""

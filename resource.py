@@ -16,7 +16,7 @@ from django.utils import simplejson
 
 import settings
 
-from emitter import LazyJSONEncoder as DefaultJSONEncoder
+from json import DefaultJSONEncoder
 from functions import Timer, request_debug
 from internal import *
 
