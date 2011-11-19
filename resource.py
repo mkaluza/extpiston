@@ -328,6 +328,9 @@ class ExtResource(Resource):
 				_columns = []
 				for n,v in self.grids[name].iteritems():		#add only columns mentioned
 					if n.startswith('_'): continue		#_keywords are internal
+					if n not in self.columns:
+						print 'ExtPiston warning! Field %s is invalid' % n
+						continue
 					col = (n,self.columns[n].copy())
 					col[1].update(v)
 					_columns.append(col)
