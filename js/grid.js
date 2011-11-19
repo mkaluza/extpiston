@@ -101,14 +101,14 @@ ExtPiston.grid.GridPanel = Ext.extend(
 
 		var _actions = {
 			add : {
-				text: "Nowy",
+				text: _("Nowy"),
 				handler: function(button, event, params) {	//button and event are params passed to the action when it's clicked as a toolbar button or menu item, params is my own
 					this.showWindow(this,false, params);
 				},
 				name: 'add'
 			},
 			edit: {
-				text: "Edytuj",
+				text: _("Edytuj"),
 				handler: function(button, event, params) {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {
@@ -118,7 +118,7 @@ ExtPiston.grid.GridPanel = Ext.extend(
 				name: 'edit'
 			},
 			remove: {
-				text: "Usuń",
+				text: _("Usuń"),
 				handler: function(button, event, params) {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {

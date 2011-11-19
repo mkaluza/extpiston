@@ -1,3 +1,5 @@
+Ext.ns('ExtPiston');
+
 function fkrenderer(value, metaData, record, rowIndex, colIndex, store) {
 	/*
 	// tego bedziemy mogli uzyc kiedy indziej
@@ -74,23 +76,26 @@ function processActions(acts, _actions, scope) {
 
 	actions.disable = function disable() {
 		this.each(function(action,index,length) {
-			action.disable();
+			if (action.disable) action.disable();
 		});
 	}
 
 	actions.enable = function enable() {
 		this.each(function(action,index,length) {
-			action.enable();
+			if (action.enable) action.enable();
 		});
 	}
 
 	return actions;
 };
 
+ExtPiston.processActions = processActions;
+
 Ext.onReady(function() {
 	Ext.create = Ext.ComponentMgr.create.createInterceptor(function(config, defaultType) {
 		var t = config.xtype || defaultType;
-		if (!(t in this.types)) console.log("Type " + t + " not found");
+		if (!(t in this.types))
+			console.log("Type " + t + " not found");
 	}, Ext.ComponentMgr);
 })
 
@@ -124,6 +129,7 @@ function fixDjangoTranslation() {
 
 fixDjangoTranslation();
 
+//a shortcut to String.format, so that we can write "some {0} string {1}".format(a,b)
 String.prototype.format = function() {
 	return String.format.apply(this, [this].concat(Ext.toArray(arguments)));
 	//old
@@ -133,6 +139,7 @@ String.prototype.format = function() {
 	return res;
 }
 
+//add map(function) to array - iterate over the array calling given function with each element as parameter
 if (!Array.prototype.map) {
 	Array.prototype.map = function(fun /*, thisp*/) {
 		var len = this.length;
@@ -149,6 +156,7 @@ if (!Array.prototype.map) {
 	};
 }
 
+//TODO add comment
 Ext.override(Ext.Component, {
 	getXTypes: function getXTypes() {
 		var tc = this.constructor;
