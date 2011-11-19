@@ -44,9 +44,14 @@ function processActions(acts, _actions, scope) {
 		act = acts[i];
 		key = i.toString();
 		if (typeof(act) == "string") {		//predefined action
+			if (['-','->'].indexOf(act) >= 0) {
+				actions.add(act, act);
+				continue;
+			}
 			key = act;
 			if (act in _actions) act = _actions[act]		//use predefined action with that name
 			else  {
+				actions.add(act, act);
 				console.log('invalid action name: ' + key);
 				continue;
 			}
