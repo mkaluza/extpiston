@@ -55,11 +55,13 @@ function processActions(acts, _actions, scope) {
 				console.log('invalid action name: ' + key);
 				continue;
 			}
-		}
-		else if (act.name) {
-			key = act.name;	//we can define new action and give it a name
-			if (key in _actions && !(act instanceof Ext.Action)) {		//we are subclassing an existing action
-				act = Ext.apply({}, act, _actions[key]);
+		} else {
+			act = Ext.apply({}, act)
+			if (act.name) {
+				key = act.name;	//we can define new action and give it a name
+				if (key in _actions && !(act instanceof Ext.Action)) {		//we are subclassing an existing action
+					act = Ext.applyIf(act, _actions[key]);
+				}
 			}
 		}
 
