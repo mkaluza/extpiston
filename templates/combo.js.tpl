@@ -11,7 +11,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		//TODO fix for global stores
 		{% endif %}
 		var config = {
-			store: new {{app_label|title}}.{{name}}.Store({autoLoad: true}),
+			store: new {{app_label|title}}.{{name}}.Store({autoLoad: this.initialConfig.autoLoad || true}),
 			mode: 'local', 				//Automatically loads the store the first time the trigger is clicked. If you do not want the store to be automatically loaded the first time the trigger is clicked, set to 'local' and manually load the store. To force a requery of the store every time the trigger is clicked see lastQuery.
 			fieldLabel: '{{ verbose_name }}',
 			triggerAction: 'all',			//The action to execute when the trigger is clicked. (query/all)

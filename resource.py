@@ -277,7 +277,7 @@ class ExtResource(Resource):
 			#print k,col
 			#if "__" in col['name'] and not col.get('fk',None): continue		#TODO po co było to ograniczenie???
 			newcol = {'fieldLabel': col['header']}
-			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'name', 'value', 'width'], newcol)
+			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'hidden', 'name', 'value', 'width'], newcol)
 			#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
@@ -309,9 +309,7 @@ class ExtResource(Resource):
 			else:
 				newcol['xtype'] = col['type']+'field'
 
-			newcol['hidden'] = col.get('hidden', False)
-			newcol['readOnly'] = not col.get('editable', True)
-			newcol['hideTrigger'] = not col.get('editable', True)
+			newcol['hideTrigger'] = newcol['readOnly'] = not col.get('editable', True)
 			newcol.update(self.forms[name].get(k,{}))	#update generated column/field definition with value passwd to a Resource via form/forms parameter
 			columns[k]=newcol
 
@@ -351,10 +349,12 @@ class ExtResource(Resource):
 			return dict([(k,d[k]) for k in keys if k in d])
 
 		def fixtype(f):
+			type_map = {'text': 'string', 'bool': 'boolean'}		#remap types
+			allowed_types = ['auto', 'boolean', 'date', 'float', 'int', 'string', ]		#TODO what about custon types?
+
 			if 'type' not in f: return f
-			if f['type'] == 'text': f['type'] = 'string'
-			elif f['type'] == 'bool': f['type'] = 'boolean'
-			elif f['type'] not in ['auto', 'boolean', 'date', 'float', 'int', 'string', ]: del f['type']		#TODO what about custon types?
+			f['type'] = type_map.get(f['type'], f['type'])
+			if f['type'] not in allowed_types: del f['type']		#TODO what about custon types?
 			return f
 
 		store = {
