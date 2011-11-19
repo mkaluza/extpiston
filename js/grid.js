@@ -169,6 +169,7 @@ ExtPiston.grid.GridPanel = Ext.extend(
 			//		throw "{{app_label|title}}.{{name}}.gridInit: invalid baseUrl: "+baseUrl;
 		}
 		//dynamic base url setting
+		this.postInit();
 	}, //initComponent
 	beforeClose: function(panel) {
 		if (this.form.isDirty())
@@ -233,6 +234,7 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange', 'cellselect']);
 		this.addEvents(['addItem','removeItem']);
+		this.postInit();
 	}	//initComponent
 });
 Ext.reg('extpiston.editorgrid',ExtPiston.grid.EditorGridPanel);

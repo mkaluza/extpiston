@@ -99,6 +99,35 @@ Ext.onReady(function() {
 	}, Ext.ComponentMgr);
 })
 
+//fix showing and hiding of toolbars within a panel
+/*
+//leave this code only as an example
+
+Ext.override(Ext.Toolbar, {
+	hide: function hide() {
+		this.el.setVisibilityMode(Ext.Element.DISPLAY);
+		Ext.Toolbar.superclass.hide.apply(this, arguments);
+		this.el.hide();
+		this.syncSize();
+		if (this.ownerCt) this.ownerCt.doLayout();
+	},
+	show: function hide() {
+		this.el.show();
+		this.syncSize();
+		if (this.ownerCt) this.ownerCt.doLayout();
+		Ext.Toolbar.superclass.show.apply(this, arguments);
+	}
+});
+*/
+
+//a better way to do it
+Ext.override(Ext.Panel, {
+	initComponent: Ext.Panel.prototype.initComponent.createSequence(function catchToolbarHide() {
+		for (var i = 0; i < this.toolbars.length; i++)
+			this.toolbars[i].on('hide', this.doLayout.createDelegate(this));
+	})
+});
+
 function urljoin(url1, url2) {
 	//TODO recognize GET params in the url
 	if (url1.charAt(url1.length-1)!='/')
