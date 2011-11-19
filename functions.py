@@ -97,8 +97,54 @@ def request_debug2(show_sql):	#this can only decorate class methods
 		return wrapper
 	return _request_debug
 
-def copy_dict(d, keys):
-	return dict([(k,d[k]) for k in keys if k in d])
+def copy_dict(src, keys = None, dst = None, overwrite = False, defaults = None, set_null_if_missing = False, overwrite_if_missing = False):
+	"""Copy data from one dict to another
+
+	src - source dictionary
+	keys [None] - keys to copy. if not given, all src will be copied
+	dst [None] - target dict, if not given, new one is created
+	overwrite [False] - True to overwrite values in target dict
+	defaults [None] - default values for those not found in src
+	set_null_if_missing [False] - if key is neither in src nor defaults nor dst, set it to None when True. Useful to avoid KeyError later
+	overwrite_if_missing [False] - if key is neither in src nor defaults, set it to None whether it exists or not when True. Works only when set_null_if_missing is True
+	"""
+
+	dst = dst or {}
+	if defaults == None:
+		defaults = {}
+	else:
+		defaults = defaults.copy()		#we need a copy here since we'll modify it later
+
+	if not keys:
+		#TODO merge defaults or not?
+		if not dst:
+			return dict(defaults, **src)	#return a copy with defaults applied (second arg are overrides)
+			return src.copy()		#or without merging defaults
+
+		return dict(dict(defaults, **src), **dst)
+		return dict(src, **dst)			#or without merging defaults
+
+	#prepare defaults
+	for k in range(0,len(keys)):
+		if isinstance(keys[k], (list, tuple)):
+			key, val = keys[k][:2]
+			keys[k] = key
+			defaults[key] = val	#TODO check for overlaps
+
+	available_keys = set(keys) & (set(src.keys()) | set(defaults.keys()))
+
+	if set_null_if_missing:
+		for k in set(keys) - available_keys:
+			if k not in dst or overwrite_if_missing:
+				dst[k] = None
+
+	#copy
+	for k in available_keys:
+		v = src.get(k, defaults.get(k))			#this will always return a value since we only iterate available keys
+		if k not in dst or overwrite:
+			dst[k] = v
+	return dst
+	return dict([(k,src[k]) for k in keys if k in src])	#old one... things used to be simple...
 
 def setup_params(obj, params_def, kwargs = None, ret_params = None):
 	"""Setup obj's fields given in params_def with overrides given in kwargs
