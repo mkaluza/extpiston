@@ -17,7 +17,7 @@ from django.utils import simplejson
 import settings
 
 from json import DefaultJSONEncoder
-from functions import Timer, request_debug
+from functions import Timer, request_debug, copy_dict
 from internal import *
 
 def JS(obj):
@@ -276,12 +276,9 @@ class ExtResource(Resource):
 		for k,col in _columns:
 			#print k,col
 			#if "__" in col['name'] and not col.get('fk',None): continue		#TODO po co było to ograniczenie???
-			newcol = {'fieldLabel': col['header'], 'name': col['name'], '_col_num':col['_col_num']}
-			if 'width' in col: newcol['width'] = col['width']
-			if 'height' in col: newcol['height'] = col['height']
-			if 'format' in col: newcol['format'] = col['format']
-			if 'value' in col: newcol['value'] = col['value']	#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
-			if 'disabled' in col: newcol['disabled'] = col['disabled']
+			newcol = {'fieldLabel': col['header']}
+			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'name', 'value', 'width'], newcol)
+			#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
 			elif 'fk' in col and col['fk']:
