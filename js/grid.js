@@ -37,16 +37,23 @@ ExtPiston.grid.Grid = {
 			//TODO actions shoud be some kind of an objects/collection (a class shoud be defined for it)
 			this.actions.each(function(action,index,length) {
 				this.tbar.push(action);
-				menu.add(action);
 				if (index<length-1) this.tbar.push('-');
+				if (action == '->') return;
+				menu.add(action);
 			}, this);
 		}
 	},
 	setBaseUrl: function(baseUrl) {
 		//TODO zrobić to lepiej... dużo lepiej...
+		this.origUrl = this.origUrl || this.store.url;
 		var url = baseUrl+'/' + this.childUrl || this.url;
 		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
 		this.store.proxy.setUrl(url,true);
+	},
+	getBaseUrl: function getBaseUrl(rec) {
+		var rec = rec || this.getSelectionModel().getSelected();
+		if (!rec) return null;
+		return urljoin(this.origUrl || this.store.url, rec.id);
 	},
 	setDynamicBaseUrl: function(store) {
 		//if it's a function, call it to get current base url
