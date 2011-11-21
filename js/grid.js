@@ -197,10 +197,17 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 					//TODO
 					var rec = {};
 					var store = this.getStore();
+
+					//what was this for??
 					for(var i=0; i<store.fields.keys.length; i++) {
 						var f = store.fields.keys[i];
 						if (f != store.reader.meta.idProperty) rec[f]='';
 					}
+					//initialize default values	TODO reocrdType should do it by itself?...
+					store.fields.each(function(f) {
+						if (f.defaultValue != "")
+							rec[f.name]=f.defaultValue;
+					});
 					var u = new store.recordType(rec);	//nie trzeba, ale wtedy cały się podświetla i jest wyraźniej
 					u.markDirty();
 					this.stopEditing();
