@@ -220,8 +220,10 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 					}
 					store.removeAt(rec[0]);
 					var cnt = store.getCount();
-					if (cnt<=rec[0]) sm.select(cnt-1,1);
-					else sm.select(rec[0],1);
+					if (cnt > 0) {
+						if (cnt<=rec[0]) sm.select(cnt-1,1);
+						else sm.select(rec[0],1);
+					}
 					this.fireEvent('removeItem', this, rec);
 				}
 			},
