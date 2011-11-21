@@ -205,7 +205,14 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 					u.markDirty();
 					this.stopEditing();
 					store.insert(0, u);
-					this.startEditing(0,1);	//TODO - to sie musi samo wymyslac albo znajdywac
+					//find first editable cell
+					var cm = this.colModel;
+					var editableCells = cm.getColumnsBy(function checkIfEditable(c, i) {
+						return c.editable;
+						return this.isCellEditable(0,i);	//this would return true if column has editor property set, but editable==false and we don't want it
+					});
+					if (editableCells.length > 0)
+						this.startEditing(0,editableCells[0].id);
 					this.fireEvent('addItem', this, u);
 				}
 			},
