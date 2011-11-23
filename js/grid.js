@@ -60,7 +60,7 @@ ExtPiston.grid.Grid = {
 		//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
 		if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
 	},
-	adjustHeightToFitMaxRows: true,					//CONFIG
+	adjustHeightToFitMaxRows: false,				//CONFIG
 	adjustHeight: function adjustHeight() {
 		if (!this.adjustHeightToFitMaxRows) return		//CONFIG
 		if (!this.el) return;
