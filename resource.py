@@ -187,6 +187,8 @@ class ExtResource(Resource):
 			if type(data['data']) in [unicode,str]: data['data'] = simplejson.loads(data['data'])
 			setattr(request,'data',data['data'])
 			del data['data']
+			request.data.update(data)
+			request.data.update(getattr(request,'params',{}))
 			data = dict(request.data, **data)
 		else:
 			setattr(request,'data',data)

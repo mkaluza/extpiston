@@ -222,10 +222,12 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 					var store = this.getStore();
 
 					//what was this for??
+					/*
 					for(var i=0; i<store.fields.keys.length; i++) {
 						var f = store.fields.keys[i];
 						if (f != store.reader.meta.idProperty) rec[f]='';
 					}
+					*/
 					//initialize default values	TODO reocrdType should do it by itself?...
 					store.fields.each(function(f) {
 						if (f.defaultValue != "")
