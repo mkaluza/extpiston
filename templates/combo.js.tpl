@@ -49,6 +49,6 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		var url = urljoin(baseUrl, this.childUrl || this.url);
 		this.store.url = url;		//so that we don't need to get grid.store.proxy.url, but only grid.store.url
 		this.store.proxy.setUrl(url,true);
-	},
+	}
 	});
 Ext.reg('{{app_label|lower}}.{{name|lower}}.combo',{{app_label|title}}.{{name}}.ComboBox);
