@@ -10,8 +10,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{% if separate_store %}
 		//TODO fix for global stores
 		{% endif %}
+		var autoLoad = (this.initialConfig.autoLoad != false)
 		var config = {
-			store: new {{app_label|title}}.{{name}}.Store({autoLoad: this.initialConfig.autoLoad || true}),
+			store: new {{app_label|title}}.{{name}}.Store({autoLoad: autoLoad}),
 			mode: 'local', 				//Automatically loads the store the first time the trigger is clicked. If you do not want the store to be automatically loaded the first time the trigger is clicked, set to 'local' and manually load the store. To force a requery of the store every time the trigger is clicked see lastQuery.
 			fieldLabel: '{{ verbose_name }}',
 			triggerAction: 'all',			//The action to execute when the trigger is clicked. (query/all)
@@ -40,7 +41,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			for(var name in this.initialConfig.baseParams)
 				this.store.setBaseParam(name,this.initialConfig.baseParams[name]);
 		{% if store_type == 'json' %}
-		this.store.load();
+		//if (autoLoad) this.store.load();
 		{% endif %}
 
 	}, //initComponent
