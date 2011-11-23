@@ -194,14 +194,15 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		Ext.apply(this,this.initialConfig);
 
 		var grid = {
-			xtype: 'extpiston.m2m.grid'
+			xtype: 'extpiston.m2m.grid',
+			header: true
 			//border: false
 		}
 
 		this.items = [];
 
-		var grid1 = {itemId: 'left'};
-		var grid2 = {itemId: 'right'};
+		var grid1 = {itemId: 'left', title: _('Not assigned')};
+		var grid2 = {itemId: 'right', title: _('Assigned')};
 
 		/*
 		Ext.applyIf(grid1, this.initialConfig);
@@ -237,6 +238,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			s_st.remove(rec);
 			d_st.add(rec);
 			if (!d_st.autoSave) d_st.save();
+			this.fireEvent('change');
 		}, this);
 
 		this.grid2.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
@@ -245,7 +247,9 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			var d_st = this.grid1.getStore();
 			d_st.add(rec);
 			s_st.remove(rec);
+			this.fireEvent('change');
 		}, this);
+		this.addEvents('change');
 	}, //initComponent
 	setBaseUrl: function(baseUrl) {
 		this.baseUrl = baseUrl;
