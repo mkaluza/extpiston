@@ -331,14 +331,16 @@ class ExtResource(Resource):
 					if n not in self.columns:
 						print 'ExtPiston warning! Field %s is invalid' % n
 						continue
-					col = (n,self.columns[n].copy())
-					col[1].update(v)
-					_columns.append(col)
+					col = self.columns[n].copy()
+					col.update(v)
+					_columns.append((n,col))
 
 				#to add columns with default values, add 'name':{}
 
 		for k,col in _columns:
 			col['dataIndex'] = col['name']
+			if col.get('type', None) in ['date', 'float', 'number']:
+				col.setdefault('align','right')
 			#TODO jakiś ładny wyjątek, żeby obsługiwał literówki w nazwach kolumn
 			columns[k]=col
 
