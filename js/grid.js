@@ -59,6 +59,27 @@ ExtPiston.grid.Grid = {
 		//if it's a function, call it to get current base url
 		//if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/{{ name|lower }}', true);
 		if (typeof(this.initialConfig.baseUrl) == "function") this.store.proxy.setUrl(this.initialConfig.baseUrl()+'/' + this.childUrl, true);
+	},
+	adjustHeightToFitMaxRows: true,					//CONFIG
+	adjustHeight: function adjustHeight() {
+		if (!this.adjustHeightToFitMaxRows) return		//CONFIG
+		if (!this.el) return;
+		var scr = Ext.query('div.x-grid3-scroller', this.el.dom)[0];
+		var rows = Ext.query('div.x-grid3-row', scr)
+		rows = Array.prototype.slice.call(rows,0);
+		//var els = Ext.query('div.x-grid3-cell-inner', scr);
+		if (!rows.length) return;
+
+		var tb;
+
+		for(var i = 0; i < this.toolbars.length; i++) {
+			tb = this.toolbars[i].pageSize;
+			if (tb) break;
+		}
+		if (!tb) return;
+		//var dh = scr.clientHeight - this.bottomToolbar.pageSize * (rows[0].clientHeight+2);
+		var dh = scr.clientHeight - tb * (rows[0].clientHeight+2);
+		this.setHeight(this.getHeight()-dh);
 	}
 }
 
@@ -147,7 +168,7 @@ ExtPiston.grid.GridPanel = Ext.extend(
 		if (editAction) {
 			this.on('celldblclick',function(grid, rowIndex, columnIndex, event){
 				grid.getSelectionModel().selectRow(rowIndex);
-				editAction.execute();
+				if (!editAction.isDisabled()) editAction.execute();
 			});
 		}
 
@@ -158,9 +179,11 @@ ExtPiston.grid.GridPanel = Ext.extend(
 
 		if (this.initialConfig.filterBy) {
 			var tb = this.tbar = this.tbar || [];
-			tb.push(new Ext.ux.form.SearchField({paramName: 'filter__'+this.initialConfig.filterBy, store: this.initialConfig.store}));
+			tb.push(new Ext.ux.form.SearchField({paramName: 'filter__'+this.initialConfig.filterBy, store: this.initialConfig.store, grid: this}));
 		}
 
+		this.on('viewready', this.adjustHeight);
+		this.store.on('load', this.adjustHeight, this);
 		ExtPiston.grid.GridPanel.superclass.initComponent.apply(this, arguments);
 
 		this.relayEvents(this.getSelectionModel(),['selectionchange','rowselect']);

@@ -29,6 +29,7 @@ Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
         if(this.hasSearch){
             this.el.dom.value = '';
             var o = {start: 0};
+            if (!this.store) this.store = this.grid.getStore();
             this.store.baseParams = this.store.baseParams || {};
             delete this.store.baseParams[this.paramName];
             this.store.reload({params:o});
@@ -44,6 +45,7 @@ Ext.ux.form.SearchField = Ext.extend(Ext.form.TwinTriggerField, {
             return;
         }
         var o = {start: 0};
+        if (!this.store) this.store = this.grid.getStore();
         this.store.baseParams = this.store.baseParams || {};
         this.store.baseParams[this.paramName] = v;
         this.store.reload({params:o});
