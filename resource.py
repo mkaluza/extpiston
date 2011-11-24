@@ -16,12 +16,9 @@ from django.utils import simplejson
 
 import settings
 
-from json import DefaultJSONEncoder
+from json import DefaultJSONEncoder, JS
 from functions import Timer, request_debug, copy_dict
 from internal import *
-
-def JS(obj):
-	return simplejson.dumps(obj,indent = 3, cls=DefaultJSONEncoder)
 
 class ExtResource(Resource):
 	"""ExtResource Class
