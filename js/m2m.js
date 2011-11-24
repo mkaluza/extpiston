@@ -185,17 +185,27 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			displayField: '__str__',
 			baseUrl: '',	//url part that comes from parent component like /name/pk_value/ - may be a function to set it dynamically
 			url: this.initialConfig.name || '',	//url that will be added to baseUrl and set as url of the grids
-			layout: 'column',
-			defaults: {columnWidth: 0.5},
+			layout: 'hbox',
+			layoutConfig: {
+				align: 'stretch',
+			},
 			height: 220,
-			plugins: ['masterslave']
+			plugins: ['masterslave'],
+			tools: [{
+				id: 'refresh',
+				handler: function(event, toolEl, panel, tc) {
+					panel.grid1.store.reload();
+					panel.grid2.store.reload();
+				}
+			}]
 		}
 		Ext.applyIf(this.initialConfig, config);
 		Ext.apply(this,this.initialConfig);
 
 		var grid = {
 			xtype: 'extpiston.m2m.grid',
-			header: true
+			header: true,
+			flex: 1
 			//border: false
 		}
 
@@ -204,10 +214,75 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		var grid1 = {itemId: 'left', title: _('Not assigned')};
 		var grid2 = {itemId: 'right', title: _('Assigned')};
 
-		/*
-		Ext.applyIf(grid1, this.initialConfig);
-		Ext.applyIf(grid2, this.initialConfig);
-		*/
+		function selRow(grid) {
+			var sm = grid.getSelectionModel();
+			var cnt = sm.grid.store.getCount() - 1;
+			var last = sm.last == false ? cnt : sm.last;
+			sm.selectRow(Math.min(last, cnt));
+		}
+
+		function add(grid, rowIndex, columnIndex, e) {
+			var rec, s_st;
+			if (grid instanceof Ext.grid.GridPanel) {
+				s_st = grid.getStore();
+				rec = s_st.getAt(rowIndex);
+			} else {
+				s_st = this.grid1.getStore();
+				rec = this.grid1.getSelectionModel().getSelected();
+				if (!rec) return;
+			}
+			var d_st = this.grid2.getStore();
+			rec.phantom = true;
+			s_st.remove(rec);
+			d_st.add(rec);
+			if (!d_st.autoSave) d_st.save();
+			selRow(this.grid1);
+			selRow(this.grid2);
+			this.fireEvent('change');
+		}
+
+		function remove(grid, rowIndex, columnIndex, e) {
+			var rec, s_st;
+			if (grid instanceof Ext.grid.GridPanel) {
+				s_st = grid.getStore();
+				rec = s_st.getAt(rowIndex);
+			} else {
+				s_st = this.grid2.getStore();
+				rec = this.grid2.getSelectionModel().getSelected();
+				if (!rec) return;
+			}
+			var d_st = this.grid1.getStore();
+			d_st.add(rec);
+			s_st.remove(rec);
+			selRow(this.grid1);
+			selRow(this.grid2);
+			this.fireEvent('change');
+		}
+		var buttonsCol = {
+			width: 35,
+			layout: {
+				type: 'vbox',
+				align: 'stretch',
+				pack: 'center'
+			},
+			defaults: {
+				xtype: 'button',
+				scope: this,
+				height: 26,
+				margins: "3px 3px"
+			},
+			items: [{
+				text: '>',
+				handler: add
+			//}, {
+			//	text: '>>'
+			}, {
+				text: '<',
+				handler: remove
+			//}, {
+			//	text: '<<'
+			}]
+		}
 		var props_to_copy = [
 			'childUrl',
 			'displayField',
@@ -223,6 +298,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		Ext.apply(grid2, grid);
 
 		this.items.push(grid1);
+		this.items.push(buttonsCol);
 		this.items.push(grid2);
 
 		ExtPiston.m2m.Panel.superclass.initComponent.apply(this, arguments);
@@ -230,25 +306,8 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 		this.grid1 = this.find('itemId','left')[0];
 		this.grid2 = this.find('itemId','right')[0];
 
-		this.grid1.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
-			var s_st = grid.getStore();
-			var rec = s_st.getAt(rowIndex);
-			var d_st = this.grid2.getStore();
-			rec.phantom = true;
-			s_st.remove(rec);
-			d_st.add(rec);
-			if (!d_st.autoSave) d_st.save();
-			this.fireEvent('change');
-		}, this);
-
-		this.grid2.on('celldblclick', function(grid, rowIndex, columnIndex, e) {
-			var s_st = grid.getStore();
-			var rec = s_st.getAt(rowIndex);
-			var d_st = this.grid1.getStore();
-			d_st.add(rec);
-			s_st.remove(rec);
-			this.fireEvent('change');
-		}, this);
+		this.grid2.on('celldblclick', remove, this);
+		this.grid1.on('celldblclick', add, this);
 		this.addEvents('change');
 	}, //initComponent
 	setBaseUrl: function(baseUrl) {
