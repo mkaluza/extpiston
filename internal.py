@@ -24,6 +24,8 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import Context, loader
 from django.utils import simplejson
+from django.utils.encoding import force_unicode
+from django.utils.functional import Promise
 
 import settings
 
@@ -129,7 +131,8 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 
 		if ff:
 			field_dict['type'] = get_field_type(ff.__class__.__name__)
-			if type(ff.verbose_name) in [str,unicode]: field_dict['header'] = ff.verbose_name
+			if type(ff.verbose_name) in [str, unicode]: field_dict['header'] = ff.verbose_name
+			elif isinstance(ff.verbose_name, Promise): field_dict['header'] = force_unicode(ff.verbose_name)
 			if ff.help_text and type(ff.help_text) in [str,unicode]: field_dict['tooltip'] = ff.help_text
 			if ff.default != django.db.models.fields.NOT_PROVIDED: field_dict['default']=ff.default
 			#TODO figure this out... can't be this way because if field is invisible and not allowed blank, the store will not save
