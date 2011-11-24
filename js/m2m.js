@@ -187,7 +187,7 @@ ExtPiston.m2m.Panel = Ext.extend(Ext.Panel, {
 			url: this.initialConfig.name || '',	//url that will be added to baseUrl and set as url of the grids
 			layout: 'hbox',
 			layoutConfig: {
-				align: 'stretch',
+				align: 'stretch'
 			},
 			height: 220,
 			plugins: ['masterslave'],
