@@ -369,7 +369,7 @@ class ExtResource(Resource):
 		jsonstore = {
 			#'xtype': 'jsonstore',	#TODO put correct xtype
 			#'root': 'data',		#TODO make it settable, use it here and in emitter
-			'url': '/%s/api/%s' % (self.app_label, self.name),
+			'url': '%s/api/%s' % (self.app_label, self.name),
 			'writeable': bool(set(self.handler.allowed_methods) & set(['PUT', 'POST', 'DELETE'])),
 		}
 		jsonstore.update(store)
