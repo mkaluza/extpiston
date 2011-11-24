@@ -338,11 +338,13 @@ class ExtResource(Resource):
 				#to add columns with default values, add 'name':{}
 
 		for k,col in _columns:
-			col['dataIndex'] = col['name']
-			if col.get('type', None) in ['date', 'float', 'number']:
-				col.setdefault('align','right')
-			#TODO jakiś ładny wyjątek, żeby obsługiwał literówki w nazwach kolumn
-			columns[k]=col
+			try:
+				col['dataIndex'] = col['name']
+				if col.get('type', None) in ['date', 'float', 'number']:
+					col.setdefault('align','right')
+				columns[k]=col
+			except:
+				print 'Error processing column %s' % k
 
 		sorted_column_names = [col[0] for col in sorted(columns.iteritems(),key=lambda x: x[1]['_col_num']) ]
 
