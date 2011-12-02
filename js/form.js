@@ -154,8 +154,10 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		} else o.method = 'POST';
 
 		o.url = url;
+		if (this.mask) this.mask.show();
 	},
 	actionComplete: function(form, action) {
+		if (this.mask) this.mask.hide();
 		App.setAlert(true, action.result.message || 'OK');
 		if (action.type == 'submit') {
 			var oldpk = this.getPk();
@@ -168,6 +170,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		};
 	},
 	actionFailed: function(form, action) {
+		if (this.mask) this.mask.hide();
 		switch (action.failureType) {
 			case Ext.form.Action.CLIENT_INVALID:
 				App.setAlert(false, 'Błąd danych w formularzu');
@@ -183,6 +186,13 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	beforeClose: function(panel) {
 		if (panel.form.isDirty())
 			return confirm('Formularz zawiera niezapisane dane. Czy na pewno chcesz zamknąć okno?');
+	},
+	onRender: function onRender() {
+		ExtPiston.form.FormPanel.superclass.onRender.apply(this, arguments);
+		if ((!this.mask && this.mask != false) || this.mask == true || !(this.mask instanceof Ext.LoadMask)) {
+			//TODO szukać maski, jeśli to będzie obiekt i ewentualnie rzucać błędem
+			this.mask = new Ext.LoadMask(this.getEl(), {msg: _("Please wait...")});
+		}
 	}
 });
 

@@ -257,3 +257,14 @@ Ext.reg('reqFieldInfo', Extensive.components.RequiredFieldInfo);
 Extensive.components.RequiredFieldInfo.prototype.requiredFieldText = 'Pole wymagane';
 
 Ext.reg('floatfield', Ext.form.NumberField);
+
+Ext.Ajax.on('beforerequest', function(conn, options) {
+	if (options.mask) options.mask.show();
+});
+Ext.Ajax.on('requestcomplete', function(conn, response, options) {
+	if (options.mask) options.mask.hide();
+});
+Ext.Ajax.on('requestexception', function(conn, response, options) {
+	if (options.mask) options.mask.hide();
+});
+
