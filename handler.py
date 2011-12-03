@@ -228,6 +228,11 @@ class ExtHandler(BaseHandler):
 			return rc.DUPLICATE_ENTRY
 
 	def update(self, request, *args, **kwargs):
+		if hasattr(self, 'protected_fields'):
+			for k in self.protected_fields:
+				if k in request.data:
+					del request.data[k]
+
 		super(ExtHandler, self).update(request, *args, **kwargs)
 
 		inst = self.read(request, *args, **kwargs)

@@ -13,6 +13,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			itemId: '{{ name|lower }}form',
 			pkField: '{{pk}}',
 			title: '{{ verbose_name|title }}',
+			{% if protected_fields %}protectedFields: {{ protected_fields }},{% endif %}
 			url: '{{app_label}}/api/{{ name|lower }}'
 		}; //config
 		this.ns = {{app_label|title}}.{{name}};

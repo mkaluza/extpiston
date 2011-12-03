@@ -116,7 +116,16 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('actioncomplete',this.actionComplete,this);
 		this.on('actionfailed',this.actionFailed,this);
 		this.on('beforeclose',this.beforeClose,this);
+		this.form.on('setvalues',this.setProtectedFields,this);
 	}, //initComponent
+	setProtectedFields: function setProtectedFields() {
+		if (this.protectedFields && this.getPk() != null) {
+			for(var i = 0; i < this.protectedFields.length; i++) {
+				var f = this.form.findField(this.protectedFields[i]);
+				if (f) f.disable();
+			}
+		}
+	},
 	setBaseUrl: function setBaseUrl(baseUrl) {
 		//TODO rethink it
 		var f = this.form;

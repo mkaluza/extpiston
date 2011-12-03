@@ -430,6 +430,7 @@ class ExtResource(Resource):
 		defaults.update(self.render_grid(request))
 		defaults.update(self.render_form(request))
 		defaults['columns'] = simplejson.dumps([self.columns[k] for k in set(self.fields) & set(self.columns.keys())],indent = 3, cls=DefaultJSONEncoder)
+		if hasattr(self.handler, 'protected_fields'): defaults['protected_fields'] = self.handler.protected_fields
 		defaults.update(dictionary or {})
 
 		if name == 'store2':
