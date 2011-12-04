@@ -196,7 +196,17 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				App.setAlert(false, 'Błąd danych w formularzu');
 				break;
 			case Ext.form.Action.CONNECT_FAILURE:
-				App.setAlert(false, 'Błąd serwera');
+				var msg = _('Błąd serwera');
+				try {
+					var msg2 = ':\n' + action.response.status + ': ' + action.response.responseText || action.response.statusText;
+					msg += msg2;
+				} catch (e) {};
+
+				if (action.response.status == 401) {
+					msg = _('Brak uprawnień');
+					if (action.response.responseText) msg += ':\n' + action.response.responseText;
+				}
+				App.setAlert(false, msg);
 				break;
 			case Ext.form.Action.SERVER_INVALID:
 				App.setAlert(false, action.result.message || 'PROCESSING ERROR');
