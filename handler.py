@@ -166,7 +166,7 @@ class ExtHandler(BaseHandler):
 		if 'data' in self.local_field_names:
 			raise ValueError("Handler %s: There can't be (yet) a field named 'data'" % self.name)
 
-	def __check_security(request):
+	def _check_security(self, request):
 		perms = {'GET': 'view', 'PUT': 'change', 'DELETE': 'delete', 'POST': 'add'}
 		#TODO make it smarter
 		if not request.user.is_authenticated(): return False
@@ -185,15 +185,15 @@ class ExtHandler(BaseHandler):
 		if not s: return True
 
 		if s == True:
-			return __check_security(request)
+			return self._check_security(request)
 		elif s == 'login':
 			if request.method == 'GET':
 				return request.user.is_authenticated()
 			else:
-				return check_security(request)
+				return self._check_security(request)
 		elif s == 'write':
 			if request.method != 'GET':
-				return check_security(request)
+				return self._check_security(request)
 			else:
 				return True
 		#elif type(s) == dict:	#TODO...
@@ -430,7 +430,7 @@ class RelatedBaseHandler(ExtHandler):
 		return super(RelatedBaseHandler,self).read(request,*args,**kwargs)
 
 class ManyToManyHandler(RelatedBaseHandler):
-	def __check_security(request):
+	def _check_security(self,request):
 		if not request.user.is_authenticated(): return False
 
 		perm = 'assign'
