@@ -7,6 +7,7 @@ from piston.handler import BaseHandler, typemapper
 from piston.utils import rc
 
 import django
+from django.conf import settings
 from django.contrib.auth.models import Permission,Group,User
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models.fields import FieldDoesNotExist, related as related_fields, files as file_fields
@@ -135,7 +136,7 @@ class ExtHandler(BaseHandler):
 		self.value_field = getattr(self,'value_field',self.pkfield)
 		self.display_field = getattr(self,'display_field','__str__')
 
-		self.security = getattr(self, 'security', False)
+		self.security = getattr(self, 'security', getattr(settings, 'EXTPISTON_DEFAULT_SECURITY', False))
 
 		#handler fields pseudofields and properties owned directly by the model
 		self.local_field_names = set(filter(lambda f: isinstance(f,(str,unicode)), self.fields))
@@ -164,6 +165,40 @@ class ExtHandler(BaseHandler):
 
 		if 'data' in self.local_field_names:
 			raise ValueError("Handler %s: There can't be (yet) a field named 'data'" % self.name)
+
+	def __check_security(request):
+		perms = {'GET': 'view', 'PUT': 'change', 'DELETE': 'delete', 'POST': 'add'}
+		#TODO make it smarter
+		if not request.user.is_authenticated(): return False
+
+		perm = perms[request.method]
+		m = self.model._meta
+		name = m.module_name
+		app = m.app_label
+		codename = "%s.%s_%s" % (app, perm, name)
+		res = request.user.has_perm(codename)
+		print "checking permission", codename, 'for', request.user, res
+		return res
+
+	def authorize(self, request):
+		s = self.security
+		if not s: return True
+
+		if s == True:
+			return __check_security(request)
+		elif s == 'login':
+			if request.method == 'GET':
+				return request.user.is_authenticated()
+			else:
+				return check_security(request)
+		elif s == 'write':
+			if request.method != 'GET':
+				return check_security(request)
+			else:
+				return True
+		#elif type(s) == dict:	#TODO...
+		else:
+			return True
 
 	def queryset(self,request,*args, **kwargs):
 		#if self.security:
@@ -395,7 +430,22 @@ class RelatedBaseHandler(ExtHandler):
 		return super(RelatedBaseHandler,self).read(request,*args,**kwargs)
 
 class ManyToManyHandler(RelatedBaseHandler):
-	pass
+	def __check_security(request):
+		if not request.user.is_authenticated(): return False
+
+		perm = 'assign'
+		om = self.owner_model._meta
+		m = self.model._meta
+
+		codename = "%s.%s_%s_to_%s" % (om.app_label, perm, m.module_name, om.module_name) #app.assign_this_to_parent
+		res = request.user.has_perm(codename)
+		if not res:
+			#TODO to nie może tak być  w 2 strony
+			#TODO alternatywnie zrobić to jako pochodną uprawnień change na którymś (obu na raz) obiekcie
+			codename = "%s.%s_%s_to_%s" % (om.app_label, perm, om.module_name, m.module_name) #app.assign_this_to_parent
+			res = request.user.has_perm(codename)
+		#print "checking permission", codename, 'for', request.user, res
+		return res
 
 class ReverseRelatedHandler(RelatedBaseHandler):
 	pass
