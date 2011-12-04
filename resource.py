@@ -149,14 +149,16 @@ class ExtResource(Resource):
 
 		if not hasattr(request, 'data') and request.method in ['GET','PUT','POST']:
 			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
-		else: data = getattr(request,'data',{})
+		else: data = getattr(request,'data',{})					#this never happens?
+
+		if '_dc' in data: del data['_dc']
 
 		if 'data' in data:
 			#print 'data2:', type(data['data']), data['data']
 			if type(data['data']) in [unicode,str]: data['data'] = simplejson.loads(data['data'])
 			setattr(request,'data',data['data'])
 			del data['data']
-			request.data.update(data)
+			request.data.update(data)					#to nakłada ewentualne baseParams, a powinno trafić do params
 			request.data.update(getattr(request,'params',{}))
 			data = dict(request.data, **data)
 		else:
@@ -164,6 +166,14 @@ class ExtResource(Resource):
 
 		data.update(getattr(request,'params',{}))	#if any inherited handler already set any params, keep them
 		setattr(request,'params',data)
+		#TODO całe to trzeba refaktoryzować, tylko najpierw trzeba dobrze ogarnąć, kiedy pojawia się data/params i w jakim stanie
+		def fix_bools(d):
+			for k, v in d.iteritems():
+				if v =='false': d[k] = False
+				elif v =='true': d[k] = True
+
+		fix_bools(request.data)
+		fix_bools(request.params)
 
 		self.handler.success = True
 		self.handler.message = None
@@ -257,7 +267,7 @@ class ExtResource(Resource):
 			#print k,col
 			#if "__" in col['name'] and not col.get('fk',None): continue		#TODO po co było to ograniczenie???
 			newcol = {'fieldLabel': col['header']}
-			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'hidden', 'name', 'value', 'width'], newcol)
+			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'hidden', 'hiddenName', 'name', 'value', 'width'], newcol)
 			#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
@@ -371,7 +381,7 @@ class ExtResource(Resource):
 
 		for f in self.fields2:
 			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
-			ff = copy(f[1], ['name', 'default', 'allowBlank'])
+			ff = copy(f[1], ['name', 'default', 'allowBlank', 'defaultValue'])
 			if 'type' in f[1] and f[1]['type'] in ['string','int','float','boolean','auto']: ff['type'] = f[1]['type']
 			if ff['name'] not in self.fields: continue
 			fixtype(ff)
