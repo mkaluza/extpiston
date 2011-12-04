@@ -435,18 +435,21 @@ class ManyToManyHandler(RelatedBaseHandler):
 	def _check_security(self,request):
 		if not request.user.is_authenticated(): return False
 
-		perm = 'assign'
 		om = self.owner_model._meta
 		m = self.model._meta
 
-		codename = "%s.%s_%s_to_%s" % (om.app_label, perm, m.module_name, om.module_name) #app.assign_this_to_parent
-		res = request.user.has_perm(codename)
-		if not res:
-			#TODO to nie może tak być  w 2 strony
-			#TODO alternatywnie zrobić to jako pochodną uprawnień change na którymś (obu na raz) obiekcie
-			codename = "%s.%s_%s_to_%s" % (om.app_label, perm, om.module_name, m.module_name) #app.assign_this_to_parent
+		if request.method == 'GET':
+			codename = "%s.view_%s" % (m.app_label, m.module_name)
 			res = request.user.has_perm(codename)
-		#print "checking permission", codename, 'for', request.user, res
+		else:
+			codename = "%s.assign_%s_to_%s" % (om.app_label, m.module_name, om.module_name) #app.assign_this_to_parent
+			res = request.user.has_perm(codename)
+			if not res:
+				#TODO to nie może tak być  w 2 strony
+				#TODO alternatywnie zrobić to jako pochodną uprawnień change na którymś (obu na raz) obiekcie
+				codename = "%s.assign_%s_to_%s" % (om.app_label, om.module_name, m.module_name) #app.assign_this_to_parent
+				res = request.user.has_perm(codename)
+		print "checking permission", codename, 'for', request.user, res
 		return res
 
 class ReverseRelatedHandler(RelatedBaseHandler):
