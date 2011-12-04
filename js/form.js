@@ -18,6 +18,17 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			defaults: {anchor: '100%'},
 			frame: true,
 			items: [],
+			keys: [
+				{
+					key: [Ext.EventObject.ENTER],
+					handler: function onEnterKey(key, ev) {
+						//TODO preserve it if config contains keys property as well or add it based on other config param (submitOnEnter) or TODO make actions listen to keys...
+						if (ev.target.type == 'textarea') return;
+						this.actions.get('save').execute();
+					},
+				scope: this
+				}
+			],
 			labelWidth: 100,
 			closeOnCreate: true,
 			trackResetOnLoad: true,
