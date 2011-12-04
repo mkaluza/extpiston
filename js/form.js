@@ -44,10 +44,12 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			 * If names are given - add only those fields, otherwise add all available fields
 			 */
 			if (this.initialConfig.fields) {
-				for (var name in this.initialConfig.fields)
+				for (var i = 0; i< this.initialConfig.fields.length; i++) {
+					var name = this.initialConfig.fields[i];
 					if (typeof(name)=="string")
-						config.items.push(this.nsformFields[name]);
+						config.items.push(this.ns.formFields[name]);
 						//TODO handle field definitions
+				}
 			} else {
 				for (var name in this.ns.formFieldNames) {
 					name = this.ns.formFieldNames[name];
