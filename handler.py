@@ -75,7 +75,8 @@ class ExtHandler(BaseHandler):
 				#1. create handler based on field name
 				if isinstance(f, (str, unicode)):	#strings are our model's field names
 					field = self.model._meta.get_field_by_name(f)[0]	#get the field
-					_m2m_handlers[f] = type('TODO', (RelatedBaseHandler,), {'field': field})	#and create a subclass of RelatedBaseHandler configured to handle this relation TODO czy nazwy musza byc unikalne czy nie?
+					#_m2m_handlers[f] = type('TODO', (RelatedBaseHandler,), {'field': field})	#and create a subclass of RelatedBaseHandler configured to handle this relation TODO czy nazwy musza byc unikalne czy nie?
+					_m2m_handlers[f] = type('TODO', (ManyToManyHandler,), {'field': field})	#and create a subclass of RelatedBaseHandler configured to handle this relation TODO czy nazwy musza byc unikalne czy nie?
 				#2. it can be already defined class
 				elif inspect.isclass(f):
 					ff = f()
@@ -83,7 +84,8 @@ class ExtHandler(BaseHandler):
 				elif isinstance(f, (list, tuple)):
 					name = f[0]
 					if isinstance(f[1], dict):
-						_m2m_handlers[f[0]] = type('TODO', (RelatedBaseHandler,), f[1])
+						#_m2m_handlers[f[0]] = type('TODO', (RelatedBaseHandler,), f[1])
+						_m2m_handlers[f[0]] = type('TODO', (ManyToManyHandler,), f[1])
 					else:
 						raise ValueError('invalid value: ' + repr(f[1]))
 				#3. tak jak w rev_rel poniżej (name, params {})
