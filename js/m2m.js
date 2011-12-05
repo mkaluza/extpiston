@@ -93,14 +93,16 @@ ExtPiston.MasterSlavePlugin = (function() {
 				if (!o.childUrl)
 					console.log("childUrl for related component not set: "+o.xtype);
 
+			var scope = obj;
+			if (m.scope == 'slave') scope = o;		//TODO what should be the default scope? slave?...
 			obj.on(m.event, function() {
-					var url = m.handler.apply(obj,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
+					var url = m.handler.apply(scope,arguments);		//TODO write generic handlers for different grids/forms and pass them only field name (or they can get it from store.idProperty and so on)
 					if (!url) {
 						this.disable();
 						return;
 					}
 					this.enable();
-					this.setBaseUrl(url);
+					if (Ext.isString(url)) this.setBaseUrl(url);			//if url is not a string but evals to true it means that handler did all the stuff and now just reload
 					if (this.store && !this.store.autoLoad) this.store.load();		//not everything has a store (i.e m2mpanel)
 					}, o);
 			o.disable();
