@@ -10,9 +10,9 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 		{% if separate_store %}
 		//TODO fix for global stores
 		{% endif %}
-		var autoLoad = (this.initialConfig.autoLoad != false)
+		var autoLoad = (this.initialConfig.autoLoad != false);		//autoLoad: true and mode: local make the combo preload before user clicks it, so it's more responsive
 		var config = {
-			store: new {{app_label|title}}.{{name}}.Store({autoLoad: autoLoad}),
+			store: new {{app_label|title}}.{{name}}.Store({autoLoad: autoLoad, baseParams: {start: null, limit: null}}),		//need to reset paging params
 			mode: 'local', 				//Automatically loads the store the first time the trigger is clicked. If you do not want the store to be automatically loaded the first time the trigger is clicked, set to 'local' and manually load the store. To force a requery of the store every time the trigger is clicked see lastQuery.
 			fieldLabel: '{{ verbose_name }}',
 			triggerAction: 'all',			//The action to execute when the trigger is clicked. (query/all)
