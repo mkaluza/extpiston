@@ -414,6 +414,7 @@ class RelatedBaseHandler(ExtHandler):
 		else: self.main_id = main_id
 
 		main_obj = self.owner_model.objects.get(pk = self.main_id)
+		self.main_obj = main_obj
 
 		if self.orig_handler:		#TODO trzeba to jakoś pogodzić z parametrem model przekazywanym do init w argumentach
 			q = self.orig_handler.queryset(request)
