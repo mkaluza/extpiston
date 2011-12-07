@@ -138,7 +138,7 @@ def flatten_fields2(handler, fields = None, model = None, prefix = '', parent_fi
 				except:
 					pass	#TODO warning message or try to fix it?
 			if ff.help_text and type(ff.help_text) in [str,unicode]: field_dict['tooltip'] = ff.help_text
-			if ff.default != django.db.models.fields.NOT_PROVIDED: field_dict['default']=ff.default
+			if ff.default != django.db.models.fields.NOT_PROVIDED: field_dict['value']=ff.default
 			#TODO figure this out... can't be this way because if field is invisible and not allowed blank, the store will not save
 			#if parent_field:
 			#	field_dict['allowBlank'] = parent_field.blank

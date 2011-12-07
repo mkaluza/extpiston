@@ -267,7 +267,7 @@ class ExtResource(Resource):
 			#print k,col
 			#if "__" in col['name'] and not col.get('fk',None): continue		#TODO po co było to ograniczenie???
 			newcol = {'fieldLabel': col['header']}
-			newcol = copy_dict(col, ['_col_num', 'anchor', 'disabled', 'format', 'height', 'hidden', 'hiddenName', 'name', 'value', 'width'], newcol)
+			newcol = copy_dict(col, ['_col_num', 'allowBlank', 'anchor', 'disabled', 'format', 'height', 'hidden', 'hiddenName', 'name', 'value', 'vtype', 'width'], newcol)
 			#TODO kopiować wartość default z pola, ale to pewnie gdzie indziej...
 			if col.get('pk',None):
 				newcol.update({'xtype': 'displayfield', 'hidden': True})
