@@ -130,6 +130,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('actionfailed',this.actionFailed,this);
 		this.on('beforeclose',this.beforeClose,this);
 		this.form.on('setvalues',this.setProtectedFields,this);
+		//this.form.submit = this.submit;	//TODO this normalizes form's submissions
 	}, //initComponent
 	setProtectedFields: function setProtectedFields() {
 		if (this.protectedFields && this.getPk() != null) {
@@ -224,6 +225,14 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		if ((!this.mask && this.mask != false) || this.mask == true || !(this.mask instanceof Ext.LoadMask)) {
 			//TODO szukać maski, jeśli to będzie obiekt i ewentualnie rzucać błędem
 			this.mask = new Ext.LoadMask(this.getEl(), {msg: _("Please wait...")});
+		}
+	},
+	submit: function submit(options) {
+		if (this.standardSubmit) {
+			return Ext.form.BasicForm.prototype.submit.call(this, options);
+		} else {
+			this.doAction('pistonsubmit', options);
+			return this;
 		}
 	}
 });

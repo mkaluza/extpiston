@@ -19,12 +19,16 @@ import settings
 from json import DefaultJSONEncoder, JS
 from functions import Timer, request_debug, copy_dict
 from internal import *
+from utils import ExtMimer
 
 class ExtResource(Resource):
 	"""ExtResource Class
 
 	description
 	"""
+
+	mimer = ExtMimer
+
 	def __init__(self,handler, authentication=None, authorization=None,**kwargs):
 		"""
 		Initialize a resource
@@ -135,8 +139,10 @@ class ExtResource(Resource):
 		#TODO for now only check security in handler
 		if not self.handler.authorize(request): return rc.FORBIDDEN
 
-		#TODO to dziala tylko, jka jest encode: true w jsonWriter
 		coerce_put_post(request)
+
+		#detect file uploads
+		#TODO use request.is_ajax()
 		if request.method=='POST' and request.META['CONTENT_TYPE'].startswith('multipart/form-data'):
 			#it's probably a submit from a form with fileUpload
 			if self.handler.pkfield in kwargs:
@@ -147,36 +153,17 @@ class ExtResource(Resource):
 		else:
 			extjs_file_post = False
 
-		if not hasattr(request, 'data') and request.method in ['GET','PUT','POST']:
-			data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
-		else: data = getattr(request,'data',{})					#this never happens?
+		if hasattr(request, 'data') and request.data == None: delattr(request, 'data')
+		if request.method == 'GET':
+			self.translate_mime(request)
+			#request.data = dict([(k,v) for k,v in getattr(request,request.method).iteritems()])
 
-		if '_dc' in data: del data['_dc']
-
-		if 'data' in data:
-			#print 'data2:', type(data['data']), data['data']
-			if type(data['data']) in [unicode,str]: data['data'] = simplejson.loads(data['data'])
-			setattr(request,'data',data['data'])
-			del data['data']
-			request.data.update(data)					#to nakłada ewentualne baseParams, a powinno trafić do params
-			request.data.update(getattr(request,'params',{}))
-			data = dict(request.data, **data)
-		else:
-			setattr(request,'data',data)
-
-		data.update(getattr(request,'params',{}))	#if any inherited handler already set any params, keep them
-		setattr(request,'params',data)
-		#TODO całe to trzeba refaktoryzować, tylko najpierw trzeba dobrze ogarnąć, kiedy pojawia się data/params i w jakim stanie
-		def fix_bools(d):
-			for k, v in d.iteritems():
-				if v =='false': d[k] = False
-				elif v =='true': d[k] = True
-
-		fix_bools(request.data)
-		fix_bools(request.params)
+			if '_dc' in request.data: del request.data['_dc']
 
 		self.handler.success = True
 		self.handler.message = None
+
+		if not hasattr(request, 'params'): request.params = getattr(request,'data',{})
 
 		response = super(ExtResource, self).__call__(request, *args, **kwargs)
 		#if it's a file upload, it's not XHR, it's via a hidden iframe and so response type must be text/html, otherwise browser shows 'save as' dialog for file 'application/json'
@@ -466,12 +453,12 @@ class RelatedExtResource(ExtResource):
 			#for the rest, we either can give parent pk as parent_field_id, or parent instance as parent_field
 			else: parent_fk_name = self.parent_fk.attname
 			#TODO check if there is field__id in data when our fk name is field_id, because it'll interfere
-			params[parent_fk_name] = kwargs.pop('parent_id')
-			kwargs[parent_fk_name] = params[parent_fk_name]
+			kwargs[parent_fk_name] = params[parent_fk_name] = kwargs.pop('parent_id')
 		else:
 			#handler takes care about parent-child relation
 			params[self.parent_fk_name] = kwargs.pop('parent_id')
 
+		request.data = params
 		setattr(request,'params',params)
 		return super(RelatedExtResource, self).__call__(request, *args, **kwargs)
 

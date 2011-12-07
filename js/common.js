@@ -267,4 +267,66 @@ Ext.Ajax.on('requestcomplete', function(conn, response, options) {
 Ext.Ajax.on('requestexception', function(conn, response, options) {
 	if (options.mask) options.mask.hide();
 });
+/*
+Ext.apply(Ext.data.HttpProxy.prototype, {
+	originalDoRequest:Ext.data.HttpProxy.prototype.doRequest,
+	doRequest:function(action, rs, params, reader, cb, scope, arg){
+		if (params) {
+			params = {data: Ext.encode(params)}
+		}
+		this.originalDoRequest.apply(this, arguments);
+	}
+});
+*/
+Ext.form.Action.PistonSubmit = Ext.extend(Ext.form.Action.Submit, {
+	run: function run() {
+		var o = this.options,
+			method = this.getMethod(),
+			isGet = method == 'GET',
+			params = !isGet ? this.getParams() : null;
 
+		if(o.clientValidation === false || this.form.isValid()){
+			if (o.submitEmptyText === false) {
+				var fields = this.form.items,
+				emptyFields = [],
+				setupEmptyFields = function(f){
+					if (f.el.getValue() == f.emptyText) {
+						emptyFields.push(f);
+						f.el.dom.value = "";
+					}
+					if(f.isComposite && f.rendered){
+						f.items.each(setupEmptyFields);
+					}
+				};
+
+				fields.each(setupEmptyFields);
+			}
+			if (!isGet) {
+				var data = Ext.encode(this.form.getValues());
+				if (params === null || params === undefined)
+					params = "data="+data;
+				else
+					params = params + "&data=" + data;
+			}
+			Ext.Ajax.request(Ext.apply(this.createCallback(o), {
+				url:this.getUrl(isGet),
+				method: method,
+				headers: o.headers,
+				params: params,
+				isUpload: this.form.fileUpload
+			}));
+			if (o.submitEmptyText === false) {
+				Ext.each(emptyFields, function(f) {
+					if (f.applyEmptyText) {
+					f.applyEmptyText();
+					}
+				});
+			}
+		}else if (o.clientValidation !== false){
+			this.failureType = Ext.form.Action.CLIENT_INVALID;
+			this.form.afterAction(this, false);
+		}
+	}
+});
+
+Ext.form.Action.ACTION_TYPES['pistonsubmit'] = Ext.form.Action.PistonSubmit;

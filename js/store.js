@@ -16,6 +16,7 @@ ExtPiston.data.JsonStore = Ext.extend(Ext.data.JsonStore, {
 
 		if (config.writeable) {
 			var writer = new Ext.data.JsonWriter(config);
+			var writer = new Ext.data.JsonWriter(Ext.apply(config,{encode: false}));
 			Ext.apply(config, {writer: writer});
 		}
 
