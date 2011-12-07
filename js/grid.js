@@ -152,10 +152,11 @@ ExtPiston.grid.GridPanel = Ext.extend(
 				handler: function(button, event, params) {
 					var rec = this.getSelectionModel().getSelected();
 					if (rec) {
-						if (confirm(_("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?"))) {
+						Ext.MessageBox.confirm(_("Potwierdzenie"), _("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?"), function cb(btn) {
+							if (btn != 'yes') return;
 							this.store.remove(rec);
-							this.store.save();
-						}
+							if (!this.store.writer.autoSave) this.store.save();
+						}, this);
 					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
 				},
 				name: 'remove'
@@ -253,6 +254,15 @@ ExtPiston.grid.EditorGridPanel = Ext.extend(
 			remove:  {
 				text: _('Usuń'), name: 'remove',
 				handler: function remove() {
+					var rec = this.getSelectionModel().selection.record;
+					if (rec) {
+						Ext.MessageBox.confirm(_("Potwierdzenie"), _("Czy jesteś pewien, że chcesz usunąć wybraną pozycję?"), function cb(btn) {
+							if (btn != 'yes') return;
+							this.store.remove(rec);
+							if (!this.store.writer.autoSave) this.store.save();
+						}, this);
+					} else Ext.MessageBox.alert(_('Błąd'),_('Proszę wybrać pozycję'));
+					return;
 					var sm = this.getSelectionModel();
 					var rec = sm.getSelectedCell();
 					var store = this.getStore();
