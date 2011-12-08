@@ -6,6 +6,7 @@ Ext.namespace('ExtPiston.form');
 Ext.namespace('ExtPiston.form.Action');
 ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 	run: function run() {
+		//disable unchanged fields before submitting
 		var fields = new Array();
 		this.items.each(
 			function disableIfNeeded(item, index, length) {
@@ -13,8 +14,62 @@ ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 			}, this);
 
 		ExtPiston.form.Action.Submit.superclass.run.apply(this, arguments);
+		//enable unchanged fields after submitting
 	}
 });
+
+ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
+	run: function run() {
+		var o = this.options,
+			method = this.getMethod(),
+			isGet = method == 'GET',
+			params = !isGet ? this.getParams() : null;
+
+		if(o.clientValidation === false || this.form.isValid()){
+			if (o.submitEmptyText === false) {
+				var fields = this.form.items,
+				emptyFields = [],
+				setupEmptyFields = function(f){
+					if (f.el.getValue() == f.emptyText) {
+						emptyFields.push(f);
+						f.el.dom.value = "";
+					}
+					if(f.isComposite && f.rendered){
+						f.items.each(setupEmptyFields);
+					}
+				};
+
+				fields.each(setupEmptyFields);
+			}
+			if (!isGet) {
+				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields));		//by default submit only dirty fields
+				if (params === null || params === undefined)
+					params = "data="+data;
+				else
+					params = params + "&data=" + data;
+			}
+			Ext.Ajax.request(Ext.apply(this.createCallback(o), {
+				url:this.getUrl(isGet),
+				method: method,
+				headers: o.headers,
+				params: params,
+				isUpload: this.form.fileUpload
+			}));
+			if (o.submitEmptyText === false) {
+				Ext.each(emptyFields, function(f) {
+					if (f.applyEmptyText) {
+					f.applyEmptyText();
+					}
+				});
+			}
+		}else if (o.clientValidation !== false){
+			this.failureType = Ext.form.Action.CLIENT_INVALID;
+			this.form.afterAction(this, false);
+		}
+	}
+});
+
+Ext.form.Action.ACTION_TYPES['pistonsubmit'] = ExtPiston.form.Action.Submit;
 
 ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	constructor: function constructor(cfg) {
