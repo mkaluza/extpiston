@@ -19,7 +19,6 @@ def form_loader(request):
 
 	if '_dc' in data: del data['_dc']
 
-
 	if meth == 'GET':
 		data = fix_bools(data)
 		request.params = dict(getattr(request, 'params', {}), **data)
@@ -64,6 +63,5 @@ class ExtMimer(Mimer):
 		if olddata:
 			request.data.update(olddata)
 
-
-
-		
+		for k,v in request.data.iteritems():
+			if v == '': request.data[k] = None
