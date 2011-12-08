@@ -27,7 +27,7 @@ def form_loader(request):
 	if 'data' in data:
 		if type(data['data']) in [unicode,str]: 			#when jsonWriter.encode==true
 			data['data'] = simplejson.loads(data['data'])
-	
+
 	params = dict([(k,v) for k,v in request.GET.iteritems()])		#on PUT and POST and DELETE params can be in url (GET)
 	request.params.update(params)
 	return data
@@ -52,7 +52,7 @@ class ExtMimer(Mimer):
 			olddata = request.data
 			super(ExtMimer, self).translate()
 			if request.data == None: request.data = {}
-		
+
 		if 'data' in request.data:
 			#this will be from the grid
 			data = request.data['data']
