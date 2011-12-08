@@ -214,14 +214,11 @@ class ExtHandler(BaseHandler):
 
 	def update_fk_fields(self, inst, fields, attrs):
 		#potential fk fields
+		model_fields = inst._meta.get_all_field_names()
 		for f in filter(lambda x:'__' in x, fields):
-			#fk = f.replace('__','_')
 			try:
-				t = f.split('__')
-				#if len(t) > 2: continue	#its not necessary since the next statement will raise ValueError if len(t) !=2 anyway
-
-				local_field_name, fk_field_name = t
-				if not hasattr(inst,local_field_name): continue
+				local_field_name, fk_field_name = f.split('__')
+				if not (hasattr(inst,local_field_name) or local_field_name in model_fields): continue		#hasattr may not be needed here
 
 				field = self.model._meta.get_field_by_name(local_field_name)[0]
 				if fk_field_name not in [field.rel.to._meta.pk.name, 'id']:
