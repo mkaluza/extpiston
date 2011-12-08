@@ -302,7 +302,7 @@ Ext.form.Action.PistonSubmit = Ext.extend(Ext.form.Action.Submit, {
 				fields.each(setupEmptyFields);
 			}
 			if (!isGet) {
-				var data = Ext.encode(this.form.getValues());
+				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields));		//by default submit only dirty fields
 				if (params === null || params === undefined)
 					params = "data="+data;
 				else
