@@ -212,6 +212,31 @@ class ExtHandler(BaseHandler):
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).select_related(depth=1)
 		return super(ExtHandler,self).queryset(request,*args,**kwargs).only(*only)	#doesn't work
 
+	def update_fk_fields(self, inst, fields, attrs):
+		#potential fk fields
+		for f in filter(lambda x:'__' in x, fields):
+			#fk = f.replace('__','_')
+			try:
+				t = f.split('__')
+				#if len(t) > 2: continue	#its not necessary since the next statement will raise ValueError if len(t) !=2 anyway
+
+				local_field_name, fk_field_name = t
+				if not hasattr(inst,local_field_name): continue
+
+				field = self.model._meta.get_field_by_name(local_field_name)[0]
+				if fk_field_name not in [field.rel.to._meta.pk.name, 'id']:
+					#TODO if it's not a primary key then we can't be sure to be unique. We could instead update related objects property, but that's another story
+					continue
+				obj = field.rel.to.objects.get(**{fk_field_name: attrs[f]})	#TODO handle other relation types? are there any?
+					#or .related.parent_model	#TODO a co z relacją o2o, tylko odwrotną?
+				setattr(inst, local_field_name, obj)
+			except:
+				pass
+			finally:
+				fields.remove(f)
+
+		return inst
+
 	def create(self, request, *args, **kwargs):
 		if not self.has_model():
 			return rc.NOT_IMPLEMENTED
@@ -235,12 +260,7 @@ class ExtHandler(BaseHandler):
 
 			inst = self.model(**modeldata)
 
-			#potential fk fields
-			for f in filter(lambda x:'__' in x,fields):
-				fk = f.replace('__','_')
-				if hasattr(inst,fk):
-					setattr(inst,fk,attrs[f])
-					fields.remove(f)
+			inst = self.update_fk_fields(inst, fields, attrs)
 
 			#the rest (properties)
 			for f in fields:
@@ -277,11 +297,8 @@ class ExtHandler(BaseHandler):
 		attrs = self.flatten_dict(request.data)
 		#potential fk fields
 		fields=set(attrs.keys())
-		for f in filter(lambda x:'__' in x,fields):
-			fk = f.replace('__','_')
-			if hasattr(inst,fk):
-				setattr(inst,fk,attrs[f])	#TODO find a related object and assign it instead of id - then the read below won't be necessary
-				fields.remove(f)
+
+		inst = self.update_fk_fields(inst, fields, attrs)
 
 		inst.save()
 
