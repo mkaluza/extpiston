@@ -3,6 +3,19 @@
 
 Ext.namespace('ExtPiston.form');
 
+Ext.namespace('ExtPiston.form.Action');
+ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
+	run: function run() {
+		var fields = new Array();
+		this.items.each(
+			function disableIfNeeded(item, index, length) {
+				var a = 0;
+			}, this);
+
+		ExtPiston.form.Action.Submit.superclass.run.apply(this, arguments);
+	}
+});
+
 ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	constructor: function constructor(cfg) {
 		cfg = cfg || {};
@@ -130,7 +143,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('actionfailed',this.actionFailed,this);
 		this.on('beforeclose',this.beforeClose,this);
 		this.form.on('setvalues',this.setProtectedFields,this);
-		//this.form.submit = this.submit;	//TODO this normalizes form's submissions
+		this.form.submit = this.submit;	//TODO this normalizes form's submissions
 	}, //initComponent
 	setProtectedFields: function setProtectedFields() {
 		if (this.protectedFields && this.getPk() != null) {
