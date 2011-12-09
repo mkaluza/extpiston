@@ -272,6 +272,16 @@ class ExtHandler(BaseHandler):
 			for ff in set(request.FILES.keys()) & self.file_fields:
 				f = request.FILES[ff]
 				ff = getattr(inst,ff)
+				ct = f.content_type
+				if ct in  ['application/force-download', '', None]:
+					try:
+						import mimetypes
+						mimetypes.init()
+						ct = mimetypes.guess_type(f.name)[0]
+					except:
+						pass
+
+				inst.content_type = ct
 				ff.save(f.name,f,save=False)
 
 			#TODO fails for inherited models?
