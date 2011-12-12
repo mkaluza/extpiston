@@ -234,8 +234,7 @@ class ExtHandler(BaseHandler):
 			#	setattr(inst, local_field_name, None)
 			except:
 				pass
-			finally:
-				fields.remove(f)
+			fields.remove(f)
 
 		return inst
 
