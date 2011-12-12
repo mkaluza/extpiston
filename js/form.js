@@ -274,7 +274,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 			case Ext.form.Action.CONNECT_FAILURE:
 				var msg = _('Błąd serwera');
 				try {
-					var msg2 = ':\n' + action.response.status + ': ' + action.response.responseText || action.response.statusText;
+					var msg2 = ':\n' + action.response.status + ': ' + (action.response.getResponseHeader('content-type')=='text/html' ? action.response.statusText : action.response.responseText);
 					msg += msg2;
 				} catch (e) {};
 
