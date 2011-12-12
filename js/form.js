@@ -301,7 +301,7 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		}
 	},
 	submit: function submit(options) {
-		if (this.standardSubmit) {
+		if (this.standardSubmit || this.fileUpload) {
 			return Ext.form.BasicForm.prototype.submit.call(this, options);
 		} else {
 			this.doAction('pistonsubmit', options);
