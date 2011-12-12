@@ -120,14 +120,14 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 				for (var i = 0; i< this.initialConfig.fields.length; i++) {
 					var name = this.initialConfig.fields[i];
 					if (typeof(name)=="string")
-						config.items.push(this.ns.formFields[name]);
+						config.items.push(Ext.apply({},this.ns.formFields[name]));
 						//TODO handle field definitions
 				}
 			} else {
 				for (var name in this.ns.formFieldNames) {
 					name = this.ns.formFieldNames[name];
 					var field = this.ns.formFields[name];
-					if (field) config.items.push(field);
+					if (field) config.items.push(Ext.apply({}, field));
 				}
 			}
 		} //if (this.ns)
