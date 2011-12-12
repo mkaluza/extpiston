@@ -42,6 +42,11 @@ ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 				fields.each(setupEmptyFields);
 			}
 			if (!isGet) {
+				this.form.items.each(function(f) {
+					if (f.allowBlank == false && !f.isDirty() && f.name != this.form.pkField) {
+						f.originalValue = f.getValue()+"X";
+					}
+				}, this);
 				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields));		//by default submit only dirty fields
 				if (params === null || params === undefined)
 					params = "data="+data;
