@@ -46,7 +46,7 @@ class ExtMimer(Mimer):
 		if not hasattr(request, 'params'): request.params = {}
 		if not hasattr(request, 'data'): request.data = {}
 
-		if ctype == 'application/x-www-form-urlencoded' or request.method=='GET':
+		if ctype == 'application/x-www-form-urlencoded' or ctype == "multipart/form-data" or request.method=='GET':
 			request.data.update(form_loader(self.request))
 		else:
 			olddata = request.data
