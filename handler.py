@@ -224,9 +224,14 @@ class ExtHandler(BaseHandler):
 				if fk_field_name not in [field.rel.to._meta.pk.name, 'id']:
 					#TODO if it's not a primary key then we can't be sure to be unique. We could instead update related objects property, but that's another story
 					continue
-				obj = field.rel.to.objects.get(**{fk_field_name: attrs[f]})	#TODO handle other relation types? are there any?
+				if attrs[f] == None:
+					obj = None
+				else:
+					obj = field.rel.to.objects.get(**{fk_field_name: attrs[f]})	#TODO handle other relation types? are there any?
 					#or .related.parent_model	#TODO a co z relacją o2o, tylko odwrotną?
 				setattr(inst, local_field_name, obj)
+			#except ObjectDoesNotExist:
+			#	setattr(inst, local_field_name, None)
 			except:
 				pass
 			finally:
