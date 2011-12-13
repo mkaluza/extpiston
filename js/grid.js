@@ -114,7 +114,9 @@ ExtPiston.grid.GridPanel = Ext.extend(
 			editWindow.baseUrl = grid.store.url;
 			var ew = Ext.apply({}, params, editWindow);
 			var win = new Ext.create(ew,'window');
+			this.win = win;
 			var frmp = win.findByType('form')[0];		//TODO switch to using ref
+			win.form = frmp;
 			frmp.closeOnSave = this.initialConfig.closeOnSave;
 
 			frmp.setBaseUrl(grid.store.url);
@@ -134,6 +136,9 @@ ExtPiston.grid.GridPanel = Ext.extend(
 				text: _("Nowy"),
 				handler: function(button, event, params) {	//button and event are params passed to the action when it's clicked as a toolbar button or menu item, params is my own
 					this.showWindow(this,false, params);
+					this.win.form.on('actioncomplete', function setPass(form,action) {
+						this.fireEvent('addItem', this, action.result.data);
+					}, this);
 				},
 				name: 'add'
 			},
@@ -203,6 +208,7 @@ ExtPiston.grid.GridPanel = Ext.extend(
 		}
 		//dynamic base url setting
 		this.postInit();
+		this.addEvents(['addItem','removeItem']);
 	}, //initComponent
 	beforeClose: function(panel) {
 		if (this.form.isDirty())
