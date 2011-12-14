@@ -319,7 +319,7 @@ class ExtHandler(BaseHandler):
 	def read(self,request,*args,**kwargs):
 		res  = super(ExtHandler,self).read(request,*args,**kwargs)
 		if isinstance(res,QuerySet):
-			for k,v in request.data.iteritems():
+			for k,v in request.params.iteritems():
 				if k.startswith('filter__') and v != '':	#'v.strip() != '':
 					k=str(k.replace('filter__',''))
 					if "__" not in k:
