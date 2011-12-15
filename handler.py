@@ -330,6 +330,8 @@ class ExtHandler(BaseHandler):
 
 	@request_debug
 	def exec_rpc_on_model(self,request,*args,**kwargs):
+		if not hasattr(request,'params'): request.params = {}
+		if not hasattr(request,'data'): request.data = {}
 		proc = kwargs.pop('procname')
 		obj = self.read(request,*args,**kwargs)
 		proc = getattr(obj,proc)
@@ -339,6 +341,8 @@ class ExtHandler(BaseHandler):
 
 	@request_debug
 	def exec_rpc(self,request,*args,**kwargs):
+		if not hasattr(request,'params'): request.params = {}
+		if not hasattr(request,'data'): request.data = {}
 		proc = kwargs.pop('procname')
 		proc = getattr(self,proc)
 		res = proc(request = request, *args, **kwargs)
