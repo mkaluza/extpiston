@@ -18,6 +18,43 @@ ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 	}
 });
 
+Ext.override(Ext.form.BasicForm, {
+    getFieldValues : function(dirtyOnly, raw){
+        var o = {},
+            n,
+            key,
+            val;
+        this.items.each(function(f) {
+            if (!f.disabled && (dirtyOnly !== true || f.isDirty())) {
+                n = f.getName();
+                key = o[n];
+                if (raw) val = f.getRawValue(); else val = f.getValue();
+
+                if(Ext.isDefined(key)){
+                    if(Ext.isArray(key)){
+                        o[n].push(val);
+                    }else{
+                        o[n] = [key, val];
+                    }
+                }else{
+                    o[n] = val;
+                }
+            }
+        });
+        return o;
+    }
+});
+
+Ext.override(Ext.form.ComboBox, {
+	getRawValue : function(){
+		var v = this.rendered ? this.hiddenField.value : Ext.value(this.value, '');
+		if(v === this.emptyText){
+			v = '';
+		}
+		return v;
+	}
+});
+
 ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 	run: function run() {
 		var o = this.options,
@@ -47,7 +84,7 @@ ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 						f.originalValue = f.getValue()+"X";
 					}
 				}, this);
-				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields));		//by default submit only dirty fields
+				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields, true));		//by default submit only dirty fields
 				if (params === null || params === undefined)
 					params = "data="+data;
 				else
