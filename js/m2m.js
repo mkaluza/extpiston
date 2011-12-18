@@ -74,7 +74,10 @@ ExtPiston.MasterSlavePlugin = (function() {
 			if (!m) return;		//neither we're part of a form nor master-slave relation has been defined	TODO see todo above :)
 
 			obj = m.component || obj || getByPath(o.ownerCt,m.path);	//target object can either be given directly, implicitly (if we're form's child) or it will be searched by path
-			if (!obj) throw "MaterSlavePlugin: cant find master component";
+			if (!obj) {
+				console.log("MaterSlavePlugin: cant find master component");
+				return;
+			}
 
 			if (!m.event) {
 				if (obj instanceof Ext.grid.EditorGridPanel) m.event = 'cellselect';
