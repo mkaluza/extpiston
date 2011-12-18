@@ -22,8 +22,10 @@ Ext.namespace('ExtPiston.m2m');
 
 ExtPiston.MasterSlavePlugin = (function() {
 	function _getByPath(obj,path) {
+		if (!obj) return;
 		if (path[0] == '..') return _getByPath(obj.ownerCt,path.slice(1));
 		var newobj = obj.find('itemId',path[0])[0];	//TODO change to get (nonrecursive)
+		if (!newobj) return _getByPath(obj.ownerCt, path);	//if object is not found, go up until there's nothing up there or the object is found
 		//TODO fix it for better logic
 		if (path.length == 1) {
 			if (newobj) return newobj;
