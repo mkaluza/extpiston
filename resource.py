@@ -14,7 +14,8 @@ from django.shortcuts import render_to_response
 from django.template import Context, loader
 from django.utils import simplejson
 
-import settings
+from django.conf import settings
+from django.utils.formats import get_format
 
 from json import DefaultJSONEncoder, JS
 from functions import Timer, request_debug, copy_dict
@@ -336,6 +337,16 @@ class ExtResource(Resource):
 			if 'type' not in f: return f
 			f['type'] = type_map.get(f['type'], f['type'])
 			if f['type'] not in allowed_types: del f['type']		#TODO what about custon types?
+
+			#use localized dates - requires custom json encoder
+			#if f.get('type') in ['date', 'datetime']:
+				#f['dateFormat'] = f.get('format', get_format('SHORT_'+f.get('type').upper()+'_FORMAT'))
+
+			if f.get('type') == 'date':
+				 f['dateFormat'] = f.get('format', 'Y-m-d')
+			if f.get('type') == 'datetime':
+				f['dateFormat'] = f.get('format', 'Y-m-d H:i:s')
+
 			return f
 
 		store = {
@@ -369,7 +380,7 @@ class ExtResource(Resource):
 		for f in self.fields2:
 			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
 			ff = copy(f[1], ['name', 'default', 'allowBlank', 'defaultValue'])
-			if 'type' in f[1] and f[1]['type'] in ['string','int','float','boolean','auto']: ff['type'] = f[1]['type']
+			if 'type' in f[1] and f[1]['type'] in ['string','int','float','boolean','auto','date']: ff['type'] = f[1]['type']
 			if ff['name'] not in self.fields: continue
 			fixtype(ff)
 			if len(ff)==1 and 'name' in ff:

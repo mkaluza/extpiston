@@ -278,3 +278,10 @@ Ext.apply(Ext.data.HttpProxy.prototype, {
 	}
 });
 */
+
+Ext.util.JSON.encodeDate = function encodeDate(o) {
+	var fmt = 'Y-m-d';
+	var fmt2 = 'Y-m-d H:i:s.u';
+	if (o.format(fmt2) != o.clone().clearTime().format(fmt2)) fmt = fmt2;
+	return '"'+o.format(fmt)+'"';
+}
