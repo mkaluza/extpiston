@@ -238,10 +238,19 @@ class ExtHandler(BaseHandler):
 
 		return inst
 
+	def remove_fields(self, request):
+		fields = request.data.get('_remove_fields',None)
+		if not fields: return
+		del request.data['_remove_fields']
+		for f in fields.split(','):
+			if f in request.data:
+				del request.data[f]
+
 	def create(self, request, *args, **kwargs):
 		if not self.has_model():
 			return rc.NOT_IMPLEMENTED
 
+		self.remove_fields(request)
 		attrs = self.flatten_dict(request.data)
 
 		try:
@@ -300,6 +309,8 @@ class ExtHandler(BaseHandler):
 			for k in self.protected_fields:
 				if k in request.data:
 					del request.data[k]
+
+		self.remove_fields(request)
 
 		super(ExtHandler, self).update(request, *args, **kwargs)
 

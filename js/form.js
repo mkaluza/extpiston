@@ -18,6 +18,7 @@ ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
 	}
 });
 
+/*
 Ext.override(Ext.form.BasicForm, {
     getFieldValues : function(dirtyOnly, raw){
         var o = {},
@@ -54,64 +55,7 @@ Ext.override(Ext.form.ComboBox, {
 		return v;
 	}
 });
-
-ExtPiston.form.Action.Submit = Ext.extend(Ext.form.Action.Submit, {
-	run: function run() {
-		var o = this.options,
-			method = this.getMethod(),
-			isGet = method == 'GET',
-			params = !isGet ? this.getParams() : null;
-
-		if(o.clientValidation === false || this.form.isValid()){
-			if (o.submitEmptyText === false) {
-				var fields = this.form.items,
-				emptyFields = [],
-				setupEmptyFields = function(f){
-					if (f.el.getValue() == f.emptyText) {
-						emptyFields.push(f);
-						f.el.dom.value = "";
-					}
-					if(f.isComposite && f.rendered){
-						f.items.each(setupEmptyFields);
-					}
-				};
-
-				fields.each(setupEmptyFields);
-			}
-			if (!isGet) {
-				this.form.items.each(function(f) {
-					if (f.allowBlank == false && !f.isDirty() && f.name != this.form.pkField) {
-						f.originalValue = f.getValue()+"X";
-					}
-				}, this);
-				var data = Ext.encode(this.form.getFieldValues(!this.form.submitAllFields, true));		//by default submit only dirty fields
-				if (params === null || params === undefined)
-					params = "data="+data;
-				else
-					params = params + "&data=" + data;
-			}
-			Ext.Ajax.request(Ext.apply(this.createCallback(o), {
-				url:this.getUrl(isGet),
-				method: method,
-				headers: o.headers,
-				params: params,
-				isUpload: this.form.fileUpload
-			}));
-			if (o.submitEmptyText === false) {
-				Ext.each(emptyFields, function(f) {
-					if (f.applyEmptyText) {
-					f.applyEmptyText();
-					}
-				});
-			}
-		}else if (o.clientValidation !== false){
-			this.failureType = Ext.form.Action.CLIENT_INVALID;
-			this.form.afterAction(this, false);
-		}
-	}
-});
-
-Ext.form.Action.ACTION_TYPES['pistonsubmit'] = ExtPiston.form.Action.Submit;
+*/
 
 ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 	constructor: function constructor(cfg) {
@@ -240,7 +184,6 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		this.on('actionfailed',this.actionFailed,this);
 		this.on('beforeclose',this.beforeClose,this);
 		this.form.on('setvalues',this.setProtectedFields,this);
-		this.form.submit = this.submit;	//TODO this normalizes form's submissions
 	}, //initComponent
 	setProtectedFields: function setProtectedFields() {
 		if (this.protectedFields && this.getPk() != null) {
@@ -288,6 +231,17 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 
 		o.url = url;
 		if (this.mask) this.mask.show();
+		var removeFields = [];
+		form.items.each(
+			function checkIfDirty(f, index, length) {
+				if (f.name == form.pkField) return;
+				if (!f.isDirty() || f.originalValue === undefined && f.getValue() == '')
+					removeFields.push(f.name);
+			},
+			form
+		);
+		action.options.params = action.options.params || {};
+		action.options.params._remove_fields = removeFields.join(',');
 	},
 	actionComplete: function(form, action) {
 		if (this.mask) this.mask.hide();
@@ -335,14 +289,6 @@ ExtPiston.form.FormPanel = Ext.extend(Ext.form.FormPanel, {
 		if ((!this.mask && this.mask != false) || this.mask == true || !(this.mask instanceof Ext.LoadMask)) {
 			//TODO szukać maski, jeśli to będzie obiekt i ewentualnie rzucać błędem
 			this.mask = new Ext.LoadMask(this.getEl(), {msg: _("Please wait...")});
-		}
-	},
-	submit: function submit(options) {
-		if (this.standardSubmit || this.fileUpload) {
-			return Ext.form.BasicForm.prototype.submit.call(this, options);
-		} else {
-			this.doAction('pistonsubmit', options);
-			return this;
 		}
 	}
 });
