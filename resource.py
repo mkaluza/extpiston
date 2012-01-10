@@ -324,7 +324,7 @@ class ExtResource(Resource):
 					col['format'] = 'Y-m-d'
 					if col['type'] == 'datetime':
 						col['format'] += ' H:i:s'
-				if col.get('type') in ['boolean','date']:
+				if col.get('type') in ['boolean','date']:		#number
 					col['xtype'] = col['type'] + 'column'
 
 				columns[k]=col
@@ -340,7 +340,7 @@ class ExtResource(Resource):
 			return dict([(k,d[k]) for k in keys if k in d])
 
 		def fixtype(f):
-			type_map = {'text': 'string', 'bool': 'boolean'}		#remap types
+			type_map = {'text': 'string', 'bool': 'boolean'}		#remap types 'number':'int'
 			allowed_types = ['auto', 'boolean', 'date', 'float', 'int', 'string', ]		#TODO what about custon types?
 
 			if 'type' not in f: return f
@@ -389,7 +389,7 @@ class ExtResource(Resource):
 		for f in self.fields2:
 			#ff = copy(f[1], ['name','type', 'default'])	#TODO na razie nie kopiujemy typów, bo jak store zacznie parsować dane, to się różne rzeczy rozsypują (bo np ma datę, a nie stringa)
 			ff = copy(f[1], ['name', 'default', 'allowBlank', 'defaultValue'])
-			if 'type' in f[1] and f[1]['type'] in ['string','int','float','boolean','auto','date']: ff['type'] = f[1]['type']
+			if 'type' in f[1] and f[1]['type'] in ['string','int','float','boolean','auto','date']: ff['type'] = f[1]['type'] 	#number
 			if ff['name'] not in self.fields: continue
 			fixtype(ff)
 			if len(ff)==1 and 'name' in ff:
