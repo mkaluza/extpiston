@@ -276,12 +276,13 @@ class ExtResource(Resource):
 				newcol['xtype'] = 'checkbox'
 			elif col['type'] == 'textarea':
 				newcol['xtype'] = 'textarea'
-			elif col['type'] == 'date':
+			elif col['type'] in ['date', 'datetime']:
 				newcol['xtype'] = 'datefield'
-				if hasattr(settings,'DATE_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATE_FORMAT
-			elif col['type'] == 'datetime':
-				newcol['xtype'] = 'datefield'
-				if hasattr(settings,'DATETIME_FORMAT') and not 'format' in newcol: newcol['format'] = settings.DATETIME_FORMAT
+				if 'format' not in newcol:
+					#newcol['format'] = get_format('SHORT_'+col.get('type').upper()+'_FORMAT')
+					newcol['format'] = 'Y-m-d'
+					if col['type'] == 'datetime':
+						newcol['format'] += ' H:i:s'
 			elif col['type'] in [ 'file', 'image' ]:
 				newcol['xtype'] = 'fileuploadfield'
 			else:
@@ -318,6 +319,14 @@ class ExtResource(Resource):
 				col['dataIndex'] = col['name']
 				if col.get('type', None) in ['date', 'float', 'number']:
 					col.setdefault('align','right')
+				if col.get('type') in ['date', 'datetime'] and not 'format' in col:
+					#col['format'] = get_format('SHORT_'+col.get('type').upper()+'_FORMAT')
+					col['format'] = 'Y-m-d'
+					if col['type'] == 'datetime':
+						col['format'] += ' H:i:s'
+				if col.get('type') in ['boolean','date']:
+					col['xtype'] = col['type'] + 'column'
+
 				columns[k]=col
 			except:
 				print 'Error processing column %s' % k
