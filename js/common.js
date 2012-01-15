@@ -580,8 +580,10 @@ Ext.lib.Ajax = function() {
                             }
                         });
                     } else if (!(/file|undefined|reset|button/i.test(type))) {
-                        if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
-                            data += encoder(name) + '=' + encoder(element.value) + '&';
+                        //if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
+                        //    data += encoder(name) + '=' + encoder(element.value) + '&';
+                        if (/radio|checkbox/i.test(type) && !(type == 'submit' && hasSubmit)) {
+                            data += encoder(name) + '=' + encoder(element.checked) + '&';
                             hasSubmit = /submit/i.test(type);
                         }
                     }
