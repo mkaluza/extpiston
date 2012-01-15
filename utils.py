@@ -19,8 +19,8 @@ def form_loader(request):
 
 	if '_dc' in data: del data['_dc']
 
+	data = fix_bools(data)
 	if meth == 'GET':
-		data = fix_bools(data)
 		request.params = dict(getattr(request, 'params', {}), **data)
 		return {}		#actually params in GET from forms and grids are params, not data...
 
