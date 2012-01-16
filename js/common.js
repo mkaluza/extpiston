@@ -582,8 +582,11 @@ Ext.lib.Ajax = function() {
                     } else if (!(/file|undefined|reset|button/i.test(type))) {
                         //if (!(/radio|checkbox/i.test(type) && !element.checked) && !(type == 'submit' && hasSubmit)) {
                         //    data += encoder(name) + '=' + encoder(element.value) + '&';
-                        if (/radio|checkbox/i.test(type) && !(type == 'submit' && hasSubmit)) {
-                            data += encoder(name) + '=' + encoder(element.checked) + '&';
+                        if (!(type == 'submit' && hasSubmit)) {
+                            if (!(/radio/i.test(type) && !element.checked))
+                                data += encoder(name) + '=' + encoder(element.value) + '&';
+                            else if (/checkbox/i.test(type))
+                                data += encoder(name) + '=' + encoder(element.checked) + '&';
                             hasSubmit = /submit/i.test(type);
                         }
                     }
