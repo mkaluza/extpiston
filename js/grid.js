@@ -64,10 +64,10 @@ ExtPiston.grid.Grid = {
 	},
 	adjustHeightToFitMaxRows: false,				//CONFIG
 	adjustHeight: function adjustHeight() {
-		if (!this.adjustHeightToFitMaxRows) return		//CONFIG
+		if (!this.adjustHeightToFitMaxRows) return;		//CONFIG
 		if (!this.el) return;
 		var scr = Ext.query('div.x-grid3-scroller', this.el.dom)[0];
-		var rows = Ext.query('div.x-grid3-row', scr)
+		var rows = Ext.query('div.x-grid3-row', scr);
 		rows = Array.prototype.slice.call(rows,0);
 		//var els = Ext.query('div.x-grid3-cell-inner', scr);
 		if (!rows.length) return;
