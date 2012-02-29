@@ -66,6 +66,23 @@ def mprint(obj, skip_defaults = True, show_nulls=False):
 		if v == f.default and skip_defaults: continue
 		if (v != None and v != '') or show_nulls: print '%s:' % k,v
 
+def mdiff(obj1, obj2):
+	m1 = model_to_dict(obj1)
+	m2 = model_to_dict(obj2)
+	keys = sorted(set(m1.keys()) | set(m2.keys()))
+	diffs = []
+	for k in keys:
+		if m1[k] != m2[k]:
+			diffs.append(map(str, [k,m1[k],m2[k]]))
+	#nice printing
+	#TODO limit max length
+	lengths = map(lambda a:map(len,a),diffs)	#calculate lengths of all strings
+	array_max = lambda x,y: map(lambda a: max(*a), zip(x,y))	#calculate scalar max(A, B) where A and B are arrrays
+	max_lengths = reduce(array_max, lengths)
+	max_lengths = map(lambda x: x+2, max_lengths)		#add margin
+	format_str = "%%-%ds: %%-%ds | %%-%ds" % tuple(max_lengths)
+	for d in diffs: print format_str % tuple(d)
+
 def request_debug(func):
 	def wrapper(self,request,*args,**kwargs):
 		print "REQUEST:",self.__class__.__name__, func.__name__
