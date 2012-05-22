@@ -27,7 +27,7 @@ Ext.namespace('{{app_label|title}}.{{name}}');
 			name: '{{ name|lower }}'
 		}; //config
 		
-		Ext.apply(this, Ext.applyIf(this.initialConfig, config));
+		Ext.apply(this, Ext.applyIf(Ext.apply({},this.initialConfig), config));		//can't apply to initialConfig object...
 		this.hiddenName = this.hiddenName || this.name;
 
 		{{app_label|title}}.{{name}}.ComboBox.superclass.initComponent.apply(this, arguments);
