@@ -139,6 +139,10 @@ Ext.override(Ext.Panel, {
 
 function urljoin(url1, url2) {
 	//TODO recognize GET params in the url
+	if (!url2) {
+		console.log('urljoin warning: joining '+url1+' with empty url2');
+		return url1;
+	}
 	if (url1.charAt(url1.length-1)!='/')
 		return url1+'/'+url2;
 	else
