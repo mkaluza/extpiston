@@ -345,6 +345,7 @@ class ExtHandler(BaseHandler):
 		if not hasattr(request,'data'): request.data = {}
 		proc = kwargs.pop('procname')
 		obj = self.read(request,*args,**kwargs)
+		if isinstance(obj, HttpResponse): return obj
 		proc = getattr(obj,proc)
 		res = proc(request = request)
 		if isinstance(res, HttpResponse): return res
